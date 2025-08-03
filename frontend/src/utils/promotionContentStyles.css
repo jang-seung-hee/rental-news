@@ -1,0 +1,285 @@
+/* 프로모션 내용 섹션 스타일 */
+
+.promotion-content-container {
+  width: 100%;
+}
+
+/* 콘텐츠 그룹 스타일 */
+.content-group {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.content-group:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.content-group:last-child {
+  margin-bottom: 0;
+}
+
+.group-content {
+  line-height: 1.6;
+}
+
+.group-content p {
+  margin-bottom: 0.75rem;
+}
+
+.group-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* 키워드 효과 스타일 */
+.keyword-green-neon {
+  background: linear-gradient(45deg, #90EE90, #98FB98) !important;
+  color: #000000 !important;
+  font-weight: normal !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  text-shadow: none !important;
+}
+
+.keyword-yellow {
+  background: linear-gradient(45deg, #FFFFE0, #FFFACD) !important;
+  color: #000000 !important;
+  font-weight: normal !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  text-shadow: none !important;
+}
+
+.keyword-pink-neon {
+  background: linear-gradient(45deg, #FFB6C1, #FFC0CB) !important;
+  color: #000000 !important;
+  font-weight: normal !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  text-shadow: none !important;
+}
+
+
+
+/* 콘텐츠 구분자 스타일 */
+.content-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 0.5rem 0;
+}
+
+.separator-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+  border-radius: 1px;
+}
+
+.separator-content {
+  display: flex;
+  align-items: center;
+  margin: 0 1rem;
+  padding: 0.25rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.separator-text {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 가로선 분리 효과 스타일 */
+.horizontal-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  padding: 0.75rem 0;
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0) 0%, 
+    rgba(248, 250, 252, 0.8) 20%, 
+    rgba(248, 250, 252, 0.8) 80%, 
+    rgba(255, 255, 255, 0) 100%);
+  border-radius: 0.5rem;
+  position: relative;
+}
+
+.horizontal-separator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(203, 213, 225, 0.5), 
+    transparent);
+}
+
+.horizontal-separator::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(203, 213, 225, 0.5), 
+    transparent);
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .content-group {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(148, 163, 184, 0.2);
+  }
+  
+  .separator-content {
+    background: #1e293b;
+    border-color: #334155;
+  }
+  
+  .separator-text {
+    color: #94a3b8;
+  }
+  
+  .horizontal-separator {
+    background: linear-gradient(180deg, 
+      rgba(15, 23, 42, 0) 0%, 
+      rgba(30, 41, 59, 0.8) 20%, 
+      rgba(30, 41, 59, 0.8) 80%, 
+      rgba(15, 23, 42, 0) 100%);
+  }
+  
+  .horizontal-separator::before,
+  .horizontal-separator::after {
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(148, 163, 184, 0.3), 
+      transparent);
+  }
+  
+  .separator-line {
+    background: linear-gradient(90deg, transparent, #475569, transparent);
+  }
+
+  /* 다크 모드에서의 키워드 효과 */
+  .keyword-green-neon {
+    background: linear-gradient(45deg, #228B22, #32CD32) !important;
+    color: #FFFFFF !important;
+    text-shadow: none !important;
+  }
+  
+  .keyword-yellow {
+    background: linear-gradient(45deg, #DAA520, #FFD700) !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+  }
+  
+  .keyword-pink-neon {
+    background: linear-gradient(45deg, #DC143C, #FF1493) !important;
+    color: #FFFFFF !important;
+    text-shadow: none !important;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .content-group {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .content-separator {
+    margin: 1.5rem 0;
+  }
+  
+  .horizontal-separator {
+    margin: 1rem 0;
+    padding: 0.5rem 0;
+  }
+  
+  .separator-content {
+    margin: 0 0.5rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .separator-text {
+    font-size: 0.7rem;
+  }
+}
+
+/* 링크 스타일 */
+.promotion-link {
+  font-weight: bold !important;
+  text-decoration: underline !important;
+  color: #1e3a8a !important; /* 남색 */
+  transition: color 0.2s ease-in-out;
+  background: none !important; /* 파란 박스 제거 */
+  border: none !important; /* 테두리 제거 */
+  padding: 0 !important; /* 패딩 제거 */
+  margin: 0 !important; /* 마진 제거 */
+}
+
+.promotion-link:hover {
+  color: #1e40af !important; /* 호버 시 더 진한 남색 */
+  text-decoration: underline !important;
+  background: none !important;
+  border: none !important;
+}
+
+/* 다크 모드에서의 링크 스타일 */
+@media (prefers-color-scheme: dark) {
+  .promotion-link {
+    color: #3b82f6 !important; /* 다크 모드에서도 남색 계열 */
+  }
+  
+  .promotion-link:hover {
+    color: #60a5fa !important;
+  }
+}
+
+/* 애니메이션 효과 */
+.content-group {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-separator {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+} 
