@@ -54,11 +54,13 @@
     "react-day-picker": "^9.8.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.61.1",
-    "react-quill": "^2.0.0",
     "react-resizable-panels": "^3.0.4",
     "react-router-dom": "^7.7.1",
     "react-scripts": "5.0.1",
     "sonner": "^2.0.6",
+    "@tiptap/react": "^2.4.0",
+    "@tiptap/pm": "^2.4.0",
+    "@tiptap/starter-kit": "^2.4.0",
     "tailwind-merge": "^3.3.1",
     "tailwind-variants": "^2.1.0",
     "tailwindcss-animate": "^1.0.7",
@@ -74,6 +76,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+
   "eslintConfig": {
     "extends": [
       "react-app",
