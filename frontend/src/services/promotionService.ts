@@ -44,16 +44,41 @@ const removeUndefined = (obj: any): any => {
   return cleaned;
 };
 
-// 프로모션 생성 (임시 더미 데이터)
+// 프로모션 생성
 export const createPromotion = async (
   data: CreatePromotionRequest
 ): Promise<CrudResult<string>> => {
-  console.log('Firebase is disabled - using dummy data');
-  return {
-    success: true,
-    data: 'dummy-promotion-id',
-    affectedCount: 1
-  };
+  try {
+    // 이미지 업로드 처리
+    let imageUrl = data.imageUrl;
+    if (data.imageUrl && data.imageUrl.startsWith('blob:')) {
+      // Blob URL을 File 객체로 변환하여 업로드
+      const response = await fetch(data.imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'promotion-image.jpg', { type: blob.type });
+      imageUrl = await uploadImage(file, 'promotions');
+    }
+
+    // 타임스탬프 추가 및 undefined 값 제거
+    const promotionData = addTimestamps({
+      ...removeUndefined(data),
+      imageUrl: imageUrl || null,
+      isActive: data.isActive ?? true
+    });
+
+    const docRef = await addDoc(getCollectionRef(COLLECTION_NAME), promotionData);
+    
+    return {
+      success: true,
+      data: docRef.id,
+      affectedCount: 1
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
 };
 
 // 프로모션 목록 조회
@@ -86,15 +111,16 @@ export const getPromotions = async (
       q = query(q, orderBy(sortField, sortDirection));
     }
 
-    // 페이지네이션 적용
-    if (lastDoc) {
-      q = query(q, startAfter(lastDoc), limit(pageSize));
+    // 페이지네이션 적용 (검색어가 있을 때는 더 많은 데이터를 가져옴)
+    const limitSize = filter?.searchTerm ? 50 : pageSize;
+    if (lastDoc && !filter?.searchTerm) {
+      q = query(q, startAfter(lastDoc), limit(limitSize));
     } else {
-      q = query(q, limit(pageSize));
+      q = query(q, limit(limitSize));
     }
 
     const querySnapshot = await getDocs(q);
-    const promotions: Promotion[] = [];
+    let promotions: Promotion[] = [];
 
     querySnapshot.forEach((doc) => {
       promotions.push({
@@ -103,7 +129,22 @@ export const getPromotions = async (
       } as Promotion);
     });
 
-    const hasNextPage = querySnapshot.docs.length === pageSize;
+    // 검색어 필터링 (클라이언트 사이드)
+    if (filter?.searchTerm) {
+      const searchTerm = filter.searchTerm.toLowerCase();
+      promotions = promotions.filter(promotion => 
+        promotion.title.toLowerCase().includes(searchTerm) ||
+        promotion.code.toLowerCase().includes(searchTerm) ||
+        promotion.content.toLowerCase().includes(searchTerm) ||
+        promotion.greeting.toLowerCase().includes(searchTerm) ||
+        promotion.closing.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // 검색어가 있을 때는 페이지네이션 비활성화
+    const hasNextPage = filter?.searchTerm 
+      ? false 
+      : querySnapshot.docs.length === limitSize;
     const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
 
     return {

@@ -25,7 +25,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<PromotionFilter>({});
   const [sort, setSort] = useState<PromotionSort>({ field: 'createdAt', direction: 'desc' });
-
+  const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [lastDoc, setLastDoc] = useState<any>(null);
 
@@ -44,6 +44,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
       if (result.success && result.data) {
         if (reset) {
           setPromotions(result.data.promotions);
+          setCurrentPage(1);
         } else {
           setPromotions(prev => [...prev, ...result.data!.promotions]);
         }
@@ -58,18 +59,18 @@ const PromotionList: React.FC<PromotionListProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [filter, sort, pageSize, lastDoc]);
+  }, [filter, sort, pageSize]);
 
   // 초기 로드
   useEffect(() => {
     loadPromotions(true);
-  }, [filter, sort, loadPromotions]);
+  }, [filter, sort]);
 
   // 검색 처리
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     // 검색어가 변경되면 필터를 업데이트하고 목록을 다시 로드
-    const newFilter = { ...filter, searchTerm: value };
+    const newFilter = { ...filter, searchTerm: value || undefined };
     setFilter(newFilter);
   };
 
@@ -122,6 +123,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   // 더 보기
   const handleLoadMore = () => {
     if (hasNextPage && !isLoading) {
+      setCurrentPage(prev => prev + 1);
       loadPromotions(false);
     }
   };
@@ -244,7 +246,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
       />
 
       {/* 더 보기 버튼 */}
-      {hasNextPage && (
+      {hasNextPage && !searchTerm && (
         <div className="flex justify-center">
           <Button
             onClick={handleLoadMore}
