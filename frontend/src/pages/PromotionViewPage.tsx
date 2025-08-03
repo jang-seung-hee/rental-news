@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Promotion } from '../types';
 import { getPromotionById } from '../services/promotionService';
@@ -13,7 +13,7 @@ const PromotionViewPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // 프로모션 데이터 로드
-  const loadPromotion = async () => {
+  const loadPromotion = useCallback(async () => {
     if (!id) {
       setError('프로모션 ID가 없습니다.');
       setIsLoading(false);
@@ -37,12 +37,12 @@ const PromotionViewPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id]);
 
   // 초기 로드
   useEffect(() => {
     loadPromotion();
-  }, [id]);
+  }, [id, loadPromotion]);
 
   if (isLoading) {
     return (

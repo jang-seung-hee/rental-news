@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -32,12 +32,11 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const pageSize = 10;
 
   // 프로모션 목록 조회
-  const loadPromotions = async (reset = false) => {
+  const loadPromotions = useCallback(async (reset = false) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const page = reset ? 1 : currentPage;
       const lastDocRef = reset ? null : lastDoc;
 
       const result = await getPromotions(filter, sort, pageSize, lastDocRef);
@@ -60,12 +59,12 @@ const PromotionList: React.FC<PromotionListProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filter, sort, pageSize, lastDoc]);
 
   // 초기 로드
   useEffect(() => {
     loadPromotions(true);
-  }, [filter, sort]);
+  }, [filter, sort, loadPromotions]);
 
   // 검색 처리
   const handleSearch = (value: string) => {
@@ -215,7 +214,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
               <select
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onChange={(e) => {
-                  const [field, direction] = e.target.value.split('-');
+                  const [field] = e.target.value.split('-');
                   handleSort(field as any);
                 }}
                 value={`${sort.field}-${sort.direction}`}

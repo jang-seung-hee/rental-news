@@ -139,7 +139,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     };
 
     fetchMonthPromotions();
-  }, [watchedMonth, promotion?.id]); // promotion?.month 제거
+  }, [watchedMonth, promotion?.id, promotion]); // promotion 의존성 추가
 
   // 다른제품 드롭다운 옵션 렌더링 함수
   const renderOtherProductOptions = () => {

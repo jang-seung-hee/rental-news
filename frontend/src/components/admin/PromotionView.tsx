@@ -4,8 +4,7 @@ import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import LazyImage from '../common/LazyImage';
-import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
+
 import { renderPromotionContent } from '../../utils/promotionContentUtils';
 import { getOtherProductsInfo } from '../../services/promotionService';
 import '../../utils/promotionContentStyles.css';

@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from '../ui/breadcrumb';
 
-interface BreadcrumbItem {
+interface BreadcrumbNavItem {
   label: string;
   path?: string;
 }
@@ -17,14 +17,14 @@ interface BreadcrumbItem {
 const BreadcrumbNav: React.FC = () => {
   const location = useLocation();
 
-  const getBreadcrumbItems = (): BreadcrumbItem[] => {
+  const getBreadcrumbItems = (): BreadcrumbNavItem[] => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
     
     if (pathSegments.length === 0) {
       return [{ label: '대시보드' }];
     }
 
-    const items: BreadcrumbItem[] = [
+    const items: BreadcrumbNavItem[] = [
       { label: '대시보드', path: '/' }
     ];
 

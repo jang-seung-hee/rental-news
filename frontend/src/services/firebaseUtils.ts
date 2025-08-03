@@ -1,18 +1,11 @@
 import { 
   collection, 
   doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
   query, 
   where, 
   orderBy, 
   limit,
-  Timestamp,
-  DocumentData,
-  QueryDocumentSnapshot
+  Timestamp
 } from 'firebase/firestore';
 import { 
   ref, 
