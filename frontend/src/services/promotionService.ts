@@ -44,41 +44,16 @@ const removeUndefined = (obj: any): any => {
   return cleaned;
 };
 
-// 프로모션 생성
+// 프로모션 생성 (임시 더미 데이터)
 export const createPromotion = async (
   data: CreatePromotionRequest
 ): Promise<CrudResult<string>> => {
-  try {
-    // 이미지 업로드 처리
-    let imageUrl = data.imageUrl;
-    if (data.imageUrl && data.imageUrl.startsWith('blob:')) {
-      // Blob URL을 File 객체로 변환하여 업로드
-      const response = await fetch(data.imageUrl);
-      const blob = await response.blob();
-      const file = new File([blob], 'promotion-image.jpg', { type: blob.type });
-      imageUrl = await uploadImage(file, 'promotions');
-    }
-
-    // 타임스탬프 추가 및 undefined 값 제거
-    const promotionData = addTimestamps({
-      ...removeUndefined(data),
-      imageUrl: imageUrl || null,
-      isActive: data.isActive ?? true
-    });
-
-    const docRef = await addDoc(getCollectionRef(COLLECTION_NAME), promotionData);
-    
-    return {
-      success: true,
-      data: docRef.id,
-      affectedCount: 1
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: handleFirebaseError(error)
-    };
-  }
+  console.log('Firebase is disabled - using dummy data');
+  return {
+    success: true,
+    data: 'dummy-promotion-id',
+    affectedCount: 1
+  };
 };
 
 // 프로모션 목록 조회
