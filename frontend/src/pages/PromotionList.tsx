@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -25,9 +25,8 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<PromotionFilter>({});
   const [sort, setSort] = useState<PromotionSort>({ field: 'createdAt', direction: 'desc' });
-  const [currentPage, setCurrentPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
-  const [lastDoc, setLastDoc] = useState<any>(null);
+  const lastDocRef = useRef<any>(null);
 
   const pageSize = 10;
 
@@ -37,19 +36,16 @@ const PromotionList: React.FC<PromotionListProps> = ({
       setIsLoading(true);
       setError(null);
 
-      const lastDocRef = reset ? null : lastDoc;
-
-      const result = await getPromotions(filter, sort, pageSize, lastDocRef);
+      const result = await getPromotions(filter, sort, pageSize, reset ? null : lastDocRef.current);
       
       if (result.success && result.data) {
         if (reset) {
           setPromotions(result.data.promotions);
-          setCurrentPage(1);
         } else {
           setPromotions(prev => [...prev, ...result.data!.promotions]);
         }
         setHasNextPage(result.data.hasNextPage);
-        setLastDoc(result.data.lastDoc);
+        lastDocRef.current = result.data.lastDoc;
       } else {
         setError(result.error || '프로모션 목록을 불러올 수 없습니다.');
       }
@@ -64,7 +60,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   // 초기 로드
   useEffect(() => {
     loadPromotions(true);
-  }, [filter, sort]);
+  }, [filter, sort, loadPromotions]);
 
   // 검색 처리
   const handleSearch = (value: string) => {
@@ -123,7 +119,6 @@ const PromotionList: React.FC<PromotionListProps> = ({
   // 더 보기
   const handleLoadMore = () => {
     if (hasNextPage && !isLoading) {
-      setCurrentPage(prev => prev + 1);
       loadPromotions(false);
     }
   };
