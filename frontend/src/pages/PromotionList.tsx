@@ -25,7 +25,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<PromotionFilter>({});
   const [sort, setSort] = useState<PromotionSort>({ field: 'createdAt', direction: 'desc' });
-  const [currentPage, setCurrentPage] = useState(1);
+
   const [hasNextPage, setHasNextPage] = useState(false);
   const [lastDoc, setLastDoc] = useState<any>(null);
 
@@ -44,7 +44,6 @@ const PromotionList: React.FC<PromotionListProps> = ({
       if (result.success && result.data) {
         if (reset) {
           setPromotions(result.data.promotions);
-          setCurrentPage(1);
         } else {
           setPromotions(prev => [...prev, ...result.data!.promotions]);
         }
@@ -123,7 +122,6 @@ const PromotionList: React.FC<PromotionListProps> = ({
   // 더 보기
   const handleLoadMore = () => {
     if (hasNextPage && !isLoading) {
-      setCurrentPage(prev => prev + 1);
       loadPromotions(false);
     }
   };
