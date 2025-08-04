@@ -19,8 +19,8 @@ export interface ContentGroup {
 export function parsePromotionContent(content: string): ContentGroup[] {
   if (!content) return [];
 
-  // "---" 문자로 내용을 분리
-  const parts = content.split('---').map(part => part.trim()).filter(part => part.length > 0);
+  // "===" 문자로 내용을 분리
+  const parts = content.split('===').map(part => part.trim()).filter(part => part.length > 0);
   
   const groups: ContentGroup[] = [];
   
@@ -29,7 +29,10 @@ export function parsePromotionContent(content: string): ContentGroup[] {
     const groupId = `group-${index + 1}`;
     
     // 가로선이 포함된 경우 상하 분리 효과 추가
-    const processedContent = processHorizontalLines(part);
+    let processedContent = processHorizontalLines(part);
+    
+    // !!문자!! 패턴 처리 (연한 분홍색 배경)
+    processedContent = processLightPinkPattern(processedContent);
     
     groups.push({
       id: groupId,
@@ -56,57 +59,102 @@ export function parsePromotionContent(content: string): ContentGroup[] {
  * @returns 키워드 효과가 적용된 콘텐츠
  */
 function applyKeywordEffects(content: string): string {
+  // 키워드 효과 기능을 비활성화
+  return content;
+}
+
+/**
+ * [[문자]] 패턴을 회색 그룹박스로 변환하는 함수
+ * @param content 원본 콘텐츠
+ * @returns [[문자]] 패턴이 처리된 콘텐츠
+ */
+function processGrayBoxPattern(content: string): string {
   if (!content) return content;
 
-  // HTML 태그를 임시로 보호
-  const tagPlaceholders: string[] = [];
-  let tagIndex = 0;
+  // HTML 엔티티를 먼저 디코딩
+  let processedContent = content
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+
+  // [[문자]] 패턴을 회색 그룹박스로 변환
+  const grayBoxPattern = /\[\[([^\]]+)\]\]/g;
+  processedContent = processedContent.replace(grayBoxPattern, (match, innerText) => {
+    return `<span class="gray-group-box">${innerText}</span>`;
+  });
+
+  return processedContent;
+}
+
+/**
+ * ""문자"" 패턴을 연한 파란색 배경으로 변환하는 함수
+ * @param content 원본 콘텐츠
+ * @returns ""문자"" 패턴이 처리된 콘텐츠
+ */
+function processPinkGradientPattern(content: string): string {
+  if (!content) return content;
+
+  // HTML 엔티티를 먼저 디코딩
+  let processedContent = content
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+
+  // ""문자"" 패턴을 연한 파란색 배경으로 변환
+  const pinkGradientPattern = /""([^"]+)""/g;
+  processedContent = processedContent.replace(pinkGradientPattern, (match, innerText) => {
+    return `<span class="pink-gradient-bg">${innerText}</span>`;
+  });
+
+  return processedContent;
+}
+
+/**
+ * <<문자>> 패턴을 파란색 소제목 타이틀로 변환하는 함수
+ * @param content 원본 콘텐츠
+ * @returns <<문자>> 패턴이 처리된 콘텐츠
+ */
+function processBlueTitlePattern(content: string): string {
+  if (!content) return content;
+
+  console.log('=== processBlueTitlePattern 시작 ===');
+  console.log('원본 콘텐츠:', JSON.stringify(content));
+
+  // HTML 엔티티를 먼저 디코딩
+  let processedContent = content
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
   
-  // HTML 태그를 임시로 대체
-  let processedContent = content.replace(/<[^>]*>/g, (match) => {
-    const placeholder = `__TAG_PLACEHOLDER_${tagIndex}__`;
-    tagPlaceholders[tagIndex] = match;
-    tagIndex++;
-    return placeholder;
+  console.log('HTML 엔티티 디코딩 후:', JSON.stringify(processedContent));
+  
+  // <<문자>> 패턴을 파란색 소제목 타이틀로 변환
+  const blueTitlePattern = /<<([^>]+)>>/g;
+  processedContent = processedContent.replace(blueTitlePattern, (match, innerText) => {
+    console.log(`파란색 타이틀 패턴 발견: "${match}" -> "${innerText}"`);
+    return `<span class="blue-title-label">${innerText}</span>`;
   });
+  
+  console.log('패턴 처리 후:', JSON.stringify(processedContent));
+  console.log('=== processBlueTitlePattern 완료 ===');
 
-  // 키워드 효과 적용
-  const keywordEffects = [
-    {
-      keyword: '타사보상',
-      className: 'keyword-green-neon'
-    },
-    {
-      keyword: '면제',
-      className: 'keyword-yellow'
-    },
-    {
-      keyword: '반값',
-      className: 'keyword-yellow'
-    },
-    {
-      keyword: '무료',
-      className: 'keyword-yellow'
-    },
-    {
-      keyword: '추천',
-      className: 'keyword-pink-neon'
-    },
-    {
-      keyword: 'NEW',
-      className: 'keyword-yellow'
-    }
-  ];
+  return processedContent;
+}
 
-  // 각 키워드에 대해 효과 적용
-  keywordEffects.forEach(({ keyword, className }) => {
-    const regex = new RegExp(`(${keyword})`, 'gi');
-    processedContent = processedContent.replace(regex, `<span class="${className}">$1</span>`);
-  });
+/**
+ * !!문자!! 패턴을 연한 분홍색 배경으로 변환하는 함수
+ * @param content 원본 콘텐츠
+ * @returns !!문자!! 패턴이 처리된 콘텐츠
+ */
+function processLightPinkPattern(content: string): string {
+  if (!content) return content;
 
-  // HTML 태그 복원
-  tagPlaceholders.forEach((tag, index) => {
-    processedContent = processedContent.replace(`__TAG_PLACEHOLDER_${index}__`, tag);
+  // HTML 엔티티를 먼저 디코딩
+  let processedContent = content
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+
+  // !!문자!! 패턴을 연한 분홍색 배경으로 변환
+  const lightPinkPattern = /!!([^!]+)!!/g;
+  processedContent = processedContent.replace(lightPinkPattern, (match, innerText) => {
+    return `<span class="light-pink-bg">${innerText}</span>`;
   });
 
   return processedContent;
@@ -120,34 +168,77 @@ function applyKeywordEffects(content: string): string {
 function processHorizontalLines(content: string): string {
   if (!content) return content;
   
-  // 다양한 가로선 패턴을 처리
-  const horizontalLinePatterns = [
-    /^[-=_*]{3,}$/gm,           // ---, ===, ___, ***
-    /^[-=_*]{2,}$/gm,           // --, ==, __, **
-    /<hr\s*\/?>/gi,             // <hr> 태그
-    /<hr\s+[^>]*\/?>/gi,        // <hr> 태그 (속성 포함)
-  ];
+  console.log('=== processHorizontalLines 시작 ===');
+  console.log('원본 콘텐츠:', JSON.stringify(content));
   
-  let processedContent = content;
+  // HTML 엔티티를 먼저 디코딩
+  let processedContent = content
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
   
-  horizontalLinePatterns.forEach(pattern => {
-    processedContent = processedContent.replace(pattern, (match) => {
-      // 가로선을 상하 분리 효과가 있는 스타일로 교체 (라벨 제외)
-      return `
-        <div class="horizontal-separator">
-          <div class="separator-line"></div>
-          <div class="separator-line"></div>
-        </div>
-      `;
-    });
+  console.log('HTML 엔티티 디코딩 후:', JSON.stringify(processedContent));
+  
+  // 커스텀 패턴들을 먼저 처리 (HTML 태그 보호 전에)
+  console.log('커스텀 패턴 처리 시작');
+  
+  // <<문자>> 패턴 처리 (파란색 소제목 타이틀)
+  processedContent = processBlueTitlePattern(processedContent);
+  
+  // [[문자]] 패턴 처리 (회색 그룹박스)
+  processedContent = processGrayBoxPattern(processedContent);
+  
+  // ""문자"" 패턴 처리 (분홍색 그라데이션 배경)
+  processedContent = processPinkGradientPattern(processedContent);
+  
+  // !!문자!! 패턴 처리 (연한 분홍색 배경)
+  processedContent = processLightPinkPattern(processedContent);
+  
+  console.log('커스텀 패턴 처리 후:', JSON.stringify(processedContent));
+  
+  // HTML 태그를 임시로 보호
+  const tagPlaceholders: string[] = [];
+  let tagIndex = 0;
+  
+  // HTML 태그를 임시로 대체
+  processedContent = processedContent.replace(/<[^>]*>/g, (match) => {
+    const placeholder = `__TAG_PLACEHOLDER_${tagIndex}__`;
+    tagPlaceholders[tagIndex] = match;
+    tagIndex++;
+    return placeholder;
   });
+  
+  console.log('HTML 태그 보호 후:', JSON.stringify(processedContent));
+  
+  // --- (두꺼운 가로선) 패턴 처리
+  const thickLinePattern = /-{3,}/g;
+  processedContent = processedContent.replace(thickLinePattern, (match) => {
+    console.log(`두꺼운 가로선 패턴 발견: "${match}"`);
+    return '<div class="thick-horizontal-line"></div>';
+  });
+  
+  // ... (점선) 패턴 처리
+  const dottedLinePattern = /\.{3,}/g;
+  processedContent = processedContent.replace(dottedLinePattern, (match) => {
+    console.log(`점선 패턴 발견: "${match}"`);
+    return '<div class="dotted-separator"></div>';
+  });
+  
+  console.log('가로선 패턴 처리 후:', JSON.stringify(processedContent));
+  
+  // HTML 태그 복원
+  tagPlaceholders.forEach((tag, index) => {
+    processedContent = processedContent.replace(`__TAG_PLACEHOLDER_${index}__`, tag);
+  });
+  
+  console.log('HTML 태그 복원 후:', JSON.stringify(processedContent));
   
   // 링크 처리 추가
   processedContent = processLinks(processedContent);
   
-  // 키워드 효과 적용
+  // 키워드 효과 적용 (비활성화됨)
   processedContent = applyKeywordEffects(processedContent);
   
+  console.log('=== processHorizontalLines 완료 ===');
   return processedContent;
 }
 
@@ -162,8 +253,10 @@ function processLinks(content: string): string {
   // URL 패턴 (http/https로 시작하는 링크)
   const urlPattern = /(https?:\/\/[^\s<>"']+)/gi;
   
-  // HTML 태그 내부가 아닌 텍스트 링크만 처리
-  let processedContent = content;
+  // HTML 엔티티를 먼저 디코딩
+  let processedContent = content
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
   
   // HTML 태그를 임시로 보호
   const tagPlaceholders: string[] = [];
@@ -254,4 +347,85 @@ export function getContentGroup(content: string, groupIndex: number): string | n
   }
   
   return null;
+} 
+
+/**
+ * 인사말과 매듭말을 위한 전용 렌더링 함수
+ * @param content 원본 내용
+ * @returns 렌더링된 HTML 문자열
+ */
+export function renderGreetingClosingContent(content: string): string {
+  if (!content) {
+    return '<p class="text-muted-foreground">내용이 없습니다.</p>';
+  }
+  
+  // HTML 엔티티를 먼저 디코딩
+  let processedContent = content
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+  
+  // 줄 바꿈을 <br> 태그로 변환
+  processedContent = processedContent.replace(/\n/g, '<br>');
+  
+  // 커스텀 패턴들을 먼저 처리 (HTML 태그 보호 전에)
+  console.log('renderGreetingClosingContent - 커스텀 패턴 처리 시작');
+  
+  // <<문자>> 패턴 처리 (파란색 소제목 타이틀)
+  processedContent = processBlueTitlePattern(processedContent);
+  
+  // !!문자!! 패턴 처리 (연한 분홍색 배경)
+  processedContent = processLightPinkPattern(processedContent);
+  
+  // [[문자]] 패턴 처리 (회색 그룹박스)
+  processedContent = processGrayBoxPattern(processedContent);
+  
+  // ""문자"" 패턴 처리 (분홍색 그라데이션 배경)
+  processedContent = processPinkGradientPattern(processedContent);
+  
+  console.log('renderGreetingClosingContent - 커스텀 패턴 처리 후:', JSON.stringify(processedContent));
+  
+  // HTML 태그를 임시로 보호
+  const tagPlaceholders: string[] = [];
+  let tagIndex = 0;
+  
+  // HTML 태그를 임시로 대체
+  processedContent = processedContent.replace(/<[^>]*>/g, (match) => {
+    const placeholder = `__TAG_PLACEHOLDER_${tagIndex}__`;
+    tagPlaceholders[tagIndex] = match;
+    tagIndex++;
+    return placeholder;
+  });
+  
+  // URL 패턴을 실제 클릭 가능한 링크로 변환
+  const urlPattern = /(https?:\/\/[^\s<>"']+)/gi;
+  processedContent = processedContent.replace(urlPattern, (match) => {
+    return `<a href="${match}" target="_blank" rel="noopener noreferrer" class="greeting-closing-link">${match}</a>`;
+  });
+  
+  // HTML 태그 복원
+  tagPlaceholders.forEach((tag, index) => {
+    processedContent = processedContent.replace(`__TAG_PLACEHOLDER_${index}__`, tag);
+  });
+  
+  return `
+    <div class="greeting-closing-content">
+      ${processedContent}
+    </div>
+  `;
+} 
+
+/**
+ * 테스트용 함수 - <<문자>> 패턴 처리 확인
+ * @param content 테스트할 내용
+ * @returns 처리 결과
+ */
+export function testBlueTitlePattern(content: string): string {
+  console.log('=== 테스트 시작 ===');
+  console.log('원본:', content);
+  
+  const result = processBlueTitlePattern(content);
+  console.log('결과:', result);
+  console.log('=== 테스트 완료 ===');
+  
+  return result;
 } 

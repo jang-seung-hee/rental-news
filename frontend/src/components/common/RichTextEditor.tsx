@@ -11,6 +11,8 @@ interface RichTextEditorProps {
   readOnly?: boolean;
   height?: string;
   onImageUpload?: (file: File) => Promise<string>;
+  fullscreen?: boolean;
+  onFullscreenChange?: (fullscreen: boolean) => void;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -20,7 +22,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   className,
   readOnly = false,
   height = '300px',
-  onImageUpload
+  onImageUpload,
+  fullscreen = false,
+  onFullscreenChange
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
@@ -76,6 +80,30 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showColorPicker]);
+
+  // ESC 키로 전체화면 해제
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && fullscreen && onFullscreenChange) {
+        onFullscreenChange(false);
+      }
+    };
+
+    if (fullscreen) {
+      document.addEventListener('keydown', handleKeyDown);
+      // 전체화면 모드일 때 body 스크롤 방지
+      document.body.style.overflow = 'hidden';
+    } else {
+      // 전체화면 모드가 아닐 때 body 스크롤 복원
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      // 컴포넌트 언마운트 시 body 스크롤 복원
+      document.body.style.overflow = '';
+    };
+  }, [fullscreen, onFullscreenChange]);
 
   // 내용 변경 핸들러
   const handleInput = () => {
@@ -173,7 +201,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const color = e.target.value;
     setSelectedColor(color);
-    execCommand('foreColor', color);
+    changeTextColor(color);
+  };
+
+  // 전체화면 토글 핸들러
+  const handleFullscreenToggle = () => {
+    if (onFullscreenChange) {
+      onFullscreenChange(!fullscreen);
+    }
   };
 
   return (
@@ -293,6 +328,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           >
             🧹 지우기
           </button>
+          <button
+            type="button"
+            onClick={handleFullscreenToggle}
+            className="toolbar-btn"
+            title={fullscreen ? "전체화면 해제" : "전체화면"}
+          >
+            {fullscreen ? "⛶ 전체화면 해제" : "⛶ 전체화면"}
+          </button>
         </div>
       )}
       
@@ -306,11 +349,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         className={cn(
           'editor-content',
           isFocused && 'focused',
-          readOnly && 'readonly'
+          readOnly && 'readonly',
+          fullscreen && 'fullscreen'
         )}
         style={{
-          minHeight: height,
-          height: height
+          minHeight: fullscreen ? 'calc(100vh - 120px)' : height,
+          height: fullscreen ? 'calc(100vh - 120px)' : height
         }}
         data-placeholder={placeholder}
       />

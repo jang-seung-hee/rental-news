@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog';
-import PromotionView from './PromotionView';
+import CustomTag from './CustomTag';
 
 interface PromotionViewDialogProps {
   promotion: Promotion | null;
@@ -37,7 +37,7 @@ const PromotionViewDialog: React.FC<PromotionViewDialogProps> = ({
         </DialogHeader>
         
         <div className="overflow-y-auto max-h-[calc(90vh-80px)]">
-          <PromotionView promotion={promotion} />
+          <CustomTag promotion={promotion} />
         </div>
       </DialogContent>
     </Dialog>

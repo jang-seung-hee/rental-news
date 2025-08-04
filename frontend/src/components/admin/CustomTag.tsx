@@ -5,19 +5,19 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import LazyImage from '../common/LazyImage';
 
-import { renderPromotionContent } from '../../utils/promotionContentUtils';
+import { renderPromotionContent, renderGreetingClosingContent } from '../../utils/promotionContentUtils';
 import { getOtherProductsInfo } from '../../services/promotionService';
 import '../../utils/promotionContentStyles.css';
 import PromotionSidebar from './PromotionSidebar';
 import PromotionBottomSheet from './PromotionBottomSheet';
 import PromotionBottomNavigation from './PromotionBottomNavigation';
 
-interface PromotionViewProps {
+interface CustomTagProps {
   promotion: Promotion;
   hideElements?: string | null;
 }
 
-const PromotionView: React.FC<PromotionViewProps> = ({ promotion, hideElements }) => {
+const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [otherProducts, setOtherProducts] = useState<{ [key: string]: { id: string; code: string; title: string } }>({});
@@ -173,22 +173,23 @@ const PromotionView: React.FC<PromotionViewProps> = ({ promotion, hideElements }
           </Card>
         )}
 
-        {/* 인사말 */}
-        {!hiddenElements.includes('greeting') && (
-          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full mr-4"></div>
-                <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  인사말
-                </h3>
-              </div>
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
-                {promotion.greeting}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                 {/* 인사말 */}
+         {!hiddenElements.includes('greeting') && (
+           <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
+             <CardContent className="p-6">
+               <div className="flex items-center mb-4">
+                 <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full mr-4"></div>
+                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                   인사말
+                 </h3>
+               </div>
+               <div 
+                 className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                 dangerouslySetInnerHTML={{ __html: renderGreetingClosingContent(promotion.greeting) }}
+               />
+             </CardContent>
+           </Card>
+         )}
 
         {/* 프로모션 내용 */}
         <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
@@ -216,9 +217,10 @@ const PromotionView: React.FC<PromotionViewProps> = ({ promotion, hideElements }
                   매듭말
                 </h3>
               </div>
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
-                {promotion.closing}
-              </div>
+              <div 
+                className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: renderGreetingClosingContent(promotion.closing) }}
+              />
             </CardContent>
           </Card>
         )}
@@ -375,4 +377,6 @@ const PromotionView: React.FC<PromotionViewProps> = ({ promotion, hideElements }
   );
 };
 
-export default PromotionView; 
+
+
+export default CustomTag; 

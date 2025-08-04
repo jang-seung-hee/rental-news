@@ -4,6 +4,55 @@
   width: 100%;
 }
 
+/* 인사말과 매듭말 전용 스타일 */
+.greeting-closing-content {
+  width: 100%;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.greeting-closing-content p {
+  margin-bottom: 1rem;
+}
+
+.greeting-closing-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* 인사말과 매듭말 전용 링크 스타일 */
+.greeting-closing-content .greeting-closing-link {
+  color: #1e40af;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.greeting-closing-content .greeting-closing-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* 다크 모드에서의 인사말과 매듭말 링크 스타일 */
+@media (prefers-color-scheme: dark) {
+  .greeting-closing-content .greeting-closing-link {
+    color: #3b82f6;
+  }
+  
+  .greeting-closing-content .greeting-closing-link:hover {
+    color: #60a5fa;
+  }
+}
+
+/* 인사말과 매듭말의 상하 간격 최소화 */
+.promotion-content-container .content-group {
+  margin-bottom: 0.5rem;
+}
+
+.promotion-content-container .content-group:last-child {
+  margin-bottom: 0;
+}
+
 /* 콘텐츠 그룹 스타일 */
 .content-group {
   margin-bottom: 1.5rem;
@@ -36,7 +85,8 @@
   margin-bottom: 0;
 }
 
-/* 키워드 효과 스타일 */
+/* 키워드 효과 스타일 - 비활성화됨 */
+/* 
 .keyword-green-neon {
   background: linear-gradient(45deg, #90EE90, #98FB98) !important;
   color: #000000 !important;
@@ -63,6 +113,7 @@
   border-radius: 3px !important;
   text-shadow: none !important;
 }
+*/
 
 
 
@@ -101,46 +152,74 @@
   letter-spacing: 0.05em;
 }
 
-/* 가로선 분리 효과 스타일 */
-.horizontal-separator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 1.5rem 0;
-  padding: 0.75rem 0;
-  background: linear-gradient(180deg, 
-    rgba(255, 255, 255, 0) 0%, 
-    rgba(248, 250, 252, 0.8) 20%, 
-    rgba(248, 250, 252, 0.8) 80%, 
-    rgba(255, 255, 255, 0) 100%);
-  border-radius: 0.5rem;
+/* 새로운 가로선 스타일 */
+.thick-horizontal-line {
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    #d1d5db 20%, 
+    #9ca3af 50%, 
+    #d1d5db 80%, 
+    transparent 100%);
+  margin: 2.5rem 0;
+  border-radius: 1px;
+  box-shadow: 0 1px 4px rgba(209, 213, 219, 0.3);
   position: relative;
+  transition: all 0.3s ease;
+  opacity: 0.8;
 }
 
-.horizontal-separator::before {
+.thick-horizontal-line::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: -2px;
   left: 0;
   right: 0;
-  height: 1px;
+  height: 6px;
   background: linear-gradient(90deg, 
-    transparent, 
-    rgba(203, 213, 225, 0.5), 
-    transparent);
+    transparent 0%, 
+    rgba(209, 213, 219, 0.1) 20%, 
+    rgba(156, 163, 175, 0.2) 50%, 
+    rgba(209, 213, 219, 0.1) 80%, 
+    transparent 100%);
+  border-radius: 3px;
+  z-index: -1;
+  transition: all 0.3s ease;
 }
 
-.horizontal-separator::after {
+.dotted-separator {
+  height: 1px;
+  background: repeating-linear-gradient(
+    to right,
+    #9ca3af 0,
+    #9ca3af 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  margin: 0.75rem 0 0.1rem 0;
+  border-radius: 0.5px;
+  position: relative;
+  min-height: 1px;
+  display: block;
+  width: 80%;
+}
+
+.dotted-separator::before {
   content: '';
   position: absolute;
-  bottom: 0;
+  top: -1px;
   left: 0;
   right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(203, 213, 225, 0.5), 
-    transparent);
+  height: 3px;
+  background: repeating-linear-gradient(
+    to right,
+    rgba(156, 163, 175, 0.1) 0,
+    rgba(156, 163, 175, 0.1) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  border-radius: 1.5px;
+  z-index: -1;
 }
 
 /* 다크 모드 지원 */
@@ -178,8 +257,50 @@
   .separator-line {
     background: linear-gradient(90deg, transparent, #475569, transparent);
   }
+  
+  /* 다크 모드에서의 새로운 가로선 스타일 */
+  .thick-horizontal-line {
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      #6b7280 20%, 
+      #9ca3af 50%, 
+      #6b7280 80%, 
+      transparent 100%);
+    box-shadow: 0 1px 4px rgba(107, 114, 128, 0.4);
+    opacity: 0.9;
+  }
+  
+  .thick-horizontal-line::before {
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(107, 114, 128, 0.1) 20%, 
+      rgba(156, 163, 175, 0.3) 50%, 
+      rgba(107, 114, 128, 0.1) 80%, 
+      transparent 100%);
+  }
+  
+  .dotted-separator {
+    background: repeating-linear-gradient(
+      to right,
+      #6b7280 0,
+      #6b7280 2px,
+      transparent 2px,
+      transparent 6px
+    );
+  }
+  
+  .dotted-separator::before {
+    background: repeating-linear-gradient(
+      to right,
+      rgba(107, 114, 128, 0.2) 0,
+      rgba(107, 114, 128, 0.2) 2px,
+      transparent 2px,
+      transparent 6px
+    );
+  }
 
-  /* 다크 모드에서의 키워드 효과 */
+  /* 다크 모드에서의 키워드 효과 - 비활성화됨 */
+  /*
   .keyword-green-neon {
     background: linear-gradient(45deg, #228B22, #32CD32) !important;
     color: #FFFFFF !important;
@@ -197,6 +318,7 @@
     color: #FFFFFF !important;
     text-shadow: none !important;
   }
+  */
 }
 
 /* 반응형 디자인 */
@@ -208,6 +330,17 @@
   
   .content-separator {
     margin: 1.5rem 0;
+  }
+  
+  .thick-horizontal-line {
+    margin: 2rem 0;
+    height: 2px;
+  }
+  
+  .dotted-separator {
+    margin: 0.5rem 0 0.05rem 0;
+    height: 1px;
+    width: 80%;
   }
   
   .horizontal-separator {
@@ -226,32 +359,40 @@
 }
 
 /* 링크 스타일 */
-.promotion-link {
-  font-weight: bold !important;
-  text-decoration: underline !important;
-  color: #1e3a8a !important; /* 남색 */
+.promotion-content-container .promotion-link,
+.content-group .promotion-link,
+.group-content .promotion-link {
+  font-weight: bold;
+  text-decoration: underline;
+  color: #1e3a8a; /* 남색 */
   transition: color 0.2s ease-in-out;
-  background: none !important; /* 파란 박스 제거 */
-  border: none !important; /* 테두리 제거 */
-  padding: 0 !important; /* 패딩 제거 */
-  margin: 0 !important; /* 마진 제거 */
+  background: none; /* 파란 박스 제거 */
+  border: none; /* 테두리 제거 */
+  padding: 0; /* 패딩 제거 */
+  margin: 0; /* 마진 제거 */
 }
 
-.promotion-link:hover {
-  color: #1e40af !important; /* 호버 시 더 진한 남색 */
-  text-decoration: underline !important;
-  background: none !important;
-  border: none !important;
+.promotion-content-container .promotion-link:hover,
+.content-group .promotion-link:hover,
+.group-content .promotion-link:hover {
+  color: #1e40af; /* 호버 시 더 진한 남색 */
+  text-decoration: underline;
+  background: none;
+  border: none;
 }
 
 /* 다크 모드에서의 링크 스타일 */
 @media (prefers-color-scheme: dark) {
-  .promotion-link {
-    color: #3b82f6 !important; /* 다크 모드에서도 남색 계열 */
+  .promotion-content-container .promotion-link,
+  .content-group .promotion-link,
+  .group-content .promotion-link {
+    color: #3b82f6; /* 다크 모드에서도 남색 계열 */
   }
   
-  .promotion-link:hover {
-    color: #60a5fa !important;
+  .promotion-content-container .promotion-link:hover,
+  .content-group .promotion-link:hover,
+  .group-content .promotion-link:hover {
+    color: #60a5fa;
   }
 }
 
@@ -275,6 +416,14 @@
   animation: fadeIn 0.4s ease-out;
 }
 
+.thick-horizontal-line {
+  animation: slideIn 0.6s ease-out;
+}
+
+.dotted-separator {
+  animation: fadeIn 0.5s ease-out;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -282,4 +431,160 @@
   to {
     opacity: 1;
   }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 } 
+
+
+
+/* 커스텀 태그 스타일 */
+.promotion-content-container .gray-group-box,
+.content-group .gray-group-box,
+.group-content .gray-group-box {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-weight: 500;
+  display: inline-block;
+  margin: 2px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  white-space: pre-line;
+}
+
+.promotion-content-container .pink-gradient-bg,
+.content-group .pink-gradient-bg,
+.group-content .pink-gradient-bg {
+  background: #e0f2fe;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  font-weight: inherit;
+  display: inline;
+  margin: 0;
+  box-shadow: none;
+  white-space: inherit;
+}
+
+.promotion-content-container .light-pink-bg,
+.content-group .light-pink-bg,
+.group-content .light-pink-bg {
+  background: #fce7f3;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  font-weight: inherit;
+  display: inline;
+  margin: 0;
+  box-shadow: none;
+  white-space: inherit;
+}
+
+/* <<문자>> 파란색 소제목 타이틀 스타일 */
+.promotion-content-container .blue-title-label,
+.content-group .blue-title-label,
+.group-content .blue-title-label,
+.greeting-closing-content .blue-title-label {
+  font-size: 1.125em; /* 2포인트 키운 크기 (18px) */
+  color: #1e40af; /* 파란색 */
+  font-weight: 600;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px solid #93c5fd;
+  display: inline-block;
+  margin: 4px 2px;
+  box-shadow: 0 2px 4px rgba(30, 64, 175, 0.1);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.promotion-content-container .blue-title-label::before,
+.content-group .blue-title-label::before,
+.group-content .blue-title-label::before,
+.greeting-closing-content .blue-title-label::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.promotion-content-container .blue-title-label:hover::before,
+.content-group .blue-title-label:hover::before,
+.group-content .blue-title-label:hover::before,
+.greeting-closing-content .blue-title-label:hover::before {
+  left: 100%;
+}
+
+/* 다크 모드에서의 커스텀 태그 스타일 */
+@media (prefers-color-scheme: dark) {
+  .promotion-content-container .gray-group-box,
+  .content-group .gray-group-box,
+  .group-content .gray-group-box {
+    background: #374151;
+    color: #f3f4f6;
+    border-color: #4b5563;
+  }
+  
+  .promotion-content-container .pink-gradient-bg,
+  .content-group .pink-gradient-bg,
+  .group-content .pink-gradient-bg {
+    background: #0c4a6e;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+    font-weight: inherit;
+    display: inline;
+    margin: 0;
+    box-shadow: none;
+    white-space: inherit;
+  }
+  
+  .promotion-content-container .light-pink-bg,
+  .content-group .light-pink-bg,
+  .group-content .light-pink-bg {
+    background: #831843;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+    font-weight: inherit;
+    display: inline;
+    margin: 0;
+    box-shadow: none;
+    white-space: inherit;
+  }
+  
+  /* 다크 모드에서의 <<문자>> 파란색 소제목 타이틀 스타일 */
+  .promotion-content-container .blue-title-label,
+  .content-group .blue-title-label,
+  .group-content .blue-title-label,
+  .greeting-closing-content .blue-title-label {
+    color: #60a5fa; /* 다크 모드에서 더 밝은 파란색 */
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    border-color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  .promotion-content-container .blue-title-label::before,
+  .content-group .blue-title-label::before,
+  .group-content .blue-title-label::before,
+  .greeting-closing-content .blue-title-label::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  }
+}

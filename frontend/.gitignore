@@ -19,6 +19,9 @@
 .env.test.local
 .env.production.local
 
+# Firebase 설정 파일 (API 키 포함)
+src/services/firebase.ts
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

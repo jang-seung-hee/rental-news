@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Promotion } from '../types';
 import { getPromotionById } from '../services/promotionService';
-import PromotionView from '../components/admin/PromotionView';
+import CustomTag from '../components/admin/CustomTag';
 import { Alert, AlertDescription } from '../components/ui/alert';
 
 const PromotionViewPage: React.FC = () => {
@@ -74,7 +74,7 @@ const PromotionViewPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
-      <PromotionView promotion={promotion} hideElements={hideElements} />
+      <CustomTag promotion={promotion} hideElements={hideElements} />
     </div>
   );
 };
