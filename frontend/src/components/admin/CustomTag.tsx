@@ -127,6 +127,15 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-16 -translate-x-16"></div>
           <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-white/5 rounded-full -translate-x-12 -translate-y-12"></div>
           
+          {/* 하단 오른쪽 이미지 추가 */}
+          <div className="absolute bottom-0 right-0 z-0">
+            <img 
+              src="/promotionViewTitle_resize.png" 
+              alt="프로모션 뷰 타이틀" 
+              className="w-auto h-36 object-contain"
+            />
+          </div>
+          
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
@@ -209,8 +218,16 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
 
         {/* 매듭말 */}
         {!hiddenElements.includes('closing') && (
-          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-            <CardContent className="p-6">
+          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl relative overflow-hidden">
+            {/* 배경 이미지 추가 */}
+            <div className="absolute top-8 right-0 z-0">
+              <img 
+                src="/byebye_resize.png" 
+                alt="매듭말 배경" 
+                className="w-auto h-24 object-contain opacity-100"
+              />
+            </div>
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
@@ -275,8 +292,25 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
 
         {/* 연락처 */}
         {!hiddenElements.includes('contact') && (
-          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-            <CardContent className="p-6">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-100 via-orange-50 to-amber-50 backdrop-blur-sm rounded-2xl relative overflow-hidden">
+            {/* 배경 이미지 추가 */}
+            <div className="absolute top-0 right-0 z-0">
+              <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-red-500 rounded-full opacity-30 transform translate-x-16 -translate-y-16"></div>
+              <div className="absolute top-8 right-8 w-16 h-16 bg-gradient-to-br from-orange-300 to-red-400 rounded-full opacity-40"></div>
+              <div className="absolute top-16 right-4 w-8 h-8 bg-gradient-to-br from-orange-200 to-red-300 rounded-full opacity-50"></div>
+              
+              {/* 추가 배경 패턴 - 더 넓게 펼쳐서 배치 */}
+              <div className="absolute top-1 left-1 w-10 h-10 bg-gradient-to-br from-amber-300 to-orange-400 rounded-full opacity-25"></div>
+              <div className="absolute bottom-1 left-1 w-16 h-16 bg-gradient-to-br from-orange-200 to-amber-300 rounded-full opacity-20"></div>
+              <div className="absolute bottom-1 right-1 w-8 h-8 bg-gradient-to-br from-red-300 to-orange-400 rounded-full opacity-35"></div>
+              <div className="absolute top-4 left-4 w-5 h-5 bg-gradient-to-br from-orange-100 to-amber-200 rounded-full opacity-30"></div>
+              
+              {/* 왼쪽 아래쪽 추가 패턴 */}
+              <div className="absolute bottom-8 left-8 w-14 h-14 bg-gradient-to-br from-orange-300 to-red-400 rounded-full opacity-25"></div>
+              <div className="absolute bottom-12 left-4 w-8 h-8 bg-gradient-to-br from-amber-200 to-orange-300 rounded-full opacity-30"></div>
+              <div className="absolute bottom-6 left-12 w-6 h-6 bg-gradient-to-br from-red-200 to-orange-300 rounded-full opacity-35"></div>
+            </div>
+            <CardContent className="p-6 relative z-10">
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">

@@ -21,7 +21,7 @@
 
 /* 인사말과 매듭말 전용 링크 스타일 */
 .greeting-closing-content .greeting-closing-link {
-  color: #1e40af;
+  color: #1e3a8a; /* 진 남색으로 변경 */
   text-decoration: underline;
   font-weight: 600;
   transition: color 0.2s ease-in-out;
@@ -29,7 +29,7 @@
 }
 
 .greeting-closing-content .greeting-closing-link:hover {
-  color: #1d4ed8;
+  color: #1e40af; /* 호버 시 더 진한 남색 */
   text-decoration: underline;
 }
 
