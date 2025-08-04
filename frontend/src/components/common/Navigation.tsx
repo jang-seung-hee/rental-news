@@ -17,7 +17,7 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ className }) => {
   const location = useLocation();
-  const { isAuthenticated, logout } = useAdminAuth();
+  const { isAdmin, signOut } = useAdminAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(path);
@@ -80,11 +80,11 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
         </nav>
         
         {/* 관리자 로그아웃 버튼 */}
-        {isAuthenticated && (
+        {isAdmin && (
           <div className="pt-4 border-t border-gray-200">
             <Button
               variant="ghost"
-              onClick={logout}
+              onClick={signOut}
               className="w-full justify-start gap-3 h-auto py-3 px-4 text-red-600 hover:text-red-700 hover:bg-red-50"
             >
               <ArrowRightOnRectangleIcon className="h-5 w-5" />

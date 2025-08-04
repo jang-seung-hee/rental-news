@@ -17,7 +17,8 @@ import NotFound from './pages/NotFound';
 import Navigation from './components/common/Navigation';
 import BreadcrumbNav from './components/common/BreadcrumbNav';
 import ErrorBoundary from './components/common/ErrorBoundary';
-import AdminPasswordDialog from './components/common/AdminPasswordDialog';
+import AdminLoginForm from './components/common/AdminLoginForm';
+import LoadingSpinner from './components/common/LoadingSpinner';
 
 // Hooks
 import { useAdminAuth } from './hooks/useAdminAuth';
@@ -72,7 +73,19 @@ function App() {
 const AppContent: React.FC = () => {
   const location = useLocation();
   const isPromotionView = location.pathname.startsWith('/view/');
-  const { isAuthenticated, isPasswordDialogOpen, openPasswordDialog, closePasswordDialog } = useAdminAuth();
+  const { user, isAdmin, loading, error } = useAdminAuth();
+
+  // 로딩 상태 처리
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner className="mx-auto mb-4" />
+          <p className="text-gray-600">인증 상태를 확인하는 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   // 프로모션 뷰 페이지는 인증 없이 접근 가능
   if (isPromotionView) {
@@ -83,39 +96,12 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // 관리자 인증이 필요한 모든 페이지 (프로모션 뷰 제외)
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">관리자 로그인</h2>
-            <p className="text-gray-600 mb-6">
-              렌탈톡톡 관리 시스템에 접근하려면 관리자 권한이 필요합니다.
-            </p>
-            <button
-              onClick={openPasswordDialog}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              관리자 로그인
-            </button>
-          </div>
-        </div>
-        
-        <AdminPasswordDialog
-          isOpen={isPasswordDialogOpen}
-          onClose={closePasswordDialog}
-          onSuccess={closePasswordDialog}
-        />
-      </div>
-    );
+  // 관리자 권한이 없는 경우 로그인 폼 표시
+  if (!user || !isAdmin) {
+    return <AdminLoginForm />;
   }
 
+  // 관리자 권한이 있는 경우 메인 레이아웃 표시
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex flex-col lg:flex-row">
@@ -154,12 +140,6 @@ const AppContent: React.FC = () => {
           </main>
         </div>
       </div>
-      
-      <AdminPasswordDialog
-        isOpen={isPasswordDialogOpen}
-        onClose={closePasswordDialog}
-        onSuccess={closePasswordDialog}
-      />
     </div>
   );
 };

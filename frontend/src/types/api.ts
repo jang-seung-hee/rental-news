@@ -94,12 +94,4 @@ export interface UserPermissions {
   canWrite: boolean;
   canDelete: boolean;
   canManage: boolean;
-}
-
-// 인증 상태 타입
-export interface AuthState {
-  isAuthenticated: boolean;
-  user: any | null;
-  loading: boolean;
-  error: string | null;
 } 
