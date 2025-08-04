@@ -19,6 +19,7 @@ import BreadcrumbNav from './components/common/BreadcrumbNav';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import AdminLoginForm from './components/common/AdminLoginForm';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import { Toaster } from './components/ui/toaster';
 
 // Hooks
 import { useAdminAuth } from './hooks/useAdminAuth';
@@ -90,9 +91,12 @@ const AppContent: React.FC = () => {
   // 프로모션 뷰 페이지는 인증 없이 접근 가능
   if (isPromotionView) {
     return (
-      <Routes>
-        <Route path="/view/:id" element={<PromotionViewPage />} />
-      </Routes>
+      <>
+        <Routes>
+          <Route path="/view/:id" element={<PromotionViewPage />} />
+        </Routes>
+        <Toaster />
+      </>
     );
   }
 
@@ -140,6 +144,7 @@ const AppContent: React.FC = () => {
           </main>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };

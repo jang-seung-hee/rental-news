@@ -5,6 +5,7 @@ import { Badge } from '../ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { useToast } from '../../hooks/use-toast';
 
 interface PromotionTableProps {
   promotions: Promotion[];
@@ -21,6 +22,8 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
   onView,
   isLoading = false
 }) => {
+  const { toast } = useToast();
+
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '-';
     try {
@@ -38,6 +41,23 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
       return `${year}년 ${parseInt(monthNum)}월`;
     } catch (error) {
       return month;
+    }
+  };
+
+  const copyToClipboard = async (promotionId: string) => {
+    try {
+      const url = `${window.location.origin}/view/${promotionId}`;
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: "링크가 복사되었습니다",
+        description: `클립보드에 프로모션 링크가 복사되었습니다.\n${url}`,
+      });
+    } catch (error) {
+      toast({
+        title: "복사 실패",
+        description: "링크 복사에 실패했습니다. 다시 시도해주세요.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -87,9 +107,10 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                 <th className="text-left py-3 px-4 font-medium text-gray-700">제목</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 w-30">월</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 w-65">타겟</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-700 w-25">상태</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 w-30">생성일</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700 w-25">상태</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 w-20">보기</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-700 w-24">링크복사</th>
                 <th className="text-left py-3 px-4 font-medium text-gray-700 w-16">삭제</th>
               </tr>
             </thead>
@@ -122,17 +143,17 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                     </span>
                   </td>
                   <td className="py-3 px-4">
+                    <span className="text-sm text-gray-500">
+                      {formatDate(promotion.createdAt)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
                     <Badge
                       variant={promotion.isActive ? "default" : "secondary"}
                       className={promotion.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
                     >
                       {promotion.isActive ? '활성' : '비활성'}
                     </Badge>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="text-sm text-gray-500">
-                      {formatDate(promotion.createdAt)}
-                    </span>
                   </td>
                   <td className="py-3 px-4">
                     <Button
@@ -142,6 +163,16 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                       className="text-purple-600 border-purple-200 hover:bg-purple-50"
                     >
                       보기
+                    </Button>
+                  </td>
+                  <td className="py-3 px-4">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => copyToClipboard(promotion.id)}
+                      className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    >
+                      링크복사
                     </Button>
                   </td>
                   <td className="py-3 px-4">
@@ -196,6 +227,14 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                   className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
                 >
                   보기
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyToClipboard(promotion.id)}
+                  className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  링크복사
                 </Button>
                 <Button
                   size="sm"

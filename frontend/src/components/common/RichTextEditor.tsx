@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { cn } from '../../lib/utils';
 import { uploadImage } from '../../services/firebaseUtils';
+import CustomTagPopup from './CustomTagPopup';
 import './RichTextEditor.css';
 
 interface RichTextEditorProps {
@@ -31,6 +32,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [isFocused, setIsFocused] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [selectedColor, setSelectedColor] = useState('#000000');
+  const [showCustomTagPopup, setShowCustomTagPopup] = useState(false);
 
   // 색상 옵션
   const colorOptions = [
@@ -211,6 +213,25 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   };
 
+  // 커스텀 태그 삽입 핸들러
+  const handleCustomTagSelect = (tag: string) => {
+    if (editorRef.current) {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const textNode = document.createTextNode(tag);
+        range.deleteContents();
+        range.insertNode(textNode);
+        range.collapse(false);
+      } else {
+        // 커서가 없으면 에디터 끝에 삽입
+        const textNode = document.createTextNode(tag);
+        editorRef.current.appendChild(textNode);
+      }
+      handleInput();
+    }
+  };
+
   return (
     <div className={cn('rich-text-editor', className)}>
       {/* 툴바 */}
@@ -336,6 +357,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           >
             {fullscreen ? "⛶ 전체화면 해제" : "⛶ 전체화면"}
           </button>
+          <button
+            type="button"
+            onClick={() => setShowCustomTagPopup(true)}
+            className="toolbar-btn"
+            title="커스텀 태그"
+          >
+            🏷️ 커스텀 TAG
+          </button>
         </div>
       )}
       
@@ -357,6 +386,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           height: fullscreen ? 'calc(100vh - 120px)' : height
         }}
         data-placeholder={placeholder}
+      />
+      
+      {/* 커스텀 태그 팝업 */}
+      <CustomTagPopup
+        isOpen={showCustomTagPopup}
+        onClose={() => setShowCustomTagPopup(false)}
+        onTagSelect={handleCustomTagSelect}
       />
     </div>
   );

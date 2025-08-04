@@ -7,6 +7,7 @@ import PromotionTable from '../components/admin/PromotionTable';
 
 import { Promotion, PromotionFilter, PromotionSort } from '../types';
 import { getPromotions, deletePromotion } from '../services/promotionService';
+import { getCurrentMonth } from '../utils/utils';
 
 interface PromotionListProps {
   onEdit: (promotion: Promotion) => void;
@@ -23,7 +24,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<PromotionFilter>({});
+  const [filter, setFilter] = useState<PromotionFilter>({ month: getCurrentMonth() });
   const [sort, setSort] = useState<PromotionSort>({ field: 'createdAt', direction: 'desc' });
   const [hasNextPage, setHasNextPage] = useState(false);
   const lastDocRef = useRef<any>(null);

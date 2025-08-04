@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import RichTextEditor from '../common/RichTextEditor';
 import { Promotion, CreatePromotionRequest, UpdatePromotionRequest } from '../../types';
 import { createPromotion, updatePromotion, getPromotionsByMonth, getOtherProductsInfo, getPromotionCodesByMonth } from '../../services/promotionService';
+import { getCurrentMonth } from '../../utils/utils';
 
 // 폼 유효성 검사 스키마
 const promotionSchema = z.object({
@@ -49,7 +50,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   const [otherProductInfo, setOtherProductInfo] = useState<{ [key: string]: { code: string; title: string } }>({});
   
   // 기존 프로모션 복사 관련 상태
-  const [copyMonth, setCopyMonth] = useState<string>('');
+  const [copyMonth, setCopyMonth] = useState<string>(getCurrentMonth());
   const [copyPromotionCodes, setCopyPromotionCodes] = useState<{ id: string; code: string; title: string }[]>([]);
   const [selectedCopyCode, setSelectedCopyCode] = useState<string>('');
   const [isCopyLoading, setIsCopyLoading] = useState(false);
@@ -65,7 +66,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     resolver: zodResolver(promotionSchema),
     defaultValues: {
       code: promotion?.code || '',
-      month: promotion?.month || '',
+      month: promotion?.month || getCurrentMonth(),
       target: promotion?.target || '',
       title: promotion?.title || '',
       greeting: promotion?.greeting || '',
