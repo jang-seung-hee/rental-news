@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import RichTextEditor from '../common/RichTextEditor';
 import { Promotion, CreatePromotionRequest, UpdatePromotionRequest } from '../../types';
-import { createPromotion, updatePromotion, getPromotionsByMonth, getOtherProductsInfo, getPromotionCodesByMonth, getPromotionById } from '../../services/promotionService';
+import { createPromotion, updatePromotion, getPromotionsByMonth, getOtherProductsInfo, getPromotionCodesByMonth } from '../../services/promotionService';
 
 // 폼 유효성 검사 스키마
 const promotionSchema = z.object({
