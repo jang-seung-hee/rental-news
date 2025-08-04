@@ -73,7 +73,7 @@ function App() {
 const AppContent: React.FC = () => {
   const location = useLocation();
   const isPromotionView = location.pathname.startsWith('/view/');
-  const { user, isAdmin, loading, error } = useAdminAuth();
+  const { user, isAdmin, loading } = useAdminAuth();
 
   // 로딩 상태 처리
   if (loading) {

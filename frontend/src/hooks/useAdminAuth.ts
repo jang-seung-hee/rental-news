@@ -7,7 +7,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../services/firebase';
-import { AuthState, AdminUser } from '../types/auth';
+
 
 interface UseAdminAuthReturn {
   user: User | null;
