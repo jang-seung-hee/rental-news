@@ -306,9 +306,7 @@ export function renderPromotionContent(content: string): string {
     } else {
       return `
         <div class="content-group" data-group-id="${group.id}">
-          <div class="group-content">
-            ${group.content}
-          </div>
+          ${group.content}
         </div>
       `;
     }
