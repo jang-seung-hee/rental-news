@@ -27,6 +27,7 @@ const promotionSchema = z.object({
   otherProduct3: z.string().optional(),
   otherProduct4: z.string().optional(),
   contact: z.string().min(1, '연락처를 입력하세요'),
+  shortUrl: z.string().optional(),
   imageUrl: z.string().optional().nullable(),
   isActive: z.boolean().default(true)
 });
@@ -77,6 +78,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
       otherProduct3: promotion?.otherProduct3 || '',
       otherProduct4: promotion?.otherProduct4 || '',
       contact: promotion?.contact || '',
+      shortUrl: promotion?.shortUrl || '',
       imageUrl: promotion?.imageUrl || null,
       isActive: promotion?.isActive ?? true
     }
@@ -458,6 +460,22 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                     <Label htmlFor="isActive" className="text-sm">
                       프로모션 활성화
                     </Label>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="shortUrl">단축 URL</Label>
+                    <Input
+                      id="shortUrl"
+                      {...register('shortUrl')}
+                      placeholder="https://example.com"
+                      className={errors.shortUrl ? 'border-red-500' : ''}
+                    />
+                    {errors.shortUrl && (
+                      <p className="text-sm text-red-500">{errors.shortUrl.message}</p>
+                    )}
+                    <p className="text-sm text-gray-500">
+                      프로모션의 단축 URL을 입력하세요. (선택사항)
+                    </p>
                   </div>
                 </div>
               </div>

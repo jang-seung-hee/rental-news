@@ -239,6 +239,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
         onDelete={handleDelete}
         onView={onView}
         isLoading={isLoading}
+        onPromotionUpdate={() => loadPromotions(true)}
       />
 
       {/* 더 보기 버튼 */}

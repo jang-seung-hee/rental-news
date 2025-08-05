@@ -488,3 +488,37 @@ export const getPromotionCodesByMonth = async (
     };
   }
 }; 
+
+// 단축 URL 업데이트
+export const updateShortUrl = async (
+  id: string,
+  shortUrl: string
+): Promise<CrudResult<void>> => {
+  try {
+    const docRef = getDocumentRef(COLLECTION_NAME, id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return {
+        success: false,
+        error: '프로모션을 찾을 수 없습니다.'
+      };
+    }
+
+    const updateData = addUpdateTimestamp({
+      shortUrl: shortUrl.trim()
+    });
+
+    await updateDoc(docRef, updateData);
+
+    return {
+      success: true,
+      affectedCount: 1
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+}; 

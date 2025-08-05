@@ -15,6 +15,7 @@ export interface Promotion {
   otherProduct3?: string;        // 다른제품 3 (프로모션 ID)
   otherProduct4?: string;        // 다른제품 4 (프로모션 ID)
   contact: string;               // 연락처
+  shortUrl?: string;             // 단축 URL (선택사항)
   createdAt: Timestamp;          // 생성일시
   updatedAt: Timestamp;          // 수정일시
   isActive?: boolean;            // 활성화 상태 (선택사항)
@@ -35,6 +36,7 @@ export interface CreatePromotionRequest {
   otherProduct3?: string;
   otherProduct4?: string;
   contact: string;
+  shortUrl?: string;
   isActive?: boolean;
   imageUrl?: string | null;
 }
@@ -54,6 +56,7 @@ export interface UpdatePromotionRequest {
   otherProduct3?: string;
   otherProduct4?: string;
   contact?: string;
+  shortUrl?: string;
   isActive?: boolean;
   imageUrl?: string | null;
 }
@@ -94,6 +97,7 @@ export interface PromotionFormData {
   otherProduct3?: string;
   otherProduct4?: string;
   contact: string;
+  shortUrl?: string;
   isActive: boolean;
   imageFile?: File;
 }
@@ -127,4 +131,5 @@ export interface PromotionValidationErrors {
   otherProduct3?: string;
   otherProduct4?: string;
   contact?: string;
+  shortUrl?: string;
 } 

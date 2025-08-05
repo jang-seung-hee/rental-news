@@ -239,6 +239,33 @@ const PromotionDetailView: React.FC<PromotionDetailViewProps> = ({
             <p className="text-lg">{promotion.contact}</p>
           </div>
 
+          {/* 단축 URL */}
+          {promotion.shortUrl && (
+            <div>
+              <h3 className="font-semibold text-sm text-muted-foreground mb-1">단축 URL</h3>
+              <div className="flex items-center gap-2">
+                <a 
+                  href={promotion.shortUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline break-all"
+                >
+                  {promotion.shortUrl}
+                </a>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(promotion.shortUrl!);
+                  }}
+                  className="text-xs"
+                >
+                  복사
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* 이미지 */}
           {promotion.imageUrl && (
             <div>
