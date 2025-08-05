@@ -11,6 +11,7 @@ import {
 } from '../ui/sheet';
 import { renderPromotionContent } from '../../utils/promotionContentUtils';
 import { getPromotionById } from '../../services/promotionService';
+import '../../utils/promotionSidebarLightMode.css';
 
 interface PromotionSidebarProps {
   isOpen: boolean;
@@ -56,7 +57,14 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full max-w-2xl overflow-y-auto [&>button]:hidden !p-0 sheet-content">
+      <SheetContent 
+        side="right" 
+        className="w-full max-w-2xl overflow-y-auto [&>button]:hidden !p-0 sheet-content promotion-sidebar-light-mode"
+        style={{
+          backgroundColor: 'white !important',
+          color: '#1f2937 !important'
+        }}
+      >
         <SheetHeader className="pb-4 border-b border-gray-200 px-4 pt-4 sheet-header">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-xl font-bold text-gray-900 sheet-title">
@@ -78,14 +86,14 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
           </SheetDescription>
         </SheetHeader>
         
-        <div className="py-1 flex flex-col h-full px-3">
+        <div className="py-1 flex flex-col h-full px-3 promotion-sidebar-content">
           {isLoadingSelectedPromotion ? (
             <div className="flex items-center justify-center py-2">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
               <span className="ml-2 text-gray-600">로딩 중...</span>
             </div>
           ) : selectedPromotion ? (
-            <Card className="border-0 shadow-sm bg-white/90 backdrop-blur-sm rounded-lg card">
+            <Card className="border-0 shadow-sm bg-white/90 backdrop-blur-sm rounded-lg card promotion-sidebar-card">
               <CardContent className="p-2 card-content">
                 <div className="flex items-center mb-2">
                   <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-2"></div>
@@ -94,7 +102,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
                   </h3>
                 </div>
                 <div 
-                  className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
+                  className="prose prose-sm max-w-none text-gray-700 leading-relaxed promotion-sidebar-prose"
                   dangerouslySetInnerHTML={{ __html: renderPromotionContent(selectedPromotion.content) }}
                 />
               </CardContent>

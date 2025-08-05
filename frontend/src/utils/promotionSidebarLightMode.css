@@ -1,0 +1,293 @@
+/* 슬라이더 전용 라이트모드 강제 적용 CSS */
+
+/* 슬라이더 전체 컨테이너 라이트모드 강제 적용 */
+.promotion-sidebar-light-mode {
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+/* Sheet 컴포넌트 라이트모드 강제 적용 */
+.promotion-sidebar-light-mode[data-radix-dialog-content] {
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+/* 슬라이더 헤더 라이트모드 강제 적용 */
+.promotion-sidebar-light-mode .sheet-header {
+  border-bottom-color: #e5e7eb !important;
+  background-color: white !important;
+}
+
+.promotion-sidebar-light-mode .sheet-title {
+  color: #111827 !important;
+}
+
+.promotion-sidebar-light-mode .sheet-description {
+  color: #6b7280 !important;
+}
+
+/* 슬라이더 콘텐츠 영역 라이트모드 강제 적용 */
+.promotion-sidebar-content {
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+/* 슬라이더 카드 라이트모드 강제 적용 */
+.promotion-sidebar-card {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: transparent !important;
+}
+
+.promotion-sidebar-card .card-content {
+  color: #374151 !important;
+}
+
+/* 슬라이더 프로모션 내용 라이트모드 강제 적용 */
+.promotion-sidebar-prose {
+  color: #374151 !important;
+}
+
+.promotion-sidebar-prose h1,
+.promotion-sidebar-prose h2,
+.promotion-sidebar-prose h3,
+.promotion-sidebar-prose h4,
+.promotion-sidebar-prose h5,
+.promotion-sidebar-prose h6 {
+  color: #111827 !important;
+}
+
+.promotion-sidebar-prose p {
+  color: #374151 !important;
+}
+
+/* 슬라이더 커스텀 태그 스타일 라이트모드 강제 적용 */
+.promotion-sidebar-prose .promotion-link {
+  color: #1e3a8a !important;
+}
+
+.promotion-sidebar-prose .promotion-link:hover {
+  color: #1e40af !important;
+}
+
+.promotion-sidebar-prose .greeting-closing-link {
+  color: #1e3a8a !important;
+}
+
+.promotion-sidebar-prose .greeting-closing-link:hover {
+  color: #1e40af !important;
+}
+
+/* 슬라이더 !! 태그 라이트모드 강제 적용 */
+.promotion-sidebar-prose .light-pink-bg {
+  background: #fce7f3 !important;
+  color: inherit !important;
+}
+
+/* 슬라이더 [[ 태그 라이트모드 강제 적용 */
+.promotion-sidebar-prose .gray-group-box {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  border-color: #6b7280 !important;
+}
+
+/* 슬라이더 "" 태그 라이트모드 강제 적용 */
+.promotion-sidebar-prose .pink-gradient-bg {
+  background: #e0f2fe !important;
+  color: inherit !important;
+}
+
+/* 슬라이더 << 태그 라이트모드 강제 적용 */
+.promotion-sidebar-prose .blue-title-label {
+  color: #1e40af !important;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+  border-color: #93c5fd !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 슬라이더 로딩 스피너 라이트모드 강제 적용 */
+.promotion-sidebar-content .animate-spin {
+  border-color: #2563eb !important;
+}
+
+.promotion-sidebar-content .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+/* 슬라이더 버튼 라이트모드 강제 적용 */
+.promotion-sidebar-content .btn-close {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+.promotion-sidebar-content .btn-close:hover {
+  background-color: #e5e7eb !important;
+}
+
+/* 슬라이더 텍스트 색상 라이트모드 강제 적용 */
+.promotion-sidebar-content .text-gray-900 {
+  color: #111827 !important;
+}
+
+.promotion-sidebar-content .text-gray-700 {
+  color: #374151 !important;
+}
+
+.promotion-sidebar-content .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.promotion-sidebar-content .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+/* 슬라이더 배경색 라이트모드 강제 적용 */
+.promotion-sidebar-content .bg-white {
+  background-color: white !important;
+}
+
+.promotion-sidebar-content .bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+.promotion-sidebar-content .bg-gray-200 {
+  background-color: #e5e7eb !important;
+}
+
+/* 슬라이더 테두리 색상 라이트모드 강제 적용 */
+.promotion-sidebar-content .border-gray-200 {
+  border-color: #e5e7eb !important;
+}
+
+/* 슬라이더 호버 효과 라이트모드 강제 적용 */
+.promotion-sidebar-content .hover\:bg-gray-200:hover {
+  background-color: #e5e7eb !important;
+}
+
+/* 슬라이더 그라데이션 라이트모드 강제 적용 */
+.promotion-sidebar-content .from-purple-500 {
+  --tw-gradient-from: #8b5cf6 !important;
+}
+
+.promotion-sidebar-content .to-purple-600 {
+  --tw-gradient-to: #9333ea !important;
+}
+
+.promotion-sidebar-content .from-purple-600 {
+  --tw-gradient-from: #9333ea !important;
+}
+
+.promotion-sidebar-content .to-pink-600 {
+  --tw-gradient-to: #db2777 !important;
+}
+
+/* 슬라이더 콘텐츠 그룹 라이트모드 강제 적용 */
+.promotion-sidebar-prose .content-group {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 슬라이더 가로선 라이트모드 강제 적용 */
+.promotion-sidebar-prose .thick-horizontal-line {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    #d1d5db 20%, 
+    #9ca3af 50%, 
+    #d1d5db 80%, 
+    transparent 100%) !important;
+  box-shadow: 0 1px 4px rgba(209, 213, 219, 0.3) !important;
+}
+
+.promotion-sidebar-prose .thick-horizontal-line::before {
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(209, 213, 219, 0.1) 20%, 
+    rgba(156, 163, 175, 0.2) 50%, 
+    rgba(209, 213, 219, 0.1) 80%, 
+    transparent 100%) !important;
+}
+
+.promotion-sidebar-prose .dotted-separator {
+  background: repeating-linear-gradient(
+    to right,
+    #9ca3af 0,
+    #9ca3af 2px,
+    transparent 2px,
+    transparent 6px
+  ) !important;
+}
+
+.promotion-sidebar-prose .dotted-separator::before {
+  background: repeating-linear-gradient(
+    to right,
+    rgba(156, 163, 175, 0.1) 0,
+    rgba(156, 163, 175, 0.1) 2px,
+    transparent 2px,
+    transparent 6px
+  ) !important;
+}
+
+/* 슬라이더 구분자 라이트모드 강제 적용 */
+.promotion-sidebar-prose .content-separator {
+  background: transparent !important;
+}
+
+.promotion-sidebar-prose .separator-line {
+  background: linear-gradient(90deg, transparent, #e5e7eb, transparent) !important;
+}
+
+/* 다크모드 미디어 쿼리 완전 무효화 - 슬라이더에서만 */
+@media (prefers-color-scheme: dark) {
+  .promotion-sidebar-light-mode,
+  .promotion-sidebar-light-mode *,
+  .promotion-sidebar-content,
+  .promotion-sidebar-content *,
+  .promotion-sidebar-prose,
+  .promotion-sidebar-prose * {
+    /* 모든 다크모드 스타일을 무효화하고 라이트모드로 강제 적용 */
+    background-color: inherit !important;
+    color: inherit !important;
+    border-color: inherit !important;
+  }
+  
+  /* 특정 요소들의 라이트모드 강제 적용 */
+  .promotion-sidebar-light-mode {
+    background-color: white !important;
+    color: #1f2937 !important;
+  }
+  
+  .promotion-sidebar-prose .content-group {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .promotion-sidebar-prose .gray-group-box {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    border-color: #6b7280 !important;
+  }
+  
+  .promotion-sidebar-prose .light-pink-bg {
+    background: #fce7f3 !important;
+    color: inherit !important;
+  }
+  
+  .promotion-sidebar-prose .pink-gradient-bg {
+    background: #e0f2fe !important;
+    color: inherit !important;
+  }
+  
+  .promotion-sidebar-prose .blue-title-label {
+    color: #1e40af !important;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    border-color: #93c5fd !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  }
+  
+  .promotion-sidebar-prose .promotion-link {
+    color: #1e3a8a !important;
+  }
+  
+  .promotion-sidebar-prose .promotion-link:hover {
+    color: #1e40af !important;
+  }
+} 
