@@ -34,6 +34,32 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
     setCurrentSelectedMenu(selectedMenu);
   }, [selectedMenu]);
 
+  // 모바일 뒤로가기 버튼 처리
+  useEffect(() => {
+    if (isOpen) {
+      // 바텀시트가 열릴 때 history에 상태 추가
+      const handlePopState = (event: PopStateEvent) => {
+        // 뒤로가기 버튼이 눌렸을 때 바텀시트가 열려있으면 닫기
+        if (isOpen) {
+          event.preventDefault();
+          handleCloseBottomSheet();
+          // history에 다시 추가하여 뒤로가기 상태 유지
+          window.history.pushState(null, '', window.location.href);
+        }
+      };
+
+      // 바텀시트가 열릴 때 history에 상태 추가
+      window.history.pushState(null, '', window.location.href);
+      
+      // popstate 이벤트 리스너 추가
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, [isOpen]);
+
   const getMenuTitle = (menuId: string) => {
     const menu = menuItems.find(item => item.id === menuId);
     return menu ? menu.title : '';

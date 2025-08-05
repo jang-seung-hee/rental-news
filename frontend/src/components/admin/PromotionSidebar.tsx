@@ -49,6 +49,32 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
     loadSelectedPromotion();
   }, [selectedProductCode]);
 
+  // 모바일 뒤로가기 버튼 처리
+  useEffect(() => {
+    if (isOpen) {
+      // 사이드바가 열릴 때 history에 상태 추가
+      const handlePopState = (event: PopStateEvent) => {
+        // 뒤로가기 버튼이 눌렸을 때 사이드바가 열려있으면 닫기
+        if (isOpen) {
+          event.preventDefault();
+          handleCloseSidebar();
+          // history에 다시 추가하여 뒤로가기 상태 유지
+          window.history.pushState(null, '', window.location.href);
+        }
+      };
+
+      // 사이드바가 열릴 때 history에 상태 추가
+      window.history.pushState(null, '', window.location.href);
+      
+      // popstate 이벤트 리스너 추가
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, [isOpen]);
+
   // 사이드바 닫기 핸들러
   const handleCloseSidebar = () => {
     onClose();
