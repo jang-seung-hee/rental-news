@@ -153,7 +153,8 @@
 }
 
 /* 새로운 가로선 스타일 */
-.thick-horizontal-line {
+.thick-horizontal-line,
+.greeting-closing-content .thick-horizontal-line {
   height: 2px;
   background: linear-gradient(90deg, 
     transparent 0%, 
@@ -169,7 +170,8 @@
   opacity: 0.8;
 }
 
-.thick-horizontal-line::before {
+.thick-horizontal-line::before,
+.greeting-closing-content .thick-horizontal-line::before {
   content: '';
   position: absolute;
   top: -2px;
@@ -187,7 +189,8 @@
   transition: all 0.3s ease;
 }
 
-.dotted-separator {
+.dotted-separator,
+.greeting-closing-content .dotted-separator {
   height: 1px;
   background: repeating-linear-gradient(
     to right,
@@ -204,7 +207,8 @@
   width: 80%;
 }
 
-.dotted-separator::before {
+.dotted-separator::before,
+.greeting-closing-content .dotted-separator::before {
   content: '';
   position: absolute;
   top: -1px;
@@ -449,7 +453,8 @@
 /* 커스텀 태그 스타일 */
 .promotion-content-container .gray-group-box,
 .content-group .gray-group-box,
-.group-content .gray-group-box {
+.group-content .gray-group-box,
+.greeting-closing-content .gray-group-box {
   background: #f3f4f6;
   color: #374151;
   padding: 4px 8px;
@@ -465,7 +470,7 @@
 .promotion-content-container .pink-gradient-bg,
 .content-group .pink-gradient-bg,
 .group-content .pink-gradient-bg {
-  background: #e0f2fe;
+  background: #b8d7fc;
   color: inherit;
   padding: 0;
   border-radius: 0;
@@ -479,7 +484,7 @@
 .promotion-content-container .light-pink-bg,
 .content-group .light-pink-bg,
 .group-content .light-pink-bg {
-  background: #fce7f3;
+  background: #f4c7d8;
   color: inherit;
   padding: 0;
   border-radius: 0;

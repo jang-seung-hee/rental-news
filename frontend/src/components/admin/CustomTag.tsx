@@ -193,7 +193,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
                  </h3>
                </div>
                <div 
-                 className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                 className="prose prose-lg max-w-none text-gray-900 leading-relaxed"
                  dangerouslySetInnerHTML={{ __html: renderGreetingClosingContent(promotion.greeting) }}
                />
              </CardContent>
@@ -235,7 +235,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
                 </h3>
               </div>
               <div 
-                className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                className="prose prose-lg max-w-none text-gray-900 leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: renderGreetingClosingContent(promotion.closing) }}
               />
             </CardContent>

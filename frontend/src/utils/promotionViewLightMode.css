@@ -57,7 +57,7 @@
 
 /* 프로모션 내용 섹션 라이트모드 강제 적용 */
 .promotion-view-light-mode .prose {
-  color: #374151 !important;
+  color: #111827 !important;
 }
 
 .promotion-view-light-mode .prose h1,
@@ -70,7 +70,7 @@
 }
 
 .promotion-view-light-mode .prose p {
-  color: #374151 !important;
+  color: #111827 !important;
 }
 
 /* 커스텀 태그 스타일 라이트모드 강제 적용 */
@@ -92,7 +92,7 @@
 
 /* !! 태그 라이트모드 강제 적용 */
 .promotion-view-light-mode .light-pink-bg {
-  background: #fce7f3 !important;
+  background: #f4c7d8 !important;
   color: inherit !important;
 }
 
@@ -105,7 +105,7 @@
 
 /* "" 태그 라이트모드 강제 적용 */
 .promotion-view-light-mode .pink-gradient-bg {
-  background: #e0f2fe !important;
+  background: #b8d7fc !important;
   color: inherit !important;
 }
 

@@ -380,6 +380,9 @@ export function renderGreetingClosingContent(content: string): string {
   // ""문자"" 패턴 처리 (분홍색 그라데이션 배경)
   processedContent = processPinkGradientPattern(processedContent);
   
+  // 가로선 패턴 처리 (---, ===, ...)
+  processedContent = processHorizontalLines(processedContent);
+  
   console.log('renderGreetingClosingContent - 커스텀 패턴 처리 후:', JSON.stringify(processedContent));
   
   // HTML 태그를 임시로 보호
