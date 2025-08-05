@@ -13,7 +13,7 @@ const PromotionBottomNavigation: React.FC<PromotionBottomNavigationProps> = ({ o
           <div className="flex-1">
             <Button
               variant="ghost"
-              className="w-full h-16 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="w-full h-16 text-base font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               onClick={() => onMenuClick('application')}
             >
               신청방법?
@@ -22,7 +22,7 @@ const PromotionBottomNavigation: React.FC<PromotionBottomNavigationProps> = ({ o
           <div className="flex-1">
             <Button
               variant="ghost"
-              className="w-full h-16 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="w-full h-16 text-base font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               onClick={() => onMenuClick('existing-cancel')}
             >
               기존제품해지?
@@ -31,7 +31,7 @@ const PromotionBottomNavigation: React.FC<PromotionBottomNavigationProps> = ({ o
           <div className="flex-1">
             <Button
               variant="ghost"
-              className="w-full h-16 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="w-full h-16 text-base font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               onClick={() => onMenuClick('gift-payment')}
             >
               사은금은?
@@ -40,7 +40,7 @@ const PromotionBottomNavigation: React.FC<PromotionBottomNavigationProps> = ({ o
           <div className="flex-1">
             <Button
               variant="ghost"
-              className="w-full h-16 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="w-full h-16 text-base font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               onClick={() => onMenuClick('card-benefits')}
             >
               제휴카드는?
@@ -51,28 +51,28 @@ const PromotionBottomNavigation: React.FC<PromotionBottomNavigationProps> = ({ o
           <div className="grid grid-cols-4">
             <Button
               variant="ghost"
-              className="h-16 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="h-16 text-base font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               onClick={() => onMenuClick('application')}
             >
               신청방법?
             </Button>
             <Button
               variant="ghost"
-              className="h-16 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="h-16 text-base font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               onClick={() => onMenuClick('existing-cancel')}
             >
               기존제품해지?
             </Button>
             <Button
               variant="ghost"
-              className="h-16 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="h-16 text-base font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               onClick={() => onMenuClick('gift-payment')}
             >
               사은금은?
             </Button>
             <Button
               variant="ghost"
-              className="h-16 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="h-16 text-base font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               onClick={() => onMenuClick('card-benefits')}
             >
               제휴카드는?

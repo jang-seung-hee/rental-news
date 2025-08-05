@@ -49,10 +49,10 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-[80vh] overflow-y-auto sheet-content">
         <SheetHeader className="pb-4 border-b border-gray-200 sheet-header">
-          <SheetTitle className="text-xl font-bold text-gray-900 sheet-title">
+          <SheetTitle className="text-2xl font-bold text-gray-900 sheet-title">
             {getMenuTitle(currentSelectedMenu || '')}
           </SheetTitle>
-          <SheetDescription className="text-gray-600 sheet-description">
+          <SheetDescription className="text-lg text-gray-600 sheet-description">
             상세 정보를 확인하세요
           </SheetDescription>
         </SheetHeader>
@@ -64,7 +64,7 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
           <div className="mt-4 pt-4 border-t border-gray-200 pb-4">
             <Button
               onClick={handleCloseBottomSheet}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 rounded-lg transition-colors btn-close"
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-lg py-3 rounded-lg transition-colors btn-close"
             >
               닫기
             </Button>
