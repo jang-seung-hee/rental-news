@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Promotion } from '../../types';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
@@ -49,6 +49,12 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
     loadSelectedPromotion();
   }, [selectedProductCode]);
 
+  // 사이드바 닫기 핸들러
+  const handleCloseSidebar = useCallback(() => {
+    onClose();
+    setSelectedPromotion(null);
+  }, [onClose]);
+
   // 모바일 뒤로가기 버튼 처리
   useEffect(() => {
     if (isOpen) {
@@ -73,13 +79,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
         window.removeEventListener('popstate', handlePopState);
       };
     }
-  }, [isOpen]);
-
-  // 사이드바 닫기 핸들러
-  const handleCloseSidebar = () => {
-    onClose();
-    setSelectedPromotion(null);
-  };
+  }, [isOpen, handleCloseSidebar]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>

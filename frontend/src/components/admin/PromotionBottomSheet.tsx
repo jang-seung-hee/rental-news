@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '../ui/button';
 import {
   Sheet,
@@ -34,6 +34,12 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
     setCurrentSelectedMenu(selectedMenu);
   }, [selectedMenu]);
 
+  // 바텀 시트 닫기 핸들러
+  const handleCloseBottomSheet = useCallback(() => {
+    onClose();
+    setCurrentSelectedMenu(null);
+  }, [onClose]);
+
   // 모바일 뒤로가기 버튼 처리
   useEffect(() => {
     if (isOpen) {
@@ -58,17 +64,11 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
         window.removeEventListener('popstate', handlePopState);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, handleCloseBottomSheet]);
 
   const getMenuTitle = (menuId: string) => {
     const menu = menuItems.find(item => item.id === menuId);
     return menu ? menu.title : '';
-  };
-
-  // 바텀 시트 닫기 핸들러
-  const handleCloseBottomSheet = () => {
-    onClose();
-    setCurrentSelectedMenu(null);
   };
 
   return (
