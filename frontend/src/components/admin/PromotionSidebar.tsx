@@ -107,7 +107,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
               </svg>
             </Button>
           </div>
-          <SheetDescription className="text-gray-600 break-words sheet-description text-lg">
+          <SheetDescription className="text-gray-600 break-words sheet-description text-lg font-semibold">
             {selectedPromotion ? selectedPromotion.title.replace(/\n/g, ' ') : '프로모션 제목입니다'}
           </SheetDescription>
         </SheetHeader>
