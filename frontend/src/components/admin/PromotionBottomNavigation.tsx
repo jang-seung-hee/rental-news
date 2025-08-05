@@ -7,7 +7,7 @@ interface PromotionBottomNavigationProps {
 
 const PromotionBottomNavigation: React.FC<PromotionBottomNavigationProps> = ({ onMenuClick }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 bottom-navigation">
       <div className="max-w-lg mx-auto">
         <div className="hidden md:flex md:max-w-[800px] md:mx-auto">
           <div className="flex-1">

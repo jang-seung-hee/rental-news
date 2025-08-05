@@ -454,7 +454,7 @@
   color: #374151;
   padding: 4px 8px;
   border-radius: 6px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #6b7280;
   font-weight: 500;
   display: inline-block;
   margin: 2px 0;
@@ -538,7 +538,7 @@
   .group-content .gray-group-box {
     background: #374151;
     color: #f3f4f6;
-    border-color: #4b5563;
+    border-color: #9ca3af;
   }
   
   .promotion-content-container .pink-gradient-bg,

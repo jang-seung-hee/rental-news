@@ -138,11 +138,11 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
-              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+              <Badge variant="secondary" className="bg-white/20 text-white border-white/30 backdrop-blur-sm badge badge-secondary">
                 {formatMonth(promotion.month)}
               </Badge>
               <Badge variant={promotion.isActive ? "default" : "secondary"} 
-                     className={promotion.isActive ? "bg-green-400 text-white shadow-lg" : "bg-gray-400 text-white shadow-lg"}>
+                     className={promotion.isActive ? "bg-green-400 text-white shadow-lg badge badge-default" : "bg-gray-400 text-white shadow-lg badge badge-secondary"}>
                 {promotion.isActive ? '활성' : '비활성'}
               </Badge>
             </div>
@@ -167,8 +167,8 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
       <div className="px-0 space-y-8">
         {/* 타겟 고객그룹 */}
         {!hiddenElements.includes('target') && (
-          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-            <CardContent className="p-6">
+          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
+            <CardContent className="p-6 card-content">
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-indigo-500 to-indigo-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
@@ -184,8 +184,8 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
 
                  {/* 인사말 */}
          {!hiddenElements.includes('greeting') && (
-           <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-             <CardContent className="p-6">
+           <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
+             <CardContent className="p-6 card-content">
                <div className="flex items-center mb-4">
                  <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full mr-4"></div>
                  <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -201,8 +201,8 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
          )}
 
         {/* 프로모션 내용 */}
-        <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-          <CardContent className="p-6">
+        <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
+          <CardContent className="p-6 card-content">
             <div className="flex items-center mb-4">
               <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-4"></div>
               <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -218,7 +218,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
 
         {/* 매듭말 */}
         {!hiddenElements.includes('closing') && (
-          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl relative overflow-hidden">
+          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl relative overflow-hidden card">
             {/* 배경 이미지 추가 */}
             <div className="absolute top-8 right-0 z-0">
               <img 
@@ -227,7 +227,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
                 className="w-auto h-24 object-contain opacity-100"
               />
             </div>
-            <CardContent className="p-6 relative z-10">
+            <CardContent className="p-6 relative z-10 card-content">
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
@@ -244,8 +244,8 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
 
         {/* 다른제품 혜택 보기 */}
         {hasOtherProducts && !hiddenElements.includes('otherProducts') && (
-          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl">
-            <CardContent className="p-6">
+          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
+            <CardContent className="p-6 card-content">
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-teal-500 to-teal-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
@@ -292,7 +292,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
 
         {/* 연락처 */}
         {!hiddenElements.includes('contact') && (
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-100 via-orange-50 to-amber-50 backdrop-blur-sm rounded-2xl relative overflow-hidden">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-100 via-orange-50 to-amber-50 backdrop-blur-sm rounded-2xl relative overflow-hidden card">
             {/* 배경 이미지 추가 */}
             <div className="absolute top-0 right-0 z-0">
               <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-red-500 rounded-full opacity-30 transform translate-x-16 -translate-y-16"></div>
@@ -310,7 +310,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
               <div className="absolute bottom-12 left-4 w-8 h-8 bg-gradient-to-br from-amber-200 to-orange-300 rounded-full opacity-30"></div>
               <div className="absolute bottom-6 left-12 w-6 h-6 bg-gradient-to-br from-red-200 to-orange-300 rounded-full opacity-35"></div>
             </div>
-            <CardContent className="p-6 relative z-10">
+            <CardContent className="p-6 relative z-10 card-content">
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
@@ -368,8 +368,8 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
 
         {/* 이미지 */}
         {promotion.imageUrl && (
-          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden">
-            <CardContent className="p-6">
+          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl overflow-hidden card">
+            <CardContent className="p-6 card-content">
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-pink-500 to-pink-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">

@@ -56,10 +56,10 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full max-w-2xl overflow-y-auto [&>button]:hidden !p-0">
-        <SheetHeader className="pb-4 border-b border-gray-200 px-4 pt-4">
+      <SheetContent side="right" className="w-full max-w-2xl overflow-y-auto [&>button]:hidden !p-0 sheet-content">
+        <SheetHeader className="pb-4 border-b border-gray-200 px-4 pt-4 sheet-header">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl font-bold text-gray-900">
+            <SheetTitle className="text-xl font-bold text-gray-900 sheet-title">
               다른 제품 혜택
             </SheetTitle>
             <Button
@@ -73,7 +73,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
               </svg>
             </Button>
           </div>
-          <SheetDescription className="text-gray-600 break-words">
+          <SheetDescription className="text-gray-600 break-words sheet-description">
             {selectedPromotion ? selectedPromotion.title.replace(/\n/g, ' ') : '프로모션 제목입니다'}
           </SheetDescription>
         </SheetHeader>
@@ -85,8 +85,8 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
               <span className="ml-2 text-gray-600">로딩 중...</span>
             </div>
           ) : selectedPromotion ? (
-            <Card className="border-0 shadow-sm bg-white/90 backdrop-blur-sm rounded-lg">
-              <CardContent className="p-2">
+            <Card className="border-0 shadow-sm bg-white/90 backdrop-blur-sm rounded-lg card">
+              <CardContent className="p-2 card-content">
                 <div className="flex items-center mb-2">
                   <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-2"></div>
                   <h3 className="text-base font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -109,7 +109,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
           <div className="mt-2 pt-2 border-t border-gray-200 pb-2">
             <Button
               onClick={handleCloseSidebar}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg transition-colors"
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg transition-colors btn-close"
             >
               닫기
             </Button>

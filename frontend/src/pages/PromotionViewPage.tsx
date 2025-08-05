@@ -4,6 +4,7 @@ import { Promotion } from '../types';
 import { getPromotionById } from '../services/promotionService';
 import CustomTag from '../components/admin/CustomTag';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import '../utils/promotionViewLightMode.css';
 
 const PromotionViewPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,10 +47,10 @@ const PromotionViewPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+      <div className="promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">로딩 중...</p>
+          <p className="text-gray-600 loading-text">로딩 중...</p>
         </div>
       </div>
     );
@@ -57,7 +58,7 @@ const PromotionViewPage: React.FC = () => {
 
   if (error || !promotion) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+      <div className="promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
           <Alert variant="destructive">
             <AlertDescription>
@@ -73,7 +74,7 @@ const PromotionViewPage: React.FC = () => {
   const hideElements = searchParams.get('hideElements');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 promotion-view-bg">
       <CustomTag promotion={promotion} hideElements={hideElements} />
     </div>
   );

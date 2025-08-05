@@ -1,0 +1,318 @@
+/* 프로모션 뷰 전용 라이트모드 강제 적용 */
+.promotion-view-light-mode {
+  /* 다크모드 미디어 쿼리 무효화 - 프로모션 뷰에서만 적용 */
+}
+
+/* 프로모션 뷰 배경 강제 적용 */
+.promotion-view-light-mode .promotion-view-bg {
+  background: linear-gradient(to bottom right, #eff6ff, #dbeafe, #e0e7ff) !important;
+}
+
+/* Sheet 컴포넌트 라이트모드 강제 적용 */
+.promotion-view-light-mode .sheet-content {
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+.promotion-view-light-mode .sheet-overlay {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.promotion-view-light-mode .sheet-header {
+  border-bottom-color: #e5e7eb !important;
+}
+
+.promotion-view-light-mode .sheet-title {
+  color: #111827 !important;
+}
+
+.promotion-view-light-mode .sheet-description {
+  color: #6b7280 !important;
+}
+
+/* 바텀 네비게이션 라이트모드 강제 적용 */
+.promotion-view-light-mode .bottom-navigation {
+  background-color: white !important;
+  border-top-color: #e5e7eb !important;
+}
+
+.promotion-view-light-mode .bottom-navigation button {
+  color: #374151 !important;
+}
+
+.promotion-view-light-mode .bottom-navigation button:hover {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+}
+
+/* Card 컴포넌트 라이트모드 강제 적용 */
+.promotion-view-light-mode .card {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: transparent !important;
+}
+
+.promotion-view-light-mode .card-content {
+  color: #374151 !important;
+}
+
+/* 프로모션 내용 섹션 라이트모드 강제 적용 */
+.promotion-view-light-mode .prose {
+  color: #374151 !important;
+}
+
+.promotion-view-light-mode .prose h1,
+.promotion-view-light-mode .prose h2,
+.promotion-view-light-mode .prose h3,
+.promotion-view-light-mode .prose h4,
+.promotion-view-light-mode .prose h5,
+.promotion-view-light-mode .prose h6 {
+  color: #111827 !important;
+}
+
+.promotion-view-light-mode .prose p {
+  color: #374151 !important;
+}
+
+/* 커스텀 태그 스타일 라이트모드 강제 적용 */
+.promotion-view-light-mode .promotion-link {
+  color: #1e3a8a !important;
+}
+
+.promotion-view-light-mode .promotion-link:hover {
+  color: #1e40af !important;
+}
+
+.promotion-view-light-mode .greeting-closing-link {
+  color: #1e3a8a !important;
+}
+
+.promotion-view-light-mode .greeting-closing-link:hover {
+  color: #1e40af !important;
+}
+
+/* !! 태그 라이트모드 강제 적용 */
+.promotion-view-light-mode .light-pink-bg {
+  background: #fce7f3 !important;
+  color: inherit !important;
+}
+
+/* [[ 태그 라이트모드 강제 적용 */
+.promotion-view-light-mode .gray-group-box {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+  border-color: #6b7280 !important;
+}
+
+/* "" 태그 라이트모드 강제 적용 */
+.promotion-view-light-mode .pink-gradient-bg {
+  background: #e0f2fe !important;
+  color: inherit !important;
+}
+
+/* 로딩 스피너 라이트모드 강제 적용 */
+.promotion-view-light-mode .animate-spin {
+  border-color: #2563eb !important;
+}
+
+.promotion-view-light-mode .loading-text {
+  color: #6b7280 !important;
+}
+
+/* 버튼 라이트모드 강제 적용 */
+.promotion-view-light-mode .btn-close {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+.promotion-view-light-mode .btn-close:hover {
+  background-color: #e5e7eb !important;
+}
+
+/* 배지 라이트모드 강제 적용 */
+.promotion-view-light-mode .badge {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.promotion-view-light-mode .badge-secondary {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.promotion-view-light-mode .badge-default {
+  background-color: #10b981 !important;
+  color: white !important;
+}
+
+/* 텍스트 색상 라이트모드 강제 적용 */
+.promotion-view-light-mode .text-gray-900 {
+  color: #111827 !important;
+}
+
+.promotion-view-light-mode .text-gray-700 {
+  color: #374151 !important;
+}
+
+.promotion-view-light-mode .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.promotion-view-light-mode .text-blue-100 {
+  color: #dbeafe !important;
+}
+
+/* 배경색 라이트모드 강제 적용 */
+.promotion-view-light-mode .bg-white {
+  background-color: white !important;
+}
+
+.promotion-view-light-mode .bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.promotion-view-light-mode .bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+.promotion-view-light-mode .bg-blue-50 {
+  background-color: #eff6ff !important;
+}
+
+.promotion-view-light-mode .bg-teal-50 {
+  background-color: #f0fdfa !important;
+}
+
+.promotion-view-light-mode .bg-cyan-50 {
+  background-color: #ecfeff !important;
+}
+
+.promotion-view-light-mode .bg-orange-50 {
+  background-color: #fff7ed !important;
+}
+
+.promotion-view-light-mode .bg-amber-50 {
+  background-color: #fffbeb !important;
+}
+
+/* 테두리 색상 라이트모드 강제 적용 */
+.promotion-view-light-mode .border-gray-200 {
+  border-color: #e5e7eb !important;
+}
+
+.promotion-view-light-mode .border-teal-200 {
+  border-color: #99f6e4 !important;
+}
+
+.promotion-view-light-mode .border-teal-300 {
+  border-color: #5eead4 !important;
+}
+
+/* 호버 효과 라이트모드 강제 적용 */
+.promotion-view-light-mode .hover\:bg-gray-50:hover {
+  background-color: #f9fafb !important;
+}
+
+.promotion-view-light-mode .hover\:bg-blue-50:hover {
+  background-color: #eff6ff !important;
+}
+
+.promotion-view-light-mode .hover\:bg-teal-100:hover {
+  background-color: #ccfbf1 !important;
+}
+
+.promotion-view-light-mode .hover\:bg-cyan-100:hover {
+  background-color: #cffafe !important;
+}
+
+.promotion-view-light-mode .hover\:text-teal-700:hover {
+  color: #0f766e !important;
+}
+
+.promotion-view-light-mode .hover\:text-blue-600:hover {
+  color: #2563eb !important;
+}
+
+/* 그라데이션 라이트모드 강제 적용 */
+.promotion-view-light-mode .from-blue-50 {
+  --tw-gradient-from: #eff6ff !important;
+}
+
+.promotion-view-light-mode .via-indigo-50 {
+  --tw-gradient-via: #eef2ff !important;
+}
+
+.promotion-view-light-mode .to-purple-50 {
+  --tw-gradient-to: #faf5ff !important;
+}
+
+.promotion-view-light-mode .from-teal-50 {
+  --tw-gradient-from: #f0fdfa !important;
+}
+
+.promotion-view-light-mode .to-cyan-50 {
+  --tw-gradient-to: #ecfeff !important;
+}
+
+.promotion-view-light-mode .from-orange-50 {
+  --tw-gradient-from: #fff7ed !important;
+}
+
+.promotion-view-light-mode .via-orange-50 {
+  --tw-gradient-via: #fff7ed !important;
+}
+
+.promotion-view-light-mode .to-amber-50 {
+  --tw-gradient-to: #fffbeb !important;
+}
+
+/* 다크모드 미디어 쿼리 무효화 - 프로모션 뷰에서만 */
+@media (prefers-color-scheme: dark) {
+  .promotion-view-light-mode .greeting-closing-content .greeting-closing-link {
+    color: #1e3a8a !important;
+  }
+  
+  .promotion-view-light-mode .greeting-closing-content .greeting-closing-link:hover {
+    color: #1e40af !important;
+  }
+  
+  .promotion-view-light-mode .content-group {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .promotion-view-light-mode .promotion-content-container .promotion-link,
+  .promotion-view-light-mode .content-group .promotion-link,
+  .promotion-view-light-mode .group-content .promotion-link {
+    color: #1e3a8a !important;
+  }
+  
+  .promotion-view-light-mode .promotion-content-container .promotion-link:hover,
+  .promotion-view-light-mode .content-group .promotion-link:hover,
+  .promotion-view-light-mode .group-content .promotion-link:hover {
+    color: #1e40af !important;
+  }
+  
+  .promotion-view-light-mode .gray-group-box {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    border-color: #6b7280 !important;
+  }
+  
+  .promotion-view-light-mode .light-pink-bg {
+    background: #fce7f3 !important;
+    color: inherit !important;
+  }
+  
+  .promotion-view-light-mode .pink-gradient-bg {
+    background: #e0f2fe !important;
+    color: inherit !important;
+  }
+  
+  .promotion-view-light-mode .blue-title-label {
+    color: #1e40af !important;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    border-color: #93c5fd !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  }
+} 
