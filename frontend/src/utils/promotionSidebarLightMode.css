@@ -23,7 +23,7 @@
 }
 
 .promotion-sidebar-light-mode .sheet-description {
-  color: #6b7280 !important;
+  color: #111827 !important;
 }
 
 /* 슬라이더 콘텐츠 영역 라이트모드 강제 적용 */
@@ -44,7 +44,7 @@
 
 /* 슬라이더 프로모션 내용 라이트모드 강제 적용 */
 .promotion-sidebar-prose {
-  color: #374151 !important;
+  color: #111827 !important;
 }
 
 .promotion-sidebar-prose h1,
@@ -57,7 +57,7 @@
 }
 
 .promotion-sidebar-prose p {
-  color: #374151 !important;
+  color: #111827 !important;
 }
 
 /* 슬라이더 커스텀 태그 스타일 라이트모드 강제 적용 */
@@ -133,11 +133,11 @@
 }
 
 .promotion-sidebar-content .text-gray-600 {
-  color: #4b5563 !important;
+  color: #374151 !important;
 }
 
 .promotion-sidebar-content .text-gray-500 {
-  color: #6b7280 !important;
+  color: #4b5563 !important;
 }
 
 /* 슬라이더 배경색 라이트모드 강제 적용 */
