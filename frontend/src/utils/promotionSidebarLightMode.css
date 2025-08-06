@@ -321,3 +321,34 @@
     color: #1e40af !important;
   }
 } 
+
+/* PC에서 슬라이더 글자 크기 조정 */
+@media (min-width: 768px) {
+  .promotion-sidebar-prose {
+    font-size: 0.875rem !important; /* 1포인트 줄임 (1rem -> 0.875rem) */
+    line-height: 1.6 !important;
+  }
+  
+  .promotion-sidebar-prose p {
+    font-size: 0.875rem !important;
+    line-height: 1.6 !important;
+  }
+  
+  .promotion-sidebar-prose h1,
+  .promotion-sidebar-prose h2,
+  .promotion-sidebar-prose h3,
+  .promotion-sidebar-prose h4,
+  .promotion-sidebar-prose h5,
+  .promotion-sidebar-prose h6 {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+  }
+  
+  .promotion-sidebar-prose .blue-title-label {
+    font-size: 1em !important; /* 1포인트 줄임 */
+  }
+  
+  .promotion-sidebar-prose .gray-group-box {
+    font-size: 0.875rem !important; /* 1포인트 줄임 */
+  }
+} 
