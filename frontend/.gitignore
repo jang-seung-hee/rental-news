@@ -1,27 +1,166 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Production builds
+build/
+dist/
+out/
 
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
+# Environment variables
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Firebase 설정 파일 (API 키 포함)
-src/services/firebase.ts
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# Next.js build output
+.next
+
+# Nuxt.js build / generate output
+.nuxt
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# Temporary folders
+tmp/
+temp/
+
+# 압축 파일들
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tar.bz2
+*.gz
+*.bz2
+*.xz
+*.lzma
+*.cab
+*.iso
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.msi
+*.exe
+*.app
+
+# 백업 파일들
+*.bak
+*.backup
+*.old
+*.orig
+*.save
+
+# 임시 파일들
+*.tmp
+*.temp
+*.cache
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Netlify
+.netlify/
+
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+
+# Misc
+*.pid
+*.seed
+*.pid.lock
+
+# React specific
+.eslintcache
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# TypeScript
+*.tsbuildinfo
+
+# PWA files
+sw.js
+workbox-*.js
+
+# Bundle analyzer
+bundle-analyzer-report.html

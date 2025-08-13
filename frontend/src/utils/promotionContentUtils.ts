@@ -199,9 +199,9 @@ function processHorizontalLines(content: string): string {
   const tagPlaceholders: string[] = [];
   let tagIndex = 0;
   
-  // HTML 태그를 임시로 대체
+  // HTML 태그를 임시로 대체 (URL 정규식과 시각적 출력에 간섭하지 않도록 HTML 주석 사용)
   processedContent = processedContent.replace(/<[^>]*>/g, (match) => {
-    const placeholder = `__TAG_PLACEHOLDER_${tagIndex}__`;
+    const placeholder = `<!--TAG_PLACEHOLDER_${tagIndex}-->`;
     tagPlaceholders[tagIndex] = match;
     tagIndex++;
     return placeholder;
@@ -216,6 +216,10 @@ function processHorizontalLines(content: string): string {
     return '<div class="thick-horizontal-line"></div>';
   });
   
+  // === (구분자) 패턴 처리 - 인사말/매듭말에서도 동일하게 두꺼운 가로선으로 표현
+  const tripleEqualPattern = /= {0,}\={2,}|={3,}/g;
+  processedContent = processedContent.replace(tripleEqualPattern, () => '<div class="thick-horizontal-line"></div>');
+  
   // ... (점선) 패턴 처리
   const dottedLinePattern = /\.{3,}/g;
   processedContent = processedContent.replace(dottedLinePattern, (match) => {
@@ -227,7 +231,7 @@ function processHorizontalLines(content: string): string {
   
   // HTML 태그 복원
   tagPlaceholders.forEach((tag, index) => {
-    processedContent = processedContent.replace(`__TAG_PLACEHOLDER_${index}__`, tag);
+    processedContent = processedContent.replace(`<!--TAG_PLACEHOLDER_${index}-->`, tag);
   });
   
   console.log('HTML 태그 복원 후:', JSON.stringify(processedContent));
@@ -262,9 +266,9 @@ function processLinks(content: string): string {
   const tagPlaceholders: string[] = [];
   let tagIndex = 0;
   
-  // HTML 태그를 임시로 대체
+  // HTML 태그를 임시로 대체 (URL 정규식과 시각적 출력에 간섭하지 않도록 HTML 주석 사용)
   processedContent = processedContent.replace(/<[^>]*>/g, (match) => {
-    const placeholder = `__TAG_PLACEHOLDER_${tagIndex}__`;
+    const placeholder = `<!--TAG_PLACEHOLDER_${tagIndex}-->`;
     tagPlaceholders[tagIndex] = match;
     tagIndex++;
     return placeholder;
@@ -277,7 +281,7 @@ function processLinks(content: string): string {
   
   // HTML 태그 복원
   tagPlaceholders.forEach((tag, index) => {
-    processedContent = processedContent.replace(`__TAG_PLACEHOLDER_${index}__`, tag);
+    processedContent = processedContent.replace(`<!--TAG_PLACEHOLDER_${index}-->`, tag);
   });
   
   return processedContent;
@@ -389,9 +393,9 @@ export function renderGreetingClosingContent(content: string): string {
   const tagPlaceholders: string[] = [];
   let tagIndex = 0;
   
-  // HTML 태그를 임시로 대체
+  // HTML 태그를 임시로 대체 (URL 정규식과 시각적 출력에 간섭하지 않도록 HTML 주석 사용)
   processedContent = processedContent.replace(/<[^>]*>/g, (match) => {
-    const placeholder = `__TAG_PLACEHOLDER_${tagIndex}__`;
+    const placeholder = `<!--TAG_PLACEHOLDER_${tagIndex}-->`;
     tagPlaceholders[tagIndex] = match;
     tagIndex++;
     return placeholder;
@@ -405,7 +409,7 @@ export function renderGreetingClosingContent(content: string): string {
   
   // HTML 태그 복원
   tagPlaceholders.forEach((tag, index) => {
-    processedContent = processedContent.replace(`__TAG_PLACEHOLDER_${index}__`, tag);
+    processedContent = processedContent.replace(`<!--TAG_PLACEHOLDER_${index}-->`, tag);
   });
   
   return `

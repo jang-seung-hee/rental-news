@@ -216,32 +216,6 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
           </CardContent>
         </Card>
 
-        {/* 매듭말 */}
-        {!hiddenElements.includes('closing') && (
-          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl relative overflow-hidden card">
-            {/* 배경 이미지 추가 */}
-            <div className="absolute top-8 right-0 z-0">
-              <img 
-                src="/byebye_resize.png" 
-                alt="매듭말 배경" 
-                className="w-auto h-24 object-contain opacity-100"
-              />
-            </div>
-            <CardContent className="p-6 relative z-10 card-content">
-              <div className="flex items-center mb-4">
-                <div className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-600 rounded-full mr-4"></div>
-                <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
-                  매듭말
-                </h3>
-              </div>
-              <div 
-                className="prose prose-lg max-w-none text-gray-900 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: renderGreetingClosingContent(promotion.closing) }}
-              />
-            </CardContent>
-          </Card>
-        )}
-
         {/* 다른제품 혜택 보기 */}
         {hasOtherProducts && !hiddenElements.includes('otherProducts') && (
           <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
@@ -286,6 +260,32 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
                   ))
                 )}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 매듭말 */}
+        {!hiddenElements.includes('closing') && (
+          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl relative overflow-hidden card">
+            {/* 배경 이미지 추가 */}
+            <div className="absolute top-8 right-0 z-0">
+              <img 
+                src="/byebye_resize.png" 
+                alt="매듭말 배경" 
+                className="w-auto h-24 object-contain opacity-100"
+              />
+            </div>
+            <CardContent className="p-6 relative z-10 card-content">
+              <div className="flex items-center mb-4">
+                <div className="w-1 h-8 bg-gradient-to-b from-green-500 to-green-600 rounded-full mr-4"></div>
+                <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+                  매듭말
+                </h3>
+              </div>
+              <div 
+                className="prose prose-lg max-w-none text-gray-900 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: renderGreetingClosingContent(promotion.closing) }}
+              />
             </CardContent>
           </Card>
         )}

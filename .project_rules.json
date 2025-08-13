@@ -1,0 +1,23 @@
+{
+  "include": [],
+  "exclude": [
+    ".cursor/rules/component-standards.mdc",
+    ".cursor/rules/firebase-standards.mdc",
+    ".cursor/rules/performance-standards.mdc",
+    ".cursor/rules/prohibitions.mdc",
+    ".cursor/rules/project-structure.mdc",
+    ".cursor/rules/styling-standards.mdc",
+    ".cursor/rules/typescript-standards.mdc",
+    ".env",
+    ".git/",
+    "backend/0.5 버전 (버그 잡다 다 날리긋다).zip",
+    "frontend/.env",
+    "frontend/.gitignore",
+    "frontend/0.5 버전 (버그 잡다 다 날리긋다).zip",
+    "frontend/firestore.rules",
+    "frontend/node_modules/",
+    "frontend/public/_redirects",
+    "frontend/storage.rules",
+    "tatus"
+  ]
+}
