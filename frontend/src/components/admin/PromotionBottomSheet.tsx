@@ -33,6 +33,7 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const isRestoringScroll = useRef(false); // 스크롤 복원 중인지 추적
   const lastScrollPosition = useRef<number>(0); // 마지막 스크롤 위치 추적
+  const hasRestoredScroll = useRef<{[key: string]: boolean}>({}); // 각 메뉴별 복원 완료 여부 추적
 
   // selectedMenu가 변경될 때 currentSelectedMenu 업데이트
   useEffect(() => {
@@ -56,22 +57,28 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
   useEffect(() => {
     if (isOpen && currentSelectedMenu && scrollRef.current) {
       const savedPosition = scrollPositions[currentSelectedMenu] || 0;
-      // 스크롤 복원 중임을 표시
-      isRestoringScroll.current = true;
-      lastScrollPosition.current = savedPosition;
+      const menuKey = currentSelectedMenu;
       
-      // 애니메이션 완료 후 스크롤 위치 복원
-      setTimeout(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTop = savedPosition;
-          // 복원 완료 후 플래그 해제
-          setTimeout(() => {
-            isRestoringScroll.current = false;
-          }, 100);
-        }
-      }, 150);
+      // 이미 복원된 메뉴인지 확인
+      if (!hasRestoredScroll.current[menuKey]) {
+        // 스크롤 복원 중임을 표시
+        isRestoringScroll.current = true;
+        lastScrollPosition.current = savedPosition;
+        
+        // 애니메이션 완료 후 스크롤 위치 복원
+        setTimeout(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTop = savedPosition;
+            // 복원 완료 후 플래그 해제
+            setTimeout(() => {
+              isRestoringScroll.current = false;
+              hasRestoredScroll.current[menuKey] = true;
+            }, 100);
+          }
+        }, 150);
+      }
     }
-  }, [isOpen, currentSelectedMenu]); // scrollPositions 의존성 제거
+  }, [isOpen, currentSelectedMenu, scrollPositions]);
 
   // 바텀시트가 완전히 닫힐 때만 selectedMenu 초기화
   useEffect(() => {
@@ -79,6 +86,8 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
       // 바텀시트가 완전히 닫힌 후 약간의 지연을 두고 selectedMenu 초기화
       const timer = setTimeout(() => {
         setCurrentSelectedMenu(null);
+        // 복원 상태 초기화
+        hasRestoredScroll.current = {};
       }, 300); // 애니메이션 완료 후 초기화
       
       return () => clearTimeout(timer);
