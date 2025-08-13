@@ -182,7 +182,10 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({ selectedMenu })
   );
 
   const renderContent = () => {
-    switch (selectedMenu) {
+    // selectedMenu가 null이어도 이전 메뉴 내용을 유지
+    const menuToRender = selectedMenu || 'application'; // 기본값으로 'application' 사용
+    
+    switch (menuToRender) {
       case 'application':
         return renderApplicationContent();
       case 'existing-cancel':
@@ -192,7 +195,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({ selectedMenu })
       case 'card-benefits':
         return renderCardBenefitsContent();
       default:
-        return null;
+        return renderApplicationContent(); // 기본값으로 신청방법 내용 표시
     }
   };
 

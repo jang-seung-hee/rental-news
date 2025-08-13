@@ -223,7 +223,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-teal-500 to-teal-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                  다른제품 혜택 보기
+                  다른제품 혜택 더 보기
                 </h3>
               </div>
               <div className="space-y-3">
@@ -398,7 +398,10 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
       
       <PromotionBottomSheet 
         isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => {
+          setIsDialogOpen(false);
+          // selectedMenu 상태는 유지하여 스크롤 위치 보존
+        }}
         selectedMenu={selectedMenu}
       />
       
