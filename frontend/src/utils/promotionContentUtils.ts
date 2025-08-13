@@ -217,7 +217,7 @@ function processHorizontalLines(content: string): string {
   });
   
   // === (구분자) 패턴 처리 - 인사말/매듭말에서도 동일하게 두꺼운 가로선으로 표현
-  const tripleEqualPattern = /= {0,}\={2,}|={3,}/g;
+  const tripleEqualPattern = /= {0,}={2,}|={3,}/g;
   processedContent = processedContent.replace(tripleEqualPattern, () => '<div class="thick-horizontal-line"></div>');
   
   // ... (점선) 패턴 처리
