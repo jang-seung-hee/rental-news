@@ -31,9 +31,8 @@ if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_USE_FIREBASE
     connectFirestoreEmulator(db, 'localhost', 8080);
     connectStorageEmulator(storage, 'localhost', 9199);
     connectAuthEmulator(auth, 'http://localhost:9099');
-    console.log('Firebase emulators connected');
   } catch (error) {
-    console.log('Firebase emulators already connected');
+    // 에뮬레이터가 이미 연결된 경우 무시
   }
 }
 

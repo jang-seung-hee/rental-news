@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
         });
         setRecentPromotions(recent);
       } catch (error) {
-        console.error('Dashboard data load error:', error);
+        // 에러 발생 시 무시하고 진행
       } finally {
         setIsLoading(false);
       }

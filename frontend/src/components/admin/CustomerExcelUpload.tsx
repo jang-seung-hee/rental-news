@@ -24,11 +24,7 @@ const CustomerExcelUpload: React.FC<CustomerExcelUploadProps> = ({ onComplete })
     const file = event.target.files?.[0];
     if (!file) return;
 
-    console.log('파일 선택됨:', file.name, file.size, file.type);
-
-    // 파일 형식 검증
     if (!validateExcelFile(file)) {
-      console.error('지원하지 않는 파일 형식:', file.type);
       toast({
         title: "오류",
         description: "지원하지 않는 파일 형식입니다. (.xlsx, .xls, .csv 파일만 가능)",
@@ -39,10 +35,7 @@ const CustomerExcelUpload: React.FC<CustomerExcelUploadProps> = ({ onComplete })
 
     try {
       setLoading(true);
-      console.log('파일 파싱 시작...');
       const data = await parseExcelFile(file);
-      console.log('파싱 완료, 데이터:', data);
-      
       setUploadedData(data);
       
       toast({
@@ -50,7 +43,6 @@ const CustomerExcelUpload: React.FC<CustomerExcelUploadProps> = ({ onComplete })
         description: `${data.length}개의 고객 데이터를 읽었습니다.`,
       });
     } catch (error) {
-      console.error('파일 업로드 에러:', error);
       toast({
         title: "오류",
         description: error instanceof Error ? error.message : "파일 파싱에 실패했습니다.",
@@ -74,12 +66,7 @@ const CustomerExcelUpload: React.FC<CustomerExcelUploadProps> = ({ onComplete })
 
     try {
       setUploading(true);
-      console.log('일괄 등록 시작, 데이터 수:', uploadedData.length);
-      console.log('등록할 데이터:', uploadedData);
-      
       await createCustomersBatch(uploadedData);
-      
-      console.log('일괄 등록 완료');
       
       toast({
         title: "성공",
@@ -88,7 +75,6 @@ const CustomerExcelUpload: React.FC<CustomerExcelUploadProps> = ({ onComplete })
       
       onComplete();
     } catch (error) {
-      console.error('일괄 등록 에러:', error);
       toast({
         title: "오류",
         description: "일괄 등록에 실패했습니다.",

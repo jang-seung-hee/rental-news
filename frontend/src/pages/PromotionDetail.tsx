@@ -42,8 +42,7 @@ const PromotionDetail: React.FC<PromotionDetailProps> = ({ onBackToList }) => {
         setError(result.error || '프로모션을 불러올 수 없습니다.');
       }
     } catch (err) {
-      setError('오류가 발생했습니다. 다시 시도해주세요.');
-      console.error('Load promotion error:', err);
+      setError('프로모션을 불러올 수 없습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -88,8 +87,7 @@ const PromotionDetail: React.FC<PromotionDetailProps> = ({ onBackToList }) => {
         setError(result.error || '프로모션 삭제에 실패했습니다.');
       }
     } catch (err) {
-      setError('오류가 발생했습니다. 다시 시도해주세요.');
-      console.error('Delete promotion error:', err);
+      setError('프로모션 삭제에 실패했습니다.');
     } finally {
       setIsDeleting(false);
     }

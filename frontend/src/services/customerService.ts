@@ -54,8 +54,7 @@ export const getCustomers = async (filter?: CustomerFilter): Promise<Customer[]>
     // 클라이언트 사이드에서 정렬
     return customers.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   } catch (error) {
-    console.error('고객 목록 조회 실패:', error);
-    throw error;
+    throw new Error('고객 목록을 불러올 수 없습니다.');
   }
 };
 
@@ -75,8 +74,7 @@ export const getCustomer = async (id: string): Promise<Customer | null> => {
     }
     return null;
   } catch (error) {
-    console.error('고객 상세 조회 실패:', error);
-    throw error;
+    throw new Error('고객 정보를 불러올 수 없습니다.');
   }
 };
 
@@ -91,8 +89,7 @@ export const createCustomer = async (customerData: CustomerFormData): Promise<st
     });
     return docRef.id;
   } catch (error) {
-    console.error('고객 등록 실패:', error);
-    throw error;
+    throw new Error('고객 등록에 실패했습니다.');
   }
 };
 
@@ -105,8 +102,7 @@ export const updateCustomer = async (id: string, customerData: Partial<CustomerF
       updatedAt: Timestamp.now(),
     });
   } catch (error) {
-    console.error('고객 수정 실패:', error);
-    throw error;
+    throw new Error('고객 정보 수정에 실패했습니다.');
   }
 };
 
@@ -116,8 +112,7 @@ export const deleteCustomer = async (id: string): Promise<void> => {
     const docRef = doc(db, CUSTOMERS_COLLECTION, id);
     await deleteDoc(docRef);
   } catch (error) {
-    console.error('고객 삭제 실패:', error);
-    throw error;
+    throw new Error('고객 삭제에 실패했습니다.');
   }
 };
 
@@ -141,8 +136,7 @@ export const createCustomersBatch = async (customersData: ExcelCustomerData[]): 
     await batch.commit();
     return customerIds;
   } catch (error) {
-    console.error('일괄 고객 등록 실패:', error);
-    throw error;
+    throw new Error('일괄 고객 등록에 실패했습니다.');
   }
 };
 
@@ -159,7 +153,6 @@ export const getCustomerStats = async (): Promise<{ [key: string]: number }> => 
     
     return stats;
   } catch (error) {
-    console.error('고객 통계 조회 실패:', error);
-    throw error;
+    throw new Error('고객 통계를 불러올 수 없습니다.');
   }
 }; 

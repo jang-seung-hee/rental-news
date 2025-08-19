@@ -47,7 +47,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
             setOtherProducts(result.data);
           }
         } catch (error) {
-          console.error('다른제품 정보 로드 실패:', error);
+          // 다른제품 정보 로드 실패 시 무시하고 진행
         } finally {
           setIsLoadingOtherProducts(false);
         }

@@ -7,6 +7,7 @@ export interface Promotion {
   month: string;                 // 프로모션 월 (YYYY-MM 형식)
   target: string;                // 타겟 고객그룹
   title: string;                 // 제목
+  slug: string;                  // SEO 친화적 URL 슬러그
   greeting: string;              // 인사말
   content: string;               // 프로모션 내용 (HTML)
   closing: string;               // 매듭말
@@ -28,6 +29,7 @@ export interface CreatePromotionRequest {
   month: string;
   target: string;
   title: string;
+  slug: string;
   greeting: string;
   content: string;
   closing: string;
@@ -48,6 +50,7 @@ export interface UpdatePromotionRequest {
   month?: string;
   target?: string;
   title?: string;
+  slug?: string;
   greeting?: string;
   content?: string;
   closing?: string;
@@ -89,6 +92,7 @@ export interface PromotionFormData {
   month: string;
   target: string;
   title: string;
+  slug: string;
   greeting: string;
   content: string;
   closing: string;
@@ -123,6 +127,7 @@ export interface PromotionValidationErrors {
   month?: string;
   target?: string;
   title?: string;
+  slug?: string;
   greeting?: string;
   content?: string;
   closing?: string;

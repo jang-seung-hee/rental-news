@@ -24,13 +24,13 @@ const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onSuccess }) => {
     }
 
     try {
-      await signIn(email.trim(), password);
+      await signIn(email, password);
+      // 로그인 성공 시 onSuccess 콜백 실행
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
       // 에러는 useAdminAuth에서 처리됨
-      console.error('로그인 에러:', error);
     }
   };
 

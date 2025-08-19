@@ -89,8 +89,8 @@ const CustomerList: React.FC = () => {
   };
 
   const handleCustomerClick = (customerId: string) => {
-    // 고객 상세 페이지로 이동 (구현 예정)
-    console.log('고객 상세 페이지로 이동:', customerId);
+    // 고객 상세 페이지로 이동
+    navigate(`/customers/${customerId}`);
   };
 
   if (loading) {

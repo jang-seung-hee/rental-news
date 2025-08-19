@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import './App.css';
 import './globals.css';
 
@@ -61,6 +61,57 @@ const PromotionDetailWrapper: React.FC = () => {
   );
 };
 
+// 기존 ID 기반 URL을 slug 기반으로 리다이렉션하는 컴포넌트
+const LegacyPromotionRedirect: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [isRedirecting, setIsRedirecting] = useState(true);
+  
+  useEffect(() => {
+    const redirectToSlug = async () => {
+      try {
+        // ID로 프로모션을 조회하여 slug 가져오기
+        const { getPromotionById } = await import('./services/promotionService');
+        const result = await getPromotionById(id!);
+        
+        if (result.success && result.data) {
+          // slug가 있으면 slug 기반 URL로 리다이렉션
+          if (result.data.slug) {
+            navigate(`/view/${result.data.slug}`, { replace: true });
+          } else {
+            // slug가 없어도 현재 slug 기반 URL로 접근 가능하도록 리다이렉션
+            // slug가 없는 경우 ID를 slug로 사용
+            navigate(`/view/${result.data.id}`, { replace: true });
+          }
+        } else {
+          // 프로모션을 찾을 수 없으면 404로 리다이렉션
+          navigate('/404', { replace: true });
+        }
+      } catch (error) {
+        // 에러 발생 시 404로 리다이렉션
+        navigate('/404', { replace: true });
+      }
+    };
+    
+    if (id) {
+      redirectToSlug();
+    }
+  }, [id, navigate]);
+  
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">리다이렉션 중...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return null;
+};
+
 function App() {
   return (
     <ErrorBoundary>
@@ -93,7 +144,9 @@ const AppContent: React.FC = () => {
     return (
       <>
         <Routes>
-          <Route path="/view/:id" element={<PromotionViewPage />} />
+          <Route path="/view/:identifier" element={<PromotionViewPage />} />
+          {/* 기존 ID 기반 URL 지원 (리다이렉션용) */}
+          <Route path="/view/id/:id" element={<LegacyPromotionRedirect />} />
         </Routes>
         <Toaster />
       </>

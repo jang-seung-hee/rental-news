@@ -55,7 +55,6 @@ export const uploadImage = async (file: File, path: string): Promise<string> => 
     const downloadURL = await getDownloadURL(snapshot.ref);
     return downloadURL;
   } catch (error) {
-    console.error('Error uploading image:', error);
     throw new Error('이미지 업로드에 실패했습니다.');
   }
 };
@@ -66,7 +65,6 @@ export const deleteImage = async (imageUrl: string): Promise<void> => {
     const imageRef = ref(storage, imageUrl);
     await deleteObject(imageRef);
   } catch (error) {
-    console.error('Error deleting image:', error);
     throw new Error('이미지 삭제에 실패했습니다.');
   }
 };
@@ -101,8 +99,6 @@ export const buildQuery = (
 
 // 에러 처리 유틸리티
 export const handleFirebaseError = (error: any): string => {
-  console.error('Firebase error:', error);
-  
   if (error.code === 'permission-denied') {
     return '권한이 없습니다.';
   } else if (error.code === 'not-found') {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import RichTextEditor from '../common/RichTextEditor';
 import { Promotion, CreatePromotionRequest, UpdatePromotionRequest } from '../../types';
 import { createPromotion, updatePromotion, getPromotionsByMonth, getOtherProductsInfo, getPromotionCodesByMonth } from '../../services/promotionService';
-import { getCurrentMonth } from '../../utils/utils';
+import { getCurrentMonth, generateSlug } from '../../utils/utils';
 
 // 폼 유효성 검사 스키마
 const promotionSchema = z.object({
@@ -19,6 +19,7 @@ const promotionSchema = z.object({
   month: z.string().min(1, '프로모션 월을 선택하세요'),
   target: z.string().min(1, '타겟 고객그룹을 입력하세요'),
   title: z.string().min(1, '제목을 입력하세요'),
+  slug: z.string().min(1, 'URL 슬러그는 필수입니다. 수동으로 입력하거나 기존 프로모션 복사로 설정하세요'),
   greeting: z.string().min(1, '인사말을 입력하세요'),
   content: z.string().min(1, '프로모션 내용을 입력하세요'),
   closing: z.string().min(1, '매듭말을 입력하세요'),
@@ -47,6 +48,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [monthPromotions, setMonthPromotions] = useState<Promotion[]>([]);
   const [otherProductInfo, setOtherProductInfo] = useState<{ [key: string]: { code: string; title: string } }>({});
   
@@ -56,6 +58,10 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   const [selectedCopyCode, setSelectedCopyCode] = useState<string>('');
   const [isCopyLoading, setIsCopyLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // slug 중복 확인 관련 상태
+  const [slugConflict, setSlugConflict] = useState<string | null>(null);
+  const [isCheckingSlug, setIsCheckingSlug] = useState(false);
 
   const {
     register,
@@ -70,6 +76,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
       month: promotion?.month || getCurrentMonth(),
       target: promotion?.target || '',
       title: promotion?.title || '',
+      slug: promotion?.slug || '',
       greeting: promotion?.greeting || '',
       content: promotion?.content || '',
       closing: promotion?.closing || '',
@@ -86,6 +93,44 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
   const watchedContent = watch('content');
   const watchedMonth = watch('month');
+  const watchedTitle = watch('title');
+
+  // title 변경 시 자동 slug 생성 기능 제거
+  // slug는 사용자가 수동으로 입력하거나 기존 프로모션 복사로만 설정 가능
+
+  // slug 중복 확인 함수
+  const checkSlugConflict = useCallback(async (slug: string) => {
+    if (!slug || slug.trim() === '') {
+      setSlugConflict(null);
+      return;
+    }
+
+    // 현재 편집 중인 프로모션의 slug는 제외
+    const currentSlug = promotion?.slug;
+    
+    try {
+      setIsCheckingSlug(true);
+      const { getPromotions } = await import('../../services/promotionService');
+      const result = await getPromotions(undefined, undefined, 1000);
+      
+      if (result.success && result.data) {
+        const existingSlugs = result.data.promotions
+          .map(p => p.slug)
+          .filter(Boolean)
+          .filter(s => s !== currentSlug); // 현재 프로모션의 slug는 제외
+        
+        if (existingSlugs.includes(slug)) {
+          setSlugConflict(`이 slug "${slug}"는 이미 사용 중입니다.`);
+        } else {
+          setSlugConflict(null);
+        }
+      }
+    } catch (error) {
+      console.error('Slug 중복 확인 실패:', error);
+    } finally {
+      setIsCheckingSlug(false);
+    }
+  }, [promotion?.slug]);
 
   // 다른제품 정보 로드
   useEffect(() => {
@@ -105,7 +150,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               setOtherProductInfo(result.data);
             }
           } catch (error) {
-            console.error('다른제품 정보 로드 실패:', error);
+            // 다른제품 정보 로드 실패 시 무시하고 진행
           }
         }
       }
@@ -134,7 +179,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             setMonthPromotions([]);
           }
         } catch (error) {
-          console.error('월별 프로모션 조회 실패:', error);
+          // 월별 프로모션 조회 실패 시 무시하고 진행
           setMonthPromotions([]);
         }
       } else {
@@ -207,7 +252,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
           setCopyPromotionCodes([]);
         }
       } catch (error) {
-        console.error('프로모션 코드 조회 실패:', error);
+        // 프로모션 코드 조회 실패 시 무시하고 진행
         setCopyPromotionCodes([]);
       }
     } else {
@@ -224,6 +269,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
       if (selectedPromotion) {
         setValue('target', selectedPromotion.target);
         setValue('title', selectedPromotion.title);
+        setValue('slug', selectedPromotion.slug || ''); // slug 추가
         setValue('greeting', selectedPromotion.greeting);
         setValue('content', selectedPromotion.content);
         setValue('closing', selectedPromotion.closing);
@@ -236,7 +282,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
         setValue('isActive', selectedPromotion.isActive ?? true);
       }
     } catch (error) {
-      console.error('프로모션 복사 중 오류:', error);
+      // 프로모션 복사 중 오류 발생 시 무시하고 진행
       setError('프로모션 복사 중 오류가 발생했습니다.');
     } finally {
       setIsCopyLoading(false);
@@ -252,6 +298,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   const onSubmit = async (data: PromotionFormData) => {
     setIsLoading(true);
     setError(null);
+    setWarning(null);
 
     try {
       if (promotion) {
@@ -263,6 +310,9 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
         
         const result = await updatePromotion(promotion.id, updateData);
         if (result.success) {
+          if (result.warning) {
+            setWarning(result.warning);
+          }
           onSuccess?.(promotion.id);
         } else {
           setError(result.error || '프로모션 수정에 실패했습니다.');
@@ -275,14 +325,17 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
         
         const result = await createPromotion(createData);
         if (result.success && result.data) {
+          if (result.warning) {
+            setWarning(result.warning);
+          }
           onSuccess?.(result.data);
         } else {
           setError(result.error || '프로모션 생성에 실패했습니다.');
         }
       }
     } catch (err) {
+      // 폼 제출 실패 시 사용자에게 알림
       setError('오류가 발생했습니다. 다시 시도해주세요.');
-      console.error('Promotion form error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -302,6 +355,13 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* 경고 메시지 */}
+          {warning && (
+            <Alert variant="default" className="border-yellow-300 bg-yellow-50 text-yellow-800">
+              <AlertDescription>{warning}</AlertDescription>
             </Alert>
           )}
 
@@ -449,6 +509,48 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                     )}
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">프로모션 제목 *</Label>
+                      <Input
+                        id="title"
+                        {...register('title')}
+                        placeholder="프로모션 제목을 입력하세요"
+                        className={errors.title ? 'border-red-500' : ''}
+                      />
+                      {errors.title && (
+                        <p className="text-sm text-red-500">{errors.title.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="slug">URL 슬러그 * (필수)</Label>
+                      <div className="relative">
+                        <Input
+                          id="slug"
+                          {...register('slug')}
+                          placeholder="수동 입력 또는 기존 프로모션 복사"
+                          className={`${errors.slug ? 'border-red-500' : ''} ${slugConflict ? 'border-yellow-500' : ''}`}
+                          onBlur={(e) => checkSlugConflict(e.target.value)}
+                        />
+                        {isCheckingSlug && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          </div>
+                        )}
+                      </div>
+                      {errors.slug && (
+                        <p className="text-sm text-red-500">{errors.slug.message}</p>
+                      )}
+                      {slugConflict && (
+                        <p className="text-sm text-yellow-600 font-medium">{slugConflict}</p>
+                      )}
+                      <p className="text-sm text-gray-500">
+                        SEO 친화적인 URL을 위한 슬러그입니다. 수동으로 입력하거나 기존 프로모션 복사로 설정할 수 있습니다.
+                      </p>
+                    </div>
+                  </div>
+
                   {/* 활성화 상태 */}
                   <div className="flex items-center space-x-2">
                     <input
@@ -488,17 +590,17 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                 </h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">제목 *</Label>
-                    <Textarea
-                      id="title"
-                      {...register('title')}
-                      placeholder="프로모션 제목을 입력하세요"
-                      rows={2}
-                      className={errors.title ? 'border-red-500' : ''}
-                    />
-                    {errors.title && (
-                      <p className="text-sm text-red-500">{errors.title.message}</p>
-                    )}
+                    <Label htmlFor="slug">URL 슬러그 미리보기</Label>
+                                          <Input
+                        id="slug-preview"
+                        value={watch('slug') || ''}
+                        disabled
+                        className="bg-gray-100"
+                        placeholder="수동 입력 또는 기존 프로모션 복사로 설정"
+                      />
+                    <p className="text-sm text-gray-500">
+                      이 슬러그는 프로모션 뷰 페이지의 URL에 사용됩니다. 수동으로 입력하거나 기존 프로모션 복사로 설정하세요.
+                    </p>
                   </div>
 
                   <div className="space-y-2">

@@ -52,7 +52,6 @@ const PromotionList: React.FC<PromotionListProps> = ({
       }
     } catch (err) {
       setError('오류가 발생했습니다. 다시 시도해주세요.');
-      console.error('Load promotions error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -104,16 +103,10 @@ const PromotionList: React.FC<PromotionListProps> = ({
     }
 
     try {
-      const result = await deletePromotion(promotionId);
-      if (result.success) {
-        // 목록에서 삭제된 항목 제거
-        setPromotions(prev => prev.filter(p => p.id !== promotionId));
-      } else {
-        setError(result.error || '삭제에 실패했습니다.');
-      }
+      await deletePromotion(promotionId);
+      setPromotions(prev => prev.filter(p => p.id !== promotionId));
     } catch (err) {
-      setError('삭제 중 오류가 발생했습니다.');
-      console.error('Delete promotion error:', err);
+      setError('프로모션 삭제에 실패했습니다.');
     }
   };
 

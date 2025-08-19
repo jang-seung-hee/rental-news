@@ -40,7 +40,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
           setSelectedPromotion(result.data);
         }
       } catch (error) {
-        console.error('선택된 프로모션 로드 실패:', error);
+        // 선택된 프로모션 로드 실패 시 무시하고 진행
       } finally {
         setIsLoadingSelectedPromotion(false);
       }

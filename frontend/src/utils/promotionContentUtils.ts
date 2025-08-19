@@ -115,25 +115,16 @@ function processPinkGradientPattern(content: string): string {
 function processBlueTitlePattern(content: string): string {
   if (!content) return content;
 
-  console.log('=== processBlueTitlePattern 시작 ===');
-  console.log('원본 콘텐츠:', JSON.stringify(content));
-
   // HTML 엔티티를 먼저 디코딩
   let processedContent = content
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>');
   
-  console.log('HTML 엔티티 디코딩 후:', JSON.stringify(processedContent));
-  
   // <<문자>> 패턴을 파란색 소제목 타이틀로 변환
   const blueTitlePattern = /<<([^>]+)>>/g;
   processedContent = processedContent.replace(blueTitlePattern, (match, innerText) => {
-    console.log(`파란색 타이틀 패턴 발견: "${match}" -> "${innerText}"`);
     return `<span class="blue-title-label">${innerText}</span>`;
   });
-  
-  console.log('패턴 처리 후:', JSON.stringify(processedContent));
-  console.log('=== processBlueTitlePattern 완료 ===');
 
   return processedContent;
 }
@@ -168,18 +159,12 @@ function processLightPinkPattern(content: string): string {
 function processHorizontalLines(content: string): string {
   if (!content) return content;
   
-  console.log('=== processHorizontalLines 시작 ===');
-  console.log('원본 콘텐츠:', JSON.stringify(content));
-  
   // HTML 엔티티를 먼저 디코딩
   let processedContent = content
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>');
   
-  console.log('HTML 엔티티 디코딩 후:', JSON.stringify(processedContent));
-  
   // 커스텀 패턴들을 먼저 처리 (HTML 태그 보호 전에)
-  console.log('커스텀 패턴 처리 시작');
   
   // <<문자>> 패턴 처리 (파란색 소제목 타이틀)
   processedContent = processBlueTitlePattern(processedContent);
@@ -193,8 +178,6 @@ function processHorizontalLines(content: string): string {
   // !!문자!! 패턴 처리 (연한 분홍색 배경)
   processedContent = processLightPinkPattern(processedContent);
   
-  console.log('커스텀 패턴 처리 후:', JSON.stringify(processedContent));
-  
   // HTML 태그를 임시로 보호
   const tagPlaceholders: string[] = [];
   let tagIndex = 0;
@@ -207,12 +190,9 @@ function processHorizontalLines(content: string): string {
     return placeholder;
   });
   
-  console.log('HTML 태그 보호 후:', JSON.stringify(processedContent));
-  
   // --- (두꺼운 가로선) 패턴 처리
   const thickLinePattern = /-{3,}/g;
   processedContent = processedContent.replace(thickLinePattern, (match) => {
-    console.log(`두꺼운 가로선 패턴 발견: "${match}"`);
     return '<div class="thick-horizontal-line"></div>';
   });
   
@@ -223,18 +203,13 @@ function processHorizontalLines(content: string): string {
   // ... (점선) 패턴 처리
   const dottedLinePattern = /\.{3,}/g;
   processedContent = processedContent.replace(dottedLinePattern, (match) => {
-    console.log(`점선 패턴 발견: "${match}"`);
     return '<div class="dotted-separator"></div>';
   });
-  
-  console.log('가로선 패턴 처리 후:', JSON.stringify(processedContent));
   
   // HTML 태그 복원
   tagPlaceholders.forEach((tag, index) => {
     processedContent = processedContent.replace(`<!--TAG_PLACEHOLDER_${index}-->`, tag);
   });
-  
-  console.log('HTML 태그 복원 후:', JSON.stringify(processedContent));
   
   // 링크 처리 추가
   processedContent = processLinks(processedContent);
@@ -242,7 +217,6 @@ function processHorizontalLines(content: string): string {
   // 키워드 효과 적용 (비활성화됨)
   processedContent = applyKeywordEffects(processedContent);
   
-  console.log('=== processHorizontalLines 완료 ===');
   return processedContent;
 }
 
@@ -370,7 +344,6 @@ export function renderGreetingClosingContent(content: string): string {
   processedContent = processedContent.replace(/\n/g, '<br>');
   
   // 커스텀 패턴들을 먼저 처리 (HTML 태그 보호 전에)
-  console.log('renderGreetingClosingContent - 커스텀 패턴 처리 시작');
   
   // <<문자>> 패턴 처리 (파란색 소제목 타이틀)
   processedContent = processBlueTitlePattern(processedContent);
@@ -386,8 +359,6 @@ export function renderGreetingClosingContent(content: string): string {
   
   // 가로선 패턴 처리 (---, ===, ...)
   processedContent = processHorizontalLines(processedContent);
-  
-  console.log('renderGreetingClosingContent - 커스텀 패턴 처리 후:', JSON.stringify(processedContent));
   
   // HTML 태그를 임시로 보호
   const tagPlaceholders: string[] = [];
@@ -417,20 +388,4 @@ export function renderGreetingClosingContent(content: string): string {
       ${processedContent}
     </div>
   `;
-} 
-
-/**
- * 테스트용 함수 - <<문자>> 패턴 처리 확인
- * @param content 테스트할 내용
- * @returns 처리 결과
- */
-export function testBlueTitlePattern(content: string): string {
-  console.log('=== 테스트 시작 ===');
-  console.log('원본:', content);
-  
-  const result = processBlueTitlePattern(content);
-  console.log('결과:', result);
-  console.log('=== 테스트 완료 ===');
-  
-  return result;
 } 

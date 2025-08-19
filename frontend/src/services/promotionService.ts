@@ -30,6 +30,7 @@ import {
   PromotionSort,
   CrudResult 
 } from '../types';
+import { generateSlug, ensureUniqueSlug } from '../utils/utils';
 
 const COLLECTION_NAME = 'promotions';
 
@@ -49,6 +50,28 @@ export const createPromotion = async (
   data: CreatePromotionRequest
 ): Promise<CrudResult<string>> => {
   try {
+    // slug는 반드시 제공되어야 함 (자동 생성 제거)
+    if (!data.slug || data.slug.trim() === '') {
+      return {
+        success: false,
+        error: 'URL 슬러그는 필수입니다.'
+      };
+    }
+
+    let slug = data.slug;
+    let slugConflict = false;
+    let originalSlug = '';
+    
+    // 수동으로 입력된 slug의 중복 확인
+    const existingPromotions = await getDocs(getCollectionRef(COLLECTION_NAME));
+    const existingSlugs = existingPromotions.docs.map(doc => doc.data().slug).filter(Boolean);
+    
+    if (existingSlugs.includes(slug)) {
+      slugConflict = true;
+      originalSlug = slug;
+      slug = ensureUniqueSlug(slug, existingSlugs);
+    }
+
     // 이미지 업로드 처리
     let imageUrl = data.imageUrl;
     if (data.imageUrl && data.imageUrl.startsWith('blob:')) {
@@ -62,6 +85,7 @@ export const createPromotion = async (
     // 타임스탬프 추가 및 undefined 값 제거
     const promotionData = addTimestamps({
       ...removeUndefined(data),
+      slug,
       imageUrl: imageUrl || null,
       isActive: data.isActive ?? true
     });
@@ -71,7 +95,8 @@ export const createPromotion = async (
     return {
       success: true,
       data: docRef.id,
-      affectedCount: 1
+      affectedCount: 1,
+      warning: slugConflict ? `입력된 slug "${originalSlug}"가 이미 존재하여 "${slug}"로 변경되었습니다.` : undefined
     };
   } catch (error) {
     return {
@@ -164,7 +189,7 @@ export const getPromotions = async (
   }
 };
 
-// 프로모션 상세 조회
+// 프로모션 상세 조회 (ID 기반)
 export const getPromotionById = async (id: string): Promise<CrudResult<Promotion>> => {
   try {
     const docRef = getDocumentRef(COLLECTION_NAME, id);
@@ -180,6 +205,51 @@ export const getPromotionById = async (id: string): Promise<CrudResult<Promotion
     const promotion: Promotion = {
       id: docSnap.id,
       ...docSnap.data()
+    } as Promotion;
+
+    return {
+      success: true,
+      data: promotion
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+};
+
+// 프로모션 상세 조회 (Slug 기반)
+export const getPromotionBySlug = async (slug: string): Promise<CrudResult<Promotion>> => {
+  try {
+    // 먼저 slug로 조회 시도
+    let q = query(
+      getCollectionRef(COLLECTION_NAME),
+      where('slug', '==', slug)
+    );
+    
+    let querySnapshot = await getDocs(q);
+    
+    // slug로 찾지 못한 경우, ID로도 조회 시도 (기존 프로모션 지원)
+    if (querySnapshot.empty) {
+      q = query(
+        getCollectionRef(COLLECTION_NAME),
+        where('id', '==', slug)
+      );
+      querySnapshot = await getDocs(q);
+    }
+    
+    if (querySnapshot.empty) {
+      return {
+        success: false,
+        error: '프로모션을 찾을 수 없습니다.'
+      };
+    }
+
+    const doc = querySnapshot.docs[0];
+    const promotion: Promotion = {
+      id: doc.id,
+      ...doc.data()
     } as Promotion;
 
     return {
@@ -221,7 +291,7 @@ export const updatePromotion = async (
         try {
           await deleteImage(existingData.imageUrl);
         } catch (error) {
-          console.warn('기존 이미지 삭제 실패:', error);
+          // 기존 이미지 삭제 실패 시 무시하고 진행
         }
       }
 
@@ -232,9 +302,31 @@ export const updatePromotion = async (
       imageUrl = await uploadImage(file, 'promotions');
     }
 
+    // slug 변경 시 중복 확인
+    let slug = data.slug;
+    let slugConflict = false;
+    let originalSlug = '';
+    
+    if (data.slug && data.slug !== existingData.slug) {
+      // 기존 slug들과 중복 확인하여 고유한 slug 생성
+      const existingPromotions = await getDocs(getCollectionRef(COLLECTION_NAME));
+      const existingSlugs = existingPromotions.docs
+        .map(doc => doc.data().slug)
+        .filter(Boolean)
+        .filter(s => s !== existingData.slug); // 현재 프로모션의 기존 slug는 제외
+      
+      if (existingSlugs.includes(data.slug)) {
+        slugConflict = true;
+        originalSlug = data.slug;
+      }
+      
+      slug = ensureUniqueSlug(data.slug, existingSlugs);
+    }
+
     // 업데이트 데이터 준비
     const updateData = addUpdateTimestamp({
       ...removeUndefined(data),
+      slug: slug || existingData.slug,
       imageUrl: imageUrl || null
     });
 
@@ -242,7 +334,76 @@ export const updatePromotion = async (
 
     return {
       success: true,
-      affectedCount: 1
+      affectedCount: 1,
+      warning: slugConflict ? `입력된 slug "${originalSlug}"가 이미 존재하여 "${slug}"로 변경되었습니다.` : undefined
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+};
+
+// 슬러그 업데이트
+export const updatePromotionSlug = async (
+  id: string,
+  newSlug: string
+): Promise<CrudResult<void>> => {
+  try {
+    const docRef = getDocumentRef(COLLECTION_NAME, id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return {
+        success: false,
+        error: '프로모션을 찾을 수 없습니다.'
+      };
+    }
+
+    // 기존 데이터 가져오기
+    const existingData = docSnap.data() as Promotion;
+    
+    // slug가 변경되지 않은 경우
+    if (newSlug === existingData.slug) {
+      return {
+        success: true,
+        affectedCount: 0
+      };
+    }
+
+    // slug 중복 확인
+    let slug = newSlug;
+    let slugConflict = false;
+    let originalSlug = '';
+    
+    if (newSlug && newSlug.trim() !== '') {
+      // 기존 slug들과 중복 확인하여 고유한 slug 생성
+      const existingPromotions = await getDocs(getCollectionRef(COLLECTION_NAME));
+      const existingSlugs = existingPromotions.docs
+        .map(doc => doc.data().slug)
+        .filter(Boolean)
+        .filter(s => s !== existingData.slug); // 현재 프로모션의 기존 slug는 제외
+      
+      if (existingSlugs.includes(newSlug)) {
+        slugConflict = true;
+        originalSlug = newSlug;
+      }
+      
+      slug = ensureUniqueSlug(newSlug, existingSlugs);
+    }
+
+    // 업데이트 데이터 준비
+    const updateData = addUpdateTimestamp({
+      slug: slug || existingData.slug
+    });
+
+    await updateDoc(docRef, updateData);
+
+    return {
+      success: true,
+      affectedCount: 1,
+      warning: slugConflict ? `입력된 slug "${originalSlug}"가 이미 존재하여 "${slug}"로 변경되었습니다.` : undefined
     };
   } catch (error) {
     return {
@@ -271,7 +432,7 @@ export const deletePromotion = async (id: string): Promise<CrudResult<void>> => 
       try {
         await deleteImage(promotion.imageUrl);
       } catch (error) {
-        console.warn('이미지 삭제 실패:', error);
+        // 이미지 삭제 실패 시 무시하고 진행
       }
     }
 
@@ -280,6 +441,106 @@ export const deletePromotion = async (id: string): Promise<CrudResult<void>> => 
     return {
       success: true,
       affectedCount: 1
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+};
+
+// 기존 프로모션들을 위한 slug 마이그레이션
+export const migratePromotionSlugs = async (): Promise<CrudResult<number>> => {
+  try {
+    const promotions = await getDocs(getCollectionRef(COLLECTION_NAME));
+    let migratedCount = 0;
+
+    for (const doc of promotions.docs) {
+      const promotion = doc.data() as Promotion;
+      
+      // slug가 없거나 빈 문자열인 경우에만 마이그레이션
+      if (!promotion.slug || promotion.slug.trim() === '') {
+        const newSlug = generateSlug(promotion.title);
+        
+        // 기존 slug들과 중복 확인
+        const existingSlugs = promotions.docs
+          .map(d => d.data().slug)
+          .filter(Boolean)
+          .filter(s => s !== newSlug);
+        
+        const uniqueSlug = ensureUniqueSlug(newSlug, existingSlugs);
+        
+        // slug 업데이트
+        await updateDoc(doc.ref, {
+          slug: uniqueSlug,
+          updatedAt: new Date()
+        });
+        
+        migratedCount++;
+      }
+    }
+
+    return {
+      success: true,
+      data: migratedCount,
+      affectedCount: migratedCount
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+};
+
+// slug 또는 ID로 프로모션 조회 (통합 함수)
+export const getPromotionBySlugOrId = async (identifier: string): Promise<CrudResult<Promotion>> => {
+  try {
+    // slug와 ID를 모두 조회하여 둘 중 하나라도 찾으면 반환
+    const [slugQuery, idQuery] = await Promise.all([
+      getDocs(query(
+        getCollectionRef(COLLECTION_NAME),
+        where('slug', '==', identifier)
+      )),
+      getDocs(query(
+        getCollectionRef(COLLECTION_NAME),
+        where('id', '==', identifier)
+      ))
+    ]);
+    
+    // slug로 찾은 경우
+    if (!slugQuery.empty) {
+      const doc = slugQuery.docs[0];
+      const promotion: Promotion = {
+        id: doc.id,
+        ...doc.data()
+      } as Promotion;
+      
+      return {
+        success: true,
+        data: promotion
+      };
+    }
+    
+    // ID로 찾은 경우
+    if (!idQuery.empty) {
+      const doc = idQuery.docs[0];
+      const promotion: Promotion = {
+        id: doc.id,
+        ...doc.data()
+      } as Promotion;
+      
+      return {
+        success: true,
+        data: promotion
+      };
+    }
+    
+    // 둘 다 찾지 못한 경우
+    return {
+      success: false,
+      error: '프로모션을 찾을 수 없습니다.'
     };
   } catch (error) {
     return {
@@ -437,7 +698,7 @@ export const getOtherProductsInfo = async (
           };
         }
       } catch (error) {
-        console.error(`다른제품 정보 조회 실패 (ID: ${id}):`, error);
+        // 다른제품 정보 조회 실패 (ID: ${id}): ${error}
       }
     }
 

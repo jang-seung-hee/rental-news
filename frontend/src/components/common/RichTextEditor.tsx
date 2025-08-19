@@ -47,7 +47,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       const imageUrl = await uploadImage(file, 'promotions');
       return imageUrl;
     } catch (error) {
-      console.error('이미지 업로드 실패:', error);
       throw new Error('이미지 업로드에 실패했습니다.');
     }
   };
@@ -119,7 +118,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const handleBlur = () => setIsFocused(false);
 
   // 이미지 업로드 핸들러
-  const handleImageUpload = async () => {
+  const handleImageUpload = () => {
     const imageUploadHandler = onImageUpload || defaultImageUpload;
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -151,7 +150,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           
           handleInput();
         } catch (error) {
-          console.error('이미지 업로드 실패:', error);
           alert('이미지 업로드에 실패했습니다.');
         }
       }

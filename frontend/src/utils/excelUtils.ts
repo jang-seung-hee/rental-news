@@ -8,8 +8,6 @@ export const parseExcelFile = (file: File): Promise<ExcelCustomerData[]> => {
     
     reader.onload = (e) => {
       try {
-        console.log('파일 읽기 시작:', file.name, file.size);
-        
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
@@ -22,15 +20,10 @@ export const parseExcelFile = (file: File): Promise<ExcelCustomerData[]> => {
         const headers = jsonData[0] as string[];
         const rows = jsonData.slice(1) as any[][];
         
-        console.log('헤더:', headers);
-        console.log('데이터 행 수:', rows.length);
-        
         // 데이터 검증 및 변환
         const customers: ExcelCustomerData[] = rows
           .filter(row => row.length >= 6) // 최소 6개 컬럼 필요
           .map((row, index) => {
-            console.log(`행 ${index + 2} 원본 데이터:`, row);
-            
             const customer: ExcelCustomerData = {
               customerGroup: String(row[0] || '').trim(),
               customerName: String(row[1] || '').trim(),
@@ -39,8 +32,6 @@ export const parseExcelFile = (file: File): Promise<ExcelCustomerData[]> => {
               installationDate: String(row[4] || '').trim(),
               mandatoryUsagePeriod: Number(row[5]) || 0,
             };
-            
-            console.log(`행 ${index + 2} 변환된 데이터:`, customer);
             
             // 필수 필드 검증
             if (!customer.customerName || !customer.phoneNumber) {
@@ -68,7 +59,6 @@ export const parseExcelFile = (file: File): Promise<ExcelCustomerData[]> => {
             }
             // 4. 기타 형식은 경고만 출력하고 그대로 사용
             else {
-              console.warn(`행 ${index + 2}: 비표준 휴대폰번호 형식 - ${phoneNumber}`);
               customer.phoneNumber = phoneNumber;
             }
             
@@ -111,16 +101,13 @@ export const parseExcelFile = (file: File): Promise<ExcelCustomerData[]> => {
             return customer;
           });
         
-        console.log('최종 변환된 고객 데이터:', customers);
         resolve(customers);
       } catch (error) {
-        console.error('파일 파싱 에러:', error);
         reject(error);
       }
     };
     
     reader.onerror = (error) => {
-      console.error('파일 읽기 에러:', error);
       reject(new Error('파일 읽기 실패'));
     };
     
@@ -141,7 +128,6 @@ export const downloadCustomerExcel = (customers: ExcelCustomerData[], filename: 
     // 엑셀 파일 생성 및 다운로드
     XLSX.writeFile(workbook, filename);
   } catch (error) {
-    console.error('엑셀 파일 생성 에러:', error);
     throw error;
   }
 };

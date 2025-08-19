@@ -17,6 +17,7 @@ interface UseAdminAuthReturn {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
+  setError: (error: string | null) => void;
 }
 
 export const useAdminAuth = (): UseAdminAuthReturn => {
@@ -31,7 +32,6 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
       const adminDoc = await getDoc(doc(db, 'admins', uid));
       return adminDoc.exists();
     } catch (error) {
-      console.error('관리자 권한 확인 실패:', error);
       return false;
     }
   };
@@ -74,8 +74,6 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
         setError('관리자 권한이 없습니다.');
       }
     } catch (error: any) {
-      console.error('로그인 실패:', error);
-      
       // Firebase Auth 에러 메시지 처리
       switch (error.code) {
         case 'auth/user-not-found':
@@ -106,7 +104,6 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
       setIsAdmin(false);
       setError(null);
     } catch (error) {
-      console.error('로그아웃 실패:', error);
       setError('로그아웃에 실패했습니다.');
     }
   };
@@ -123,6 +120,7 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
     error,
     signIn,
     signOut: handleSignOut,
-    clearError
+    clearError,
+    setError
   };
 }; 

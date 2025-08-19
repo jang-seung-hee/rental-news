@@ -52,8 +52,7 @@ const PromotionDetailView: React.FC<PromotionDetailViewProps> = ({
               products[id] = null;
             }
           } catch (error) {
-            console.error('다른제품 정보 조회 실패:', error);
-            products[id] = null;
+            // 다른제품 정보 조회 실패 시 무시하고 진행
           }
         }
       }

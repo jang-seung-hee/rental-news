@@ -63,6 +63,7 @@ export interface CrudResult<T = any> {
   success: boolean;
   data?: T;
   error?: string;
+  warning?: string;
   affectedCount?: number;
 }
 
