@@ -65,7 +65,7 @@ const PromotionDetailWrapper: React.FC = () => {
 const LegacyPromotionRedirect: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [isRedirecting, setIsRedirecting] = useState(true);
+  const [isRedirecting] = useState(true);
   
   useEffect(() => {
     const redirectToSlug = async () => {

@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import RichTextEditor from '../common/RichTextEditor';
 import { Promotion, CreatePromotionRequest, UpdatePromotionRequest } from '../../types';
 import { createPromotion, updatePromotion, getPromotionsByMonth, getOtherProductsInfo, getPromotionCodesByMonth } from '../../services/promotionService';
-import { getCurrentMonth, generateSlug } from '../../utils/utils';
+import { getCurrentMonth } from '../../utils/utils';
 
 // 폼 유효성 검사 스키마
 const promotionSchema = z.object({
@@ -93,7 +93,6 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
   const watchedContent = watch('content');
   const watchedMonth = watch('month');
-  const watchedTitle = watch('title');
 
   // title 변경 시 자동 slug 생성 기능 제거
   // slug는 사용자가 수동으로 입력하거나 기존 프로모션 복사로만 설정 가능
