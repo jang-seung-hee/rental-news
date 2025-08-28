@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,7 +10,7 @@ import {
   upsertSystemSettings, 
   initializeDefaultSystemSettings 
 } from '../services/systemSettingsService';
-import { SystemSettings, UpdateSystemSettingsRequest } from '../types/systemSettings';
+import { SystemSettings } from '../types/systemSettings';
 import { uploadImage } from '../services/firebaseUtils';
 import SettingsTabs from '../components/admin/settings/SettingsTabs';
 import SiteBasicInfoTab from '../components/admin/settings/SiteBasicInfoTab';
@@ -48,7 +48,7 @@ const SystemSettingsPage: React.FC = () => {
   const { handleSubmit, setValue, reset, formState: { isDirty } } = methods;
 
   // 시스템 설정 로드
-  const loadSystemSettings = async () => {
+  const loadSystemSettings = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -84,12 +84,12 @@ const SystemSettingsPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setValue]);
 
   // 초기 로드
   useEffect(() => {
     loadSystemSettings();
-  }, []);
+  }, [loadSystemSettings]);
 
   // systemSettings가 변경될 때마다 폼 값 동기화
   useEffect(() => {

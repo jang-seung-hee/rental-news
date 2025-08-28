@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Promotion } from '../../types';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
 import LazyImage from '../common/LazyImage';
 
 import { renderPromotionContent, renderGreetingClosingContent } from '../../utils/promotionContentUtils';
 import { getOtherProductsInfo } from '../../services/promotionService';
 import { getSystemSettings } from '../../services/systemSettingsService';
-import { hasLineBreaks } from '../../utils/textUtils';
 import '../../utils/promotionContentStyles.css';
 import PromotionSidebar from './PromotionSidebar';
 import PromotionBottomSheet from './PromotionBottomSheet';
@@ -37,7 +35,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
   const hiddenElements = hideElements ? hideElements.split(',').map(item => item.trim()) : [];
 
   // 시스템 설정 로드 (props로 전달되지 않은 경우에만)
-  const loadSystemSettings = async () => {
+  const loadSystemSettings = useCallback(async () => {
     if (propSystemSettings) return; // props로 전달된 경우 로드하지 않음
     
     try {
@@ -46,7 +44,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
     } catch (error) {
       console.error('시스템 설정을 불러올 수 없습니다:', error);
     }
-  };
+  }, [propSystemSettings]);
 
   // 다른제품 정보 로드
   useEffect(() => {
@@ -76,7 +74,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
 
     loadOtherProducts();
     loadSystemSettings();
-  }, [promotion]);
+  }, [promotion, loadSystemSettings]);
 
 
 

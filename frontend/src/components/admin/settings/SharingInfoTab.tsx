@@ -7,7 +7,6 @@ import { Label } from '../../ui/label';
 import { Badge } from '../../ui/badge';
 import { Separator } from '../../ui/separator';
 import { SystemSettings } from '../../../types/systemSettings';
-import { uploadImage } from '../../../services/firebaseUtils';
 
 interface SharingInfoTabProps {
   systemSettings: SystemSettings | null;
