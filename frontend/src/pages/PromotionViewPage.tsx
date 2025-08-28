@@ -58,12 +58,63 @@ const PromotionViewPage: React.FC = () => {
     loadSystemSettings();
   }, [identifier, loadPromotion, loadSystemSettings]);
 
+  // 메타태그 직접 설정 (React Helmet 보완용)
+  useEffect(() => {
+    if (promotion && systemSettings) {
+      const title = systemSettings?.defaultTitle || `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
+      const description = systemSettings?.defaultDescription || promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
+      
+      console.log('🔧 직접 메타태그 설정 중...');
+      console.log('Title:', title);
+      console.log('Description:', description);
+      console.log('Favicon URL:', systemSettings.faviconUrl);
+      
+      document.title = title;
+      
+      // 기존 description 메타태그 찾아서 업데이트
+      let descriptionMeta = document.querySelector('meta[name="description"]');
+      if (descriptionMeta) {
+        descriptionMeta.setAttribute('content', description);
+      } else {
+        // 없으면 새로 생성
+        descriptionMeta = document.createElement('meta');
+        descriptionMeta.setAttribute('name', 'description');
+        descriptionMeta.setAttribute('content', description);
+        document.head.appendChild(descriptionMeta);
+      }
+      
+      // 파비콘 직접 설정
+      if (systemSettings.faviconUrl) {
+        console.log('🔧 파비콘 직접 설정:', systemSettings.faviconUrl);
+        
+        // 기존 파비콘 제거
+        const existingFavicons = document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]');
+        existingFavicons.forEach(link => link.remove());
+        
+        // 새 파비콘 추가
+        const favicon = document.createElement('link');
+        favicon.rel = 'icon';
+        favicon.href = systemSettings.faviconUrl;
+        document.head.appendChild(favicon);
+        
+        // Apple Touch Icon도 추가
+        const appleTouchIcon = document.createElement('link');
+        appleTouchIcon.rel = 'apple-touch-icon';
+        appleTouchIcon.href = systemSettings.faviconUrl;
+        document.head.appendChild(appleTouchIcon);
+        
+        console.log('✅ 파비콘 설정 완료');
+      }
+    }
+  }, [promotion, systemSettings]);
+
   // 메타태그 생성
   const generateMetaTags = () => {
     if (!promotion) return null;
 
-    const title = `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
-    const description = promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
+    // 시스템 설정의 defaultTitle을 우선적으로 사용하고, 없으면 프로모션 제목 + 사이트명 사용
+    const title = systemSettings?.defaultTitle || `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
+    const description = systemSettings?.defaultDescription || promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
     const imageUrl = promotion.imageUrl || systemSettings?.defaultImageUrl || '/promotionViewTitle_resize.png';
     const url = `${window.location.origin}/view/${promotion.slug || promotion.id}`;
     const siteName = systemSettings?.siteName || '렌탈톡톡';
@@ -96,6 +147,9 @@ const PromotionViewPage: React.FC = () => {
         {/* 파비콘 */}
         {systemSettings?.faviconUrl && (
           <link rel="icon" href={systemSettings.faviconUrl} />
+        )}
+        {systemSettings?.faviconUrl && (
+          <link rel="apple-touch-icon" href={systemSettings.faviconUrl} />
         )}
       </Helmet>
     );
