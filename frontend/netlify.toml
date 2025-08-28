@@ -5,10 +5,10 @@
 
 # Edge Functions: 모든 경로에 대해 크롤러 접근 시 시스템 설정 기반 OG 메타 반환
 [edge_functions]
-  directory = "netlify/edge-functions"
+  directory = "edge-functions"
 
 [[edge_functions]]
-  path = "/*"
+  path = "/view/*"
   function = "promotion-og"
 
 [[redirects]]
