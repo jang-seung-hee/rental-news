@@ -266,6 +266,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     try {
       const selectedPromotion = monthPromotions.find(p => p.id === selectedCopyCode);
       if (selectedPromotion) {
+        setValue('code', `${selectedPromotion.code}(copy)`);
         setValue('target', selectedPromotion.target);
         setValue('title', selectedPromotion.title);
         setValue('slug', selectedPromotion.slug || ''); // slug 추가
@@ -291,6 +292,31 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   // 전체화면 모드 토글 핸들러
   const handleFullscreenToggle = (fullscreen: boolean) => {
     setIsFullscreen(fullscreen);
+  };
+
+  // 랜덤 문자 생성 함수 (대소문자 알파벳만)
+  const generateRandomChars = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return chars.charAt(Math.floor(Math.random() * chars.length)) + 
+           chars.charAt(Math.floor(Math.random() * chars.length));
+  };
+
+  // 랜덤 문자 버튼 클릭 핸들러
+  const handleRandomSlug = () => {
+    const currentSlug = watch('slug') || '';
+    const randomChars = generateRandomChars();
+    
+    // 기존 슬러그가 있으면 첫 두 글자만 랜덤으로 교체, 없으면 랜덤 두 글자 생성
+    if (currentSlug.length >= 2) {
+      const newSlug = randomChars + currentSlug.slice(2);
+      setValue('slug', newSlug);
+    } else {
+      setValue('slug', randomChars + currentSlug);
+    }
+    
+    // 변경된 슬러그로 중복 확인
+    const newSlug = currentSlug.length >= 2 ? randomChars + currentSlug.slice(2) : randomChars + currentSlug;
+    checkSlugConflict(newSlug);
   };
 
   // 폼 제출 핸들러
@@ -524,18 +550,32 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
                     <div className="space-y-2">
                       <Label htmlFor="slug">URL 슬러그 * (필수)</Label>
-                      <div className="relative">
-                        <Input
-                          id="slug"
-                          {...register('slug')}
-                          placeholder="수동 입력 또는 기존 프로모션 복사"
-                          className={`${errors.slug ? 'border-red-500' : ''} ${slugConflict ? 'border-yellow-500' : ''}`}
-                          onBlur={(e) => checkSlugConflict(e.target.value)}
-                        />
-                        {isCheckingSlug && (
-                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          </div>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Input
+                            id="slug"
+                            {...register('slug')}
+                            placeholder="수동 입력 또는 기존 프로모션 복사"
+                            className={`${errors.slug ? 'border-red-500' : ''} ${slugConflict ? 'border-yellow-500' : ''}`}
+                            onBlur={(e) => checkSlugConflict(e.target.value)}
+                          />
+                          {isCheckingSlug && (
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            </div>
+                          )}
+                        </div>
+                        {!promotion && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRandomSlug}
+                            className="px-3 py-2 text-sm whitespace-nowrap bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200 hover:text-slate-800"
+                            title="첫 두 글자를 랜덤 알파벳으로 변경"
+                          >
+                            랜덤문자
+                          </Button>
                         )}
                       </div>
                       {errors.slug && (

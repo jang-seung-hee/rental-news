@@ -11,6 +11,7 @@ import PromotionNew from './pages/PromotionNew';
 import PromotionEdit from './pages/PromotionEdit';
 import PromotionViewPage from './pages/PromotionViewPage';
 import CustomerList from './pages/CustomerList';
+import SystemSettingsPage from './pages/SystemSettings';
 import NotFound from './pages/NotFound';
 
 // Components
@@ -190,7 +191,7 @@ const AppContent: React.FC = () => {
               <Route path="/promotions/:id" element={<PromotionDetailWrapper />} />
               <Route path="/promotions/:id/edit" element={<PromotionEdit />} />
               <Route path="/customers" element={<CustomerList />} />
-              <Route path="/settings" element={<div className="text-center py-8">설정 페이지 (구현 예정)</div>} />
+              <Route path="/settings" element={<SystemSettingsPage />} />
               <Route path="/404" element={<NotFound />} />
               <Route path="*" element={<Navigate to="/404" replace />} />
             </Routes>

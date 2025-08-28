@@ -7,26 +7,46 @@ import LazyImage from '../common/LazyImage';
 
 import { renderPromotionContent, renderGreetingClosingContent } from '../../utils/promotionContentUtils';
 import { getOtherProductsInfo } from '../../services/promotionService';
+import { getSystemSettings } from '../../services/systemSettingsService';
+import { hasLineBreaks } from '../../utils/textUtils';
 import '../../utils/promotionContentStyles.css';
 import PromotionSidebar from './PromotionSidebar';
 import PromotionBottomSheet from './PromotionBottomSheet';
 import PromotionBottomNavigation from './PromotionBottomNavigation';
+import InactivePromotionNotice from '../common/InactivePromotionNotice';
 
 interface CustomTagProps {
   promotion: Promotion;
   hideElements?: string | null;
+  systemSettings?: any;
 }
 
-const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
+const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSettings: propSystemSettings }) => {
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [otherProducts, setOtherProducts] = useState<{ [key: string]: { id: string; code: string; title: string } }>({});
   const [isLoadingOtherProducts, setIsLoadingOtherProducts] = useState(false);
   const [isSlidePanelOpen, setIsSlidePanelOpen] = useState(false);
   const [selectedProductCode, setSelectedProductCode] = useState<string | null>(null);
+  const [localSystemSettings, setLocalSystemSettings] = useState<any>(null);
+  
+  // props로 전달된 시스템 설정이 있으면 사용, 없으면 로컬에서 로드
+  const systemSettings = propSystemSettings || localSystemSettings;
 
   // hideElements 파라미터 파싱
   const hiddenElements = hideElements ? hideElements.split(',').map(item => item.trim()) : [];
+
+  // 시스템 설정 로드 (props로 전달되지 않은 경우에만)
+  const loadSystemSettings = async () => {
+    if (propSystemSettings) return; // props로 전달된 경우 로드하지 않음
+    
+    try {
+      const settings = await getSystemSettings();
+      setLocalSystemSettings(settings);
+    } catch (error) {
+      console.error('시스템 설정을 불러올 수 없습니다:', error);
+    }
+  };
 
   // 다른제품 정보 로드
   useEffect(() => {
@@ -55,43 +75,12 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
     };
 
     loadOtherProducts();
+    loadSystemSettings();
   }, [promotion]);
 
 
 
-  // 프로모션이 비활성화된 경우 안내 메시지 표시
-  if (!promotion.isActive) {
-    return (
-      <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="mb-6">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">프로모션 종료</h2>
-            <p className="text-gray-600 leading-relaxed">
-              죄송합니다. 해당 프로모션은 종료되었습니다.
-            </p>
-          </div>
-          
-          <div className="bg-blue-50 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800 font-medium">
-              허준 팀장에게 현재 진행중인 프로모션으로 새로 안내해 달라고 하세요.
-            </p>
-          </div>
-          
-          <Button 
-            onClick={() => window.history.back()} 
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition-colors"
-          >
-            돌아가기
-          </Button>
-        </div>
-      </div>
-    );
-  }
+
 
   const formatMonth = (month: string) => {
     if (!month) return '-';
@@ -183,7 +172,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
         )}
 
                  {/* 인사말 */}
-         {!hiddenElements.includes('greeting') && (
+         {!hiddenElements.includes('greeting') && promotion.isActive && (
            <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
              <CardContent className="p-6 card-content">
                <div className="flex items-center mb-4">
@@ -201,23 +190,25 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
          )}
 
         {/* 프로모션 내용 */}
-        <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
-          <CardContent className="p-6 card-content">
-            <div className="flex items-center mb-4">
-              <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-4"></div>
-              <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                프로모션 내용
-              </h3>
-            </div>
-            <div 
-              className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: renderPromotionContent(promotion.content) }}
-            />
-          </CardContent>
-        </Card>
+        {promotion.isActive && (
+          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
+            <CardContent className="p-6 card-content">
+              <div className="flex items-center mb-4">
+                <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-4"></div>
+                <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  프로모션 내용
+                </h3>
+              </div>
+              <div 
+                className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: renderPromotionContent(promotion.content) }}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* 다른제품 혜택 보기 */}
-        {hasOtherProducts && !hiddenElements.includes('otherProducts') && (
+        {hasOtherProducts && !hiddenElements.includes('otherProducts') && promotion.isActive && (
           <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
             <CardContent className="p-6 card-content">
               <div className="flex items-center mb-4">
@@ -265,7 +256,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
         )}
 
         {/* 매듭말 */}
-        {!hiddenElements.includes('closing') && (
+        {!hiddenElements.includes('closing') && promotion.isActive && (
           <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl relative overflow-hidden card">
             {/* 배경 이미지 추가 */}
             <div className="absolute top-8 right-0 z-0">
@@ -288,6 +279,11 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements }) => {
               />
             </CardContent>
           </Card>
+        )}
+
+        {/* 프로모션 종료 안내 */}
+        {!promotion.isActive && (
+          <InactivePromotionNotice systemSettings={systemSettings} />
         )}
 
         {/* 연락처 */}

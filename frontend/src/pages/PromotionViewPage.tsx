@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Promotion } from '../types';
 import { getPromotionBySlugOrId } from '../services/promotionService';
+import { getSystemSettings } from '../services/systemSettingsService';
 import CustomTag from '../components/admin/CustomTag';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import '../utils/promotionViewLightMode.css';
@@ -13,6 +14,7 @@ const PromotionViewPage: React.FC = () => {
   const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [systemSettings, setSystemSettings] = useState<any>(null);
 
   // 프로모션 데이터 로드 (slug 또는 ID 기반)
   const loadPromotion = useCallback(async () => {
@@ -40,19 +42,31 @@ const PromotionViewPage: React.FC = () => {
     }
   }, [identifier]);
 
+  // 시스템 설정 로드
+  const loadSystemSettings = useCallback(async () => {
+    try {
+      const settings = await getSystemSettings();
+      setSystemSettings(settings);
+    } catch (err) {
+      console.error('시스템 설정을 불러올 수 없습니다:', err);
+    }
+  }, []);
+
   // 초기 로드
   useEffect(() => {
     loadPromotion();
-  }, [identifier, loadPromotion]);
+    loadSystemSettings();
+  }, [identifier, loadPromotion, loadSystemSettings]);
 
   // 메타태그 생성
   const generateMetaTags = () => {
     if (!promotion) return null;
 
-    const title = `${promotion.title} - 렌탈톡톡`;
+    const title = `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
     const description = promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
-    const imageUrl = promotion.imageUrl || '/default-promotion-image.jpg';
+    const imageUrl = promotion.imageUrl || systemSettings?.defaultImageUrl || '/promotionViewTitle_resize.png';
     const url = `${window.location.origin}/view/${promotion.slug || promotion.id}`;
+    const siteName = systemSettings?.siteName || '렌탈톡톡';
 
     return (
       <Helmet>
@@ -66,7 +80,7 @@ const PromotionViewPage: React.FC = () => {
         <meta property="og:image" content={imageUrl} />
         <meta property="og:url" content={url} />
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="렌탈톡톡" />
+        <meta property="og:site_name" content={siteName} />
         
         {/* Twitter Card 태그 */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -76,8 +90,13 @@ const PromotionViewPage: React.FC = () => {
         
         {/* 추가 메타태그 */}
         <meta name="robots" content="index, follow" />
-        <meta name="author" content="렌탈톡톡" />
+        <meta name="author" content={siteName} />
         <link rel="canonical" href={url} />
+        
+        {/* 파비콘 */}
+        {systemSettings?.faviconUrl && (
+          <link rel="icon" href={systemSettings.faviconUrl} />
+        )}
       </Helmet>
     );
   };
@@ -124,7 +143,7 @@ const PromotionViewPage: React.FC = () => {
     <>
       {generateMetaTags()}
       <div className="promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 promotion-view-bg">
-        <CustomTag promotion={promotion} hideElements={hideElements} />
+        <CustomTag promotion={promotion} hideElements={hideElements} systemSettings={systemSettings} />
       </div>
     </>
   );
