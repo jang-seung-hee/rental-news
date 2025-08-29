@@ -6,8 +6,6 @@ import {
   where, 
   orderBy, 
   limit,
-  runTransaction,
-  Transaction,
   Timestamp,
   updateDoc,
   arrayUnion,
@@ -16,14 +14,10 @@ import {
 import { 
   getCollectionRef, 
   getDocumentRef,
-  addTimestamps, 
-  addUpdateTimestamp, 
   handleFirebaseError 
 } from './firebaseUtils';
-import { db } from './firebase';
 import { 
   PromotionViewStats, 
-  PromotionViewRecord, 
   PromotionStatsSummary,
   CrudResult 
 } from '../types';
