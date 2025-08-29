@@ -1,8 +1,6 @@
 import { 
   getDocs, 
-  getDoc, 
   addDoc, 
-  updateDoc, 
   deleteDoc,
   query, 
   where, 
@@ -14,7 +12,6 @@ import {
 } from 'firebase/firestore';
 import { 
   getCollectionRef, 
-  getDocumentRef, 
   addTimestamps, 
   addUpdateTimestamp, 
   handleFirebaseError 
@@ -394,7 +391,6 @@ export const getDashboardStats = async (): Promise<CrudResult<{
       
       // 각 프로모션의 viewHistory를 확인하여 날짜별 집계
       stats.viewHistory.forEach((record) => {
-        const recordDate = record.viewedAt.toDate();
         const recordTimestamp = record.viewedAt;
 
         // 어제 데이터

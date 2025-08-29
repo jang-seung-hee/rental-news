@@ -32,7 +32,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isPersistEnabled, setIsPersistEnabled] = useState(false);
   const lastDocRef = useRef<any>(null);
-  const { confirm, ConfirmComponent } = useConfirm();
+  const { ConfirmComponent } = useConfirm();
 
   const pageSize = 10;
 
