@@ -8,7 +8,10 @@ import {
   limit,
   runTransaction,
   Transaction,
-  Timestamp
+  Timestamp,
+  updateDoc,
+  arrayUnion,
+  increment
 } from 'firebase/firestore';
 import { 
   getCollectionRef, 
@@ -158,7 +161,8 @@ export const recordPromotionView = async (
       console.log('✅ 새로운 통계 문서 생성 완료');
     } else {
       // 기존 통계 문서 업데이트 (트랜잭션 사용)
-      await runTransaction(db, async (transaction: Transaction) => {
+      try {
+        await runTransaction(db, async (transaction: Transaction) => {
         const statsDoc = statsSnapshot.docs[0];
         const docRef = statsDoc.ref;
         const docSnapshot = await transaction.get(docRef);
@@ -196,7 +200,32 @@ export const recordPromotionView = async (
 
         transaction.update(docRef, addUpdateTimestamp(updatedStats));
         console.log('✅ 기존 통계 문서 업데이트 완료');
-      });
+        });
+      } catch (txError) {
+        console.warn('⚠️ 트랜잭션 실패, 안전한 단일 업데이트로 폴백 시도:', txError);
+        try {
+          const statsDoc = statsSnapshot.docs[0];
+          const docRef = statsDoc.ref as any;
+          const newViewRecord: any = {
+            ip: clientIP,
+            userAgent,
+            viewedAt,
+            ...(referrer && { referrer })
+          };
+          await updateDoc(docRef, {
+            totalViews: increment(1),
+            uniqueIPs: arrayUnion(clientIP),
+            // uniqueIPCount는 정확 동기화를 위해 이후 집계에서 재계산되어 사용됨
+            viewHistory: arrayUnion(newViewRecord),
+            lastUpdated: viewedAt,
+            updatedAt: Timestamp.now()
+          } as any);
+          console.log('✅ 폴백 업데이트 완료');
+        } catch (fallbackError) {
+          console.error('❌ 폴백 업데이트도 실패:', fallbackError);
+          throw fallbackError;
+        }
+      }
     }
 
     console.log('🎉 프로모션 조회 기록 완료!');
