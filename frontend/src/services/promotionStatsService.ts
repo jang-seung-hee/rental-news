@@ -34,9 +34,21 @@ const getClientIP = async (): Promise<string> => {
                          window.location.hostname === 'localhost' ||
                          window.location.hostname === '127.0.0.1';
     
+    // 카카오톡 인앱 브라우저 체크
+    const isKakaoInApp = typeof navigator !== 'undefined' && /KAKAOTALK/i.test(navigator.userAgent);
+    
     if (isDevelopment) {
       // 개발 환경에서는 고정 IP 사용 (같은 세션에서는 동일한 IP)
       return '127.0.0.1'; // 개발용 고정 IP
+    }
+    
+    if (isKakaoInApp) {
+      // 카카오톡에서는 외부 API 호출 없이 바로 대체 ID 생성
+      const userAgent = navigator.userAgent || '';
+      const timestamp = Date.now();
+      const fallbackId = btoa(`kakao-${userAgent.substring(0, 15)}-${timestamp}`).substring(0, 12);
+      console.log('카카오톡 인앱: 외부 IP API 건너뛰고 대체 ID 사용');
+      return `kakao-${fallbackId}`;
     }
     
     // 프로덕션 환경에서는 실제 IP 가져오기 (타임아웃 적용)
