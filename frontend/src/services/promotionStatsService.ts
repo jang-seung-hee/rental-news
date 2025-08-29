@@ -8,6 +8,7 @@ import {
   limit,
   Timestamp,
   updateDoc,
+  setDoc,
   arrayUnion,
   increment
 } from 'firebase/firestore';
@@ -139,37 +140,22 @@ export const recordPromotionView = async (
     const docId = `stats_${promotionId}`;
     const docRef = getDocumentRef(STATS_COLLECTION_NAME, docId);
 
-    try {
-      // 먼저 업데이트 시도 (문서가 존재하는 경우)
-      await updateDoc(docRef, {
-        totalViews: increment(1),
-        uniqueIPs: arrayUnion(clientIP),
-        viewHistory: arrayUnion(newViewRecord),
-        lastUpdated: viewedAt,
-        updatedAt: Timestamp.now()
-      } as any);
-      console.log('✅ 기존 통계 문서 업데이트 완료');
-    } catch (updateError: any) {
-      // 문서가 없으면 새로 생성
-      if (updateError.code === 'not-found') {
-        console.log('📝 통계 문서가 없어서 새로 생성합니다');
-        const newStats: any = {
-          promotionId,
-          totalViews: 1,
-          uniqueIPs: [clientIP],
-          uniqueIPCount: 1,
-          viewHistory: [newViewRecord],
-          lastUpdated: viewedAt,
-          createdAt: viewedAt,
-          updatedAt: viewedAt
-        };
-
-        await addDoc(getCollectionRef(STATS_COLLECTION_NAME), newStats);
-        console.log('✅ 새로운 통계 문서 생성 완료');
-      } else {
-        throw updateError;
-      }
-    }
+    // setDoc with merge: 문서가 없으면 생성, 있으면 merge
+    await setDoc(docRef, {
+      promotionId,
+      totalViews: increment(1),
+      uniqueIPs: arrayUnion(clientIP),
+      viewHistory: arrayUnion(newViewRecord),
+      lastUpdated: viewedAt,
+      updatedAt: Timestamp.now(),
+      // 문서가 없을 때만 설정될 기본값들
+      ...(newViewRecord.ip && { 
+        createdAt: viewedAt,
+        uniqueIPCount: 1  // 첫 생성시에만 설정
+      })
+    } as any, { merge: true });
+    
+    console.log('✅ 통계 문서 업데이트/생성 완료');
 
     console.log('🎉 프로모션 조회 기록 완료!');
     return {
