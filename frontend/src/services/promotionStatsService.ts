@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore';
 import { 
   getCollectionRef, 
+  getDocumentRef,
   addTimestamps, 
   addUpdateTimestamp, 
   handleFirebaseError 
@@ -132,99 +133,47 @@ export const recordPromotionView = async (
       viewedAt: viewedAt.toDate()
     });
 
-    // 기존 통계 문서 조회
-    const statsQuery = query(
-      getCollectionRef(STATS_COLLECTION_NAME),
-      where('promotionId', '==', promotionId),
-      limit(1)
-    );
-    
-    const statsSnapshot = await getDocs(statsQuery);
-    
-    if (statsSnapshot.empty) {
-      // 새 통계 문서 생성
-      const newStats: Omit<PromotionViewStats, 'id'> = {
-        promotionId,
-        totalViews: 1,
-        uniqueIPs: [clientIP],
-        uniqueIPCount: 1,
-        viewHistory: [{
-          ip: clientIP,
-          userAgent,
-          viewedAt,
-          ...(referrer && { referrer }) // referrer가 있을 때만 포함
-        }],
-        lastUpdated: viewedAt
-      };
+    // 권한 문제 해결: 기존 문서 조회 없이 바로 업데이트 시도
+    const newViewRecord: any = {
+      ip: clientIP,
+      userAgent,
+      viewedAt,
+      ...(referrer && { referrer })
+    };
 
-      await addDoc(getCollectionRef(STATS_COLLECTION_NAME), addTimestamps(newStats));
-      console.log('✅ 새로운 통계 문서 생성 완료');
-    } else {
-      // 기존 통계 문서 업데이트 (트랜잭션 사용)
-      try {
-        await runTransaction(db, async (transaction: Transaction) => {
-        const statsDoc = statsSnapshot.docs[0];
-        const docRef = statsDoc.ref;
-        const docSnapshot = await transaction.get(docRef);
-        
-        if (!docSnapshot.exists()) {
-          throw new Error('Statistics document has been deleted');
-        }
-        
-        const existingStats = docSnapshot.data() as PromotionViewStats;
-        
-        const newViewRecord: PromotionViewRecord = {
-          ip: clientIP,
-          userAgent,
-          viewedAt,
-          ...(referrer && { referrer }) // referrer가 있을 때만 포함
+    // 고정된 문서 ID 사용 (promotionId 기반)
+    const docId = `stats_${promotionId}`;
+    const docRef = getDocumentRef(STATS_COLLECTION_NAME, docId);
+
+    try {
+      // 먼저 업데이트 시도 (문서가 존재하는 경우)
+      await updateDoc(docRef, {
+        totalViews: increment(1),
+        uniqueIPs: arrayUnion(clientIP),
+        viewHistory: arrayUnion(newViewRecord),
+        lastUpdated: viewedAt,
+        updatedAt: Timestamp.now()
+      } as any);
+      console.log('✅ 기존 통계 문서 업데이트 완료');
+    } catch (updateError: any) {
+      // 문서가 없으면 새로 생성
+      if (updateError.code === 'not-found') {
+        console.log('📝 통계 문서가 없어서 새로 생성합니다');
+        const newStats: any = {
+          promotionId,
+          totalViews: 1,
+          uniqueIPs: [clientIP],
+          uniqueIPCount: 1,
+          viewHistory: [newViewRecord],
+          lastUpdated: viewedAt,
+          createdAt: viewedAt,
+          updatedAt: viewedAt
         };
 
-        // 고유 IP 목록 업데이트
-        const updatedUniqueIPs = existingStats.uniqueIPs.includes(clientIP) 
-          ? existingStats.uniqueIPs 
-          : [...existingStats.uniqueIPs, clientIP];
-
-        // 조회 기록 추가 (최근 100개만 유지)
-        const updatedViewHistory = [...existingStats.viewHistory, newViewRecord]
-          .sort((a, b) => b.viewedAt.toMillis() - a.viewedAt.toMillis())
-          .slice(0, 100);
-
-        const updatedStats = {
-          totalViews: existingStats.totalViews + 1,
-          uniqueIPs: updatedUniqueIPs,
-          uniqueIPCount: updatedUniqueIPs.length,
-          viewHistory: updatedViewHistory,
-          lastUpdated: viewedAt
-        };
-
-        transaction.update(docRef, addUpdateTimestamp(updatedStats));
-        console.log('✅ 기존 통계 문서 업데이트 완료');
-        });
-      } catch (txError) {
-        console.warn('⚠️ 트랜잭션 실패, 안전한 단일 업데이트로 폴백 시도:', txError);
-        try {
-          const statsDoc = statsSnapshot.docs[0];
-          const docRef = statsDoc.ref as any;
-          const newViewRecord: any = {
-            ip: clientIP,
-            userAgent,
-            viewedAt,
-            ...(referrer && { referrer })
-          };
-          await updateDoc(docRef, {
-            totalViews: increment(1),
-            uniqueIPs: arrayUnion(clientIP),
-            // uniqueIPCount는 정확 동기화를 위해 이후 집계에서 재계산되어 사용됨
-            viewHistory: arrayUnion(newViewRecord),
-            lastUpdated: viewedAt,
-            updatedAt: Timestamp.now()
-          } as any);
-          console.log('✅ 폴백 업데이트 완료');
-        } catch (fallbackError) {
-          console.error('❌ 폴백 업데이트도 실패:', fallbackError);
-          throw fallbackError;
-        }
+        await addDoc(getCollectionRef(STATS_COLLECTION_NAME), newStats);
+        console.log('✅ 새로운 통계 문서 생성 완료');
+      } else {
+        throw updateError;
       }
     }
 
