@@ -109,11 +109,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
         setHasNextPage(result.data.hasNextPage);
         lastDocRef.current = result.data.lastDoc;
         
-        // 프로모션 통계 로드
-        if (newPromotions.length > 0) {
-          const promotionIds = newPromotions.map(p => p.id);
-          loadPromotionStats(promotionIds, reset);
-        }
+        // 통계는 별도 useEffect에서 처리
       } else {
         setError(result.error || '프로모션 목록을 불러올 수 없습니다.');
       }
@@ -164,6 +160,14 @@ const PromotionList: React.FC<PromotionListProps> = ({
   useEffect(() => {
     loadPromotions(true);
   }, [filter, sort, loadPromotions]);
+
+  // 프로모션이 로드된 후 통계 로드
+  useEffect(() => {
+    if (promotions.length > 0) {
+      const promotionIds = promotions.map(p => p.id);
+      loadPromotionStats(promotionIds, true);
+    }
+  }, [promotions, loadPromotionStats]);
 
   // 검색 처리
   const handleSearch = (value: string) => {
