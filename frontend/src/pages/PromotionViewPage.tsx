@@ -71,7 +71,7 @@ const PromotionViewPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [identifier]);
+  }, [identifier, isKakaoInApp]);
 
   // 시스템 설정 로드
   const loadSystemSettings = useCallback(async () => {
