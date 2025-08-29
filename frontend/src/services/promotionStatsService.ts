@@ -468,15 +468,3 @@ export const getDashboardStats = async (): Promise<CrudResult<{
     };
   }
 };
-
-
-export default {
-  recordPromotionView,
-  getPromotionStats,
-  getPromotionStatsSummary,
-  deletePromotionStats,
-  getTopViewedPromotions,
-  getTopUserPromotions,
-  getDashboardStats
-};
- 
