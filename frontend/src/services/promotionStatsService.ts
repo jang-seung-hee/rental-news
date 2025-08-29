@@ -39,14 +39,38 @@ const getClientIP = async (): Promise<string> => {
       return '127.0.0.1'; // 개발용 고정 IP
     }
     
-    // 프로덕션 환경에서는 실제 IP 가져오기
-    const response = await fetch('https://api.ipify.org?format=json');
-    const data = await response.json();
-    return data.ip || 'localhost';
+    // 프로덕션 환경에서는 실제 IP 가져오기 (타임아웃 적용)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3초 타임아웃
+    
+    try {
+      const response = await fetch('https://api.ipify.org?format=json', {
+        signal: controller.signal,
+        cache: 'no-cache'
+      });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.ip || 'unknown';
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      console.warn('외부 IP API 호출 실패:', fetchError);
+      
+      // IP 가져오기 실패 시 대체 IP 생성 (카카오톡 등에서 차단될 수 있음)
+      // 브라우저 정보와 타임스탬프를 기반으로 고유 식별자 생성
+      const userAgent = navigator.userAgent || '';
+      const timestamp = Date.now();
+      const fallbackId = btoa(`${userAgent.substring(0, 20)}-${timestamp}`).substring(0, 12);
+      return `fallback-${fallbackId}`;
+    }
   } catch (error) {
     console.warn('IP 주소를 가져올 수 없습니다:', error);
-    // 개발 환경에서는 고정 IP 반환
-    return '127.0.0.1';
+    // 완전한 실패 시 기본 IP 반환
+    return 'unknown';
   }
 };
 
@@ -62,7 +86,13 @@ export const recordPromotionView = async (
   try {
     console.log('🔥 프로모션 조회 기록 시작:', promotionId);
     
-    const clientIP = await getClientIP();
+    // IP 가져오기를 Promise.race로 더 안전하게 처리
+    const ipPromise = getClientIP();
+    const timeoutPromise = new Promise<string>((resolve) => {
+      setTimeout(() => resolve('timeout-fallback'), 5000); // 5초 후 fallback
+    });
+    
+    const clientIP = await Promise.race([ipPromise, timeoutPromise]);
     const userAgent = getUserAgent();
     const referrer = document.referrer || undefined;
     const viewedAt = Timestamp.now();

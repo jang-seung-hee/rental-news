@@ -39,11 +39,15 @@ const PromotionViewPage: React.FC = () => {
         if (viewRecordedRef.current !== result.data.id) {
           viewRecordedRef.current = result.data.id;
           
-          // 프로모션 조회 기록 (비동기적으로 처리하여 페이지 로딩에 영향 없음)
-          recordPromotionView(result.data.id).catch(error => {
-            console.warn('프로모션 조회 기록 실패:', error);
-            // 조회 기록 실패는 사용자에게 알리지 않음 (백그라운드 처리)
-          });
+          // 프로모션 조회 기록 (완전히 비동기적으로 처리하여 페이지 로딩에 영향 없음)
+          // setTimeout을 사용하여 다음 이벤트 루프에서 실행
+          const promotionId = result.data.id;
+          setTimeout(() => {
+            recordPromotionView(promotionId).catch(error => {
+              console.warn('프로모션 조회 기록 실패 (백그라운드 처리):', error);
+              // 조회 기록 실패는 사용자에게 알리지 않음 (선택적 기능)
+            });
+          }, 0);
         }
       } else {
         setError(result.error || '프로모션을 찾을 수 없습니다.');
