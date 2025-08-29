@@ -246,9 +246,15 @@ export const getPromotionStats = async (
     }
 
     const doc = querySnapshot.docs[0];
+    const data = doc.data();
+    
+    // uniqueIPs 배열의 길이로 실제 고유 IP 수 계산
+    const actualUniqueIPCount = data.uniqueIPs ? data.uniqueIPs.length : 0;
+    
     const stats: PromotionViewStats = {
       id: doc.id,
-      ...doc.data()
+      ...data,
+      uniqueIPCount: actualUniqueIPCount // 실시간 계산된 값으로 덮어쓰기
     } as PromotionViewStats;
 
     return {
