@@ -13,6 +13,8 @@ const CustomTag = lazy(() => import('../components/admin/CustomTag'));
 const PromotionViewPage: React.FC = () => {
   const { identifier } = useParams<{ identifier: string }>();
   const [searchParams] = useSearchParams();
+  const debug = searchParams.get('debug') === '1';
+  const disableStats = searchParams.get('disableStats') === '1';
   const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,9 +47,15 @@ const PromotionViewPage: React.FC = () => {
           // setTimeout을 사용하여 다음 이벤트 루프에서 실행
           const promotionId = result.data.id;
           const scheduleRecord = () => {
-            recordPromotionView(promotionId).catch(error => {
+            if (disableStats) {
+              if (debug) console.log('[stats] disabled via query param');
+              return;
+            }
+            if (debug) console.log('[stats] recordPromotionView start');
+            recordPromotionView(promotionId).then(() => {
+              if (debug) console.log('[stats] recordPromotionView done');
+            }).catch(error => {
               console.warn('프로모션 조회 기록 실패 (백그라운드 처리):', error);
-              // 조회 기록 실패는 사용자에게 알리지 않음 (선택적 기능)
             });
           };
           if (isKakaoInApp) {

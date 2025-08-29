@@ -398,12 +398,14 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
           // selectedMenu 상태는 유지하여 스크롤 위치 보존
         }}
         selectedMenu={selectedMenu}
+        disableHistory={disableHistory}
       />
       
       <PromotionSidebar
         isOpen={isSlidePanelOpen}
         onClose={handleCloseSlidePanel}
         selectedProductCode={selectedProductCode}
+        disableHistory={disableHistory}
       />
     </div>
   );
