@@ -50,7 +50,7 @@ service cloud.firestore {
     }
     
     // 프로모션 통계 컬렉션
-    match /promotionStats/{document} {
+    match /promotionStats/{document=**} {
       // 읽기: 인증된 관리자만 가능
       allow read: if request.auth != null && 
                   exists(/databases/$(database)/documents/admins/$(request.auth.uid));

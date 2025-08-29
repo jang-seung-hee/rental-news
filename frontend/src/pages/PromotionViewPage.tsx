@@ -39,11 +39,31 @@ const PromotionViewPage: React.FC = () => {
         if (viewRecordedRef.current !== result.data.id) {
           viewRecordedRef.current = result.data.id;
           
-          // 프로모션 조회 기록 (비동기적으로 처리하여 페이지 로딩에 영향 없음)
-          recordPromotionView(result.data.id).catch(error => {
-            console.warn('프로모션 조회 기록 실패:', error);
-            // 조회 기록 실패는 사용자에게 알리지 않음 (백그라운드 처리)
+          console.log('🎯 조회수 기록 시작 - 프로모션 ID:', result.data.id);
+          console.log('🎯 현재 환경:', {
+            userAgent: navigator.userAgent,
+            isMobile: /Mobi|Android/i.test(navigator.userAgent),
+            isKakao: /KAKAOTALK/i.test(navigator.userAgent),
+            hostname: window.location.hostname,
+            protocol: window.location.protocol,
+            href: window.location.href
           });
+          
+          // 프로모션 조회 기록 (비동기적으로 처리하여 페이지 로딩에 영향 없음)
+          recordPromotionView(result.data.id)
+            .then(result => {
+              console.log('🎉 조회수 기록 성공:', result);
+            })
+            .catch(error => {
+              console.error('❌ 프로모션 조회 기록 실패:', error);
+              console.error('❌ 에러 상세:', {
+                message: error.message,
+                code: error.code,
+                stack: error.stack
+              });
+            });
+        } else {
+          console.log('🔄 이미 기록된 프로모션:', result.data.id);
         }
       } else {
         setError(result.error || '프로모션을 찾을 수 없습니다.');
