@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Alert, AlertDescription } from '../ui/alert';
 import RichTextEditor from '../common/RichTextEditor';
 import { Promotion, CreatePromotionRequest, UpdatePromotionRequest } from '../../types';
-import { createPromotion, updatePromotion, getPromotionsByMonth, getOtherProductsInfo, getPromotionCodesByMonth } from '../../services/promotionService';
+import { createPromotion, updatePromotion, getPromotionsByMonth, getOtherProductsInfo, getPromotionCodesByMonth, checkCodeDuplicate } from '../../services/promotionService';
 import { getCurrentMonth } from '../../utils/utils';
 
 // 폼 유효성 검사 스키마
@@ -62,6 +62,10 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
   // slug 중복 확인 관련 상태
   const [slugConflict, setSlugConflict] = useState<string | null>(null);
   const [isCheckingSlug, setIsCheckingSlug] = useState(false);
+  
+  // code 중복 확인 관련 상태
+  const [codeConflict, setCodeConflict] = useState<string | null>(null);
+  const [isCheckingCode, setIsCheckingCode] = useState(false);
 
   const {
     register,
@@ -93,9 +97,36 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
   const watchedContent = watch('content');
   const watchedMonth = watch('month');
+  const watchedCode = watch('code');
 
   // title 변경 시 자동 slug 생성 기능 제거
   // slug는 사용자가 수동으로 입력하거나 기존 프로모션 복사로만 설정 가능
+
+  // code 중복 확인 함수
+  const checkCodeConflictHandler = useCallback(async (code: string) => {
+    if (!code || code.trim() === '') {
+      setCodeConflict(null);
+      return;
+    }
+
+    setIsCheckingCode(true);
+    try {
+      const result = await checkCodeDuplicate(code, promotion?.id);
+      if (result.success) {
+        if (result.data) {
+          setCodeConflict(`"${code}"는 이미 사용 중인 프로모션 코드입니다.`);
+        } else {
+          setCodeConflict(null);
+        }
+      } else {
+        console.error('코드 중복 확인 실패:', result.error);
+      }
+    } catch (error) {
+      console.error('코드 중복 확인 실패:', error);
+    } finally {
+      setIsCheckingCode(false);
+    }
+  }, [promotion?.id]);
 
   // slug 중복 확인 함수
   const checkSlugConflict = useCallback(async (slug: string) => {
@@ -157,6 +188,17 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
     loadOtherProductInfo();
   }, [promotion]);
+
+  // code 변경 감지 및 중복 검사
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (watchedCode && watchedCode.trim() !== '') {
+        checkCodeConflictHandler(watchedCode);
+      }
+    }, 500); // 500ms 디바운스
+
+    return () => clearTimeout(timeoutId);
+  }, [watchedCode, checkCodeConflictHandler]);
 
   // 월별 프로모션 조회
   useEffect(() => {
@@ -488,14 +530,33 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="code">프로모션 코드 *</Label>
-                      <Input
-                        id="code"
-                        {...register('code')}
-                        placeholder="예: PROMO-2024-001"
-                        className={errors.code ? 'border-red-500' : ''}
-                      />
+                      <div className="relative">
+                        <Input
+                          id="code"
+                          {...register('code')}
+                          placeholder="예: PROMO-2024-001"
+                          className={`${errors.code || codeConflict ? 'border-red-500' : ''} ${codeConflict ? 'pr-10' : ''}`}
+                        />
+                        {isCheckingCode && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          </div>
+                        )}
+                      </div>
                       {errors.code && (
                         <p className="text-sm text-red-500">{errors.code.message}</p>
+                      )}
+                      {codeConflict && (
+                        <p className="text-sm text-red-500 flex items-center gap-1">
+                          <span>⚠️</span>
+                          {codeConflict}
+                        </p>
+                      )}
+                      {!errors.code && !codeConflict && watchedCode && !isCheckingCode && (
+                        <p className="text-sm text-green-500 flex items-center gap-1">
+                          <span>✅</span>
+                          사용 가능한 프로모션 코드입니다.
+                        </p>
                       )}
                     </div>
 
@@ -802,8 +863,8 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isLoading}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  disabled={isLoading || !!codeConflict || !!slugConflict}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
                 >
                   {isLoading ? '처리 중...' : (promotion ? '수정' : '등록')}
                 </Button>

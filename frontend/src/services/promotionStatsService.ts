@@ -8,7 +8,8 @@ import {
   Timestamp,
   setDoc,
   arrayUnion,
-  increment
+  increment,
+  getDoc
 } from 'firebase/firestore';
 import { 
   getCollectionRef, 
@@ -98,6 +99,59 @@ const getUserAgent = (): string => {
   return navigator.userAgent || 'unknown';
 };
 
+// 기존 통계 데이터 마이그레이션 함수
+const migrateExistingStats = async (promotionId: string): Promise<void> => {
+  try {
+    const targetDocId = `stats_${promotionId}`;
+    const targetDocRef = getDocumentRef(STATS_COLLECTION_NAME, targetDocId);
+    
+    // 이미 새 형식의 문서가 있는지 확인
+    const targetDoc = await getDoc(targetDocRef);
+    if (targetDoc.exists()) {
+      // 이미 마이그레이션 완료
+      return;
+    }
+    
+    // 기존 문서들 중에서 해당 promotionId를 가진 문서 찾기
+    const q = query(
+      getCollectionRef(STATS_COLLECTION_NAME),
+      where('promotionId', '==', promotionId)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      // 기존 데이터를 새 문서로 복사
+      const existingDoc = querySnapshot.docs[0];
+      const existingData = existingDoc.data();
+      
+      console.log('📦 기존 통계 데이터 마이그레이션:', {
+        promotionId,
+        기존_데이터: {
+          totalViews: existingData.totalViews,
+          uniqueIPCount: existingData.uniqueIPs?.length || 0
+        }
+      });
+      
+      // 새 문서 형식으로 데이터 복사
+      await setDoc(targetDocRef, {
+        promotionId: existingData.promotionId,
+        totalViews: existingData.totalViews || 0,
+        uniqueIPs: existingData.uniqueIPs || [],
+        viewHistory: existingData.viewHistory || [],
+        createdAt: existingData.createdAt || Timestamp.now(),
+        lastUpdated: existingData.lastUpdated || Timestamp.now(),
+        updatedAt: Timestamp.now()
+      });
+      
+      console.log('✅ 통계 데이터 마이그레이션 완료');
+    }
+  } catch (error) {
+    console.warn('⚠️ 기존 통계 데이터 마이그레이션 실패:', error);
+    // 마이그레이션 실패해도 새 기록은 계속 진행
+  }
+};
+
 // 프로모션 조회 기록
 export const recordPromotionView = async (
   promotionId: string
@@ -134,6 +188,9 @@ export const recordPromotionView = async (
       ...(referrer && { referrer })
     };
 
+    // 기존 데이터가 있는지 확인하고 마이그레이션
+    await migrateExistingStats(promotionId);
+
     // 고정된 문서 ID 사용 (promotionId 기반)
     const docId = `stats_${promotionId}`;
     const docRef = getDocumentRef(STATS_COLLECTION_NAME, docId);
@@ -148,8 +205,8 @@ export const recordPromotionView = async (
       updatedAt: Timestamp.now(),
       // 문서가 없을 때만 설정될 기본값들
       ...(newViewRecord.ip && { 
-        createdAt: viewedAt,
-        uniqueIPCount: 1  // 첫 생성시에만 설정
+        createdAt: viewedAt
+        // uniqueIPCount 제거 - 항상 uniqueIPs.length로 계산
       })
     } as any, { merge: true });
     

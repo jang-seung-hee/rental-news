@@ -31,7 +31,7 @@ import {
   CrudResult 
 } from '../types';
 import { generateSlug, ensureUniqueSlug } from '../utils/utils';
-import { deletePromotionStats } from './promotionStatsService';
+
 
 const COLLECTION_NAME = 'promotions';
 
@@ -46,6 +46,36 @@ const removeUndefined = (obj: any): any => {
   return cleaned;
 };
 
+// 프로모션 code 중복 검사
+export const checkCodeDuplicate = async (
+  code: string,
+  excludePromotionId?: string
+): Promise<CrudResult<boolean>> => {
+  try {
+    const q = query(
+      getCollectionRef(COLLECTION_NAME),
+      where('code', '==', code)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    // 수정 시에는 현재 프로모션은 제외
+    const duplicates = querySnapshot.docs.filter(doc => 
+      !excludePromotionId || doc.id !== excludePromotionId
+    );
+    
+    return {
+      success: true,
+      data: duplicates.length > 0
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+};
+
 // 프로모션 생성
 export const createPromotion = async (
   data: CreatePromotionRequest
@@ -56,6 +86,22 @@ export const createPromotion = async (
       return {
         success: false,
         error: 'URL 슬러그는 필수입니다.'
+      };
+    }
+
+    // code 중복 검사
+    const codeCheck = await checkCodeDuplicate(data.code);
+    if (!codeCheck.success) {
+      return {
+        success: false,
+        error: `프로모션 코드 중복 검사 실패: ${codeCheck.error}`
+      };
+    }
+    
+    if (codeCheck.data) {
+      return {
+        success: false,
+        error: `프로모션 코드 "${data.code}"가 이미 존재합니다. 다른 코드를 사용해주세요.`
       };
     }
 
@@ -287,8 +333,27 @@ export const updatePromotion = async (
       };
     }
 
-    // 기존 이미지 URL 가져오기
+    // 기존 데이터 가져오기
     const existingData = docSnap.data() as Promotion;
+    
+    // code 변경 시 중복 검사
+    if (data.code && data.code !== existingData.code) {
+      const codeCheck = await checkCodeDuplicate(data.code, id);
+      if (!codeCheck.success) {
+        return {
+          success: false,
+          error: `프로모션 코드 중복 검사 실패: ${codeCheck.error}`
+        };
+      }
+      
+      if (codeCheck.data) {
+        return {
+          success: false,
+          error: `프로모션 코드 "${data.code}"가 이미 존재합니다. 다른 코드를 사용해주세요.`
+        };
+      }
+    }
+    
     let imageUrl = data.imageUrl || existingData.imageUrl;
 
     // 새 이미지가 업로드된 경우
@@ -482,6 +547,7 @@ export const deletePromotion = async (id: string): Promise<CrudResult<void>> => 
 
     // 관련 통계 데이터 삭제
     try {
+      const { deletePromotionStats } = await import('./promotionStatsService');
       await deletePromotionStats(id);
     } catch (error) {
       console.warn('프로모션 통계 삭제 실패:', error);
