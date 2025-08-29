@@ -17,14 +17,12 @@ interface PromotionSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   selectedProductCode: string | null;
-  disableHistory?: boolean;
 }
 
 const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
   isOpen,
   onClose,
-  selectedProductCode,
-  disableHistory = false
+  selectedProductCode
 }) => {
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
   const [isLoadingSelectedPromotion, setIsLoadingSelectedPromotion] = useState(false);
@@ -59,7 +57,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
 
   // 모바일 뒤로가기 버튼 처리
   useEffect(() => {
-    if (isOpen && !disableHistory) {
+    if (isOpen) {
       // 사이드바가 열릴 때 history에 상태 추가
       const handlePopState = (event: PopStateEvent) => {
         // 뒤로가기 버튼이 눌렸을 때 사이드바가 열려있으면 닫기
@@ -81,7 +79,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
         window.removeEventListener('popstate', handlePopState);
       };
     }
-  }, [isOpen, handleCloseSidebar, disableHistory]);
+  }, [isOpen, handleCloseSidebar]);
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>

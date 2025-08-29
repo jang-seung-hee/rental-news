@@ -26,6 +26,16 @@ import {
 
 const STATS_COLLECTION_NAME = 'promotionStats';
 
+// 카카오 인앱 브라우저 감지
+const isKakaoInApp = (): boolean => {
+  try {
+    const ua = navigator.userAgent || '';
+    return /KAKAOTALK|KAKAOBROWSER/i.test(ua);
+  } catch {
+    return false;
+  }
+};
+
 // 클라이언트 IP 가져오기 함수
 const getClientIP = async (): Promise<string> => {
   try {
@@ -34,61 +44,40 @@ const getClientIP = async (): Promise<string> => {
                          window.location.hostname === 'localhost' ||
                          window.location.hostname === '127.0.0.1';
     
-    // 카카오톡 인앱 브라우저 체크
-    const isKakaoInApp = typeof navigator !== 'undefined' && /KAKAOTALK/i.test(navigator.userAgent);
-    
     if (isDevelopment) {
       // 개발 환경에서는 고정 IP 사용 (같은 세션에서는 동일한 IP)
       return '127.0.0.1'; // 개발용 고정 IP
     }
     
-    if (isKakaoInApp) {
-      // 카카오톡에서는 외부 API 호출 없이 바로 대체 ID 생성
-      const userAgent = navigator.userAgent || '';
-      const timestamp = Date.now();
-      const fallbackId = btoa(`kakao-${userAgent.substring(0, 15)}-${timestamp}`).substring(0, 12);
-      console.log('카카오톡 인앱: 외부 IP API 건너뛰고 대체 ID 사용');
-      return `kakao-${fallbackId}`;
+    // 카카오 인앱 브라우저에서는 외부 IP 조회가 차단/지연될 수 있으므로 즉시 폴백
+    if (isKakaoInApp()) {
+      return '0.0.0.0';
     }
     
     // 프로덕션 환경에서는 실제 IP 가져오기 (타임아웃 적용)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3초 타임아웃
-    
+    const timeoutId = setTimeout(() => controller.abort(), 1500);
     try {
-      const response = await fetch('https://api.ipify.org?format=json', {
-        signal: controller.signal,
-        cache: 'no-cache'
-      });
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
+      const response = await fetch('https://api.ipify.org?format=json', { signal: controller.signal });
       const data = await response.json();
-      return data.ip || 'unknown';
-    } catch (fetchError) {
+      return data.ip || 'localhost';
+    } finally {
       clearTimeout(timeoutId);
-      console.warn('외부 IP API 호출 실패:', fetchError);
-      
-      // IP 가져오기 실패 시 대체 IP 생성 (카카오톡 등에서 차단될 수 있음)
-      // 브라우저 정보와 타임스탬프를 기반으로 고유 식별자 생성
-      const userAgent = navigator.userAgent || '';
-      const timestamp = Date.now();
-      const fallbackId = btoa(`${userAgent.substring(0, 20)}-${timestamp}`).substring(0, 12);
-      return `fallback-${fallbackId}`;
     }
   } catch (error) {
     console.warn('IP 주소를 가져올 수 없습니다:', error);
-    // 완전한 실패 시 기본 IP 반환
-    return 'unknown';
+    // 개발 환경에서는 고정 IP 반환, 프로덕션에서는 로컬 표시
+    return process.env.NODE_ENV === 'development' ? '127.0.0.1' : '0.0.0.0';
   }
 };
 
 // User-Agent 정보 가져오기
 const getUserAgent = (): string => {
-  return navigator.userAgent || 'unknown';
+  try {
+    return navigator.userAgent || 'unknown';
+  } catch {
+    return 'unknown';
+  }
 };
 
 // 프로모션 조회 기록
@@ -98,15 +87,15 @@ export const recordPromotionView = async (
   try {
     console.log('🔥 프로모션 조회 기록 시작:', promotionId);
     
-    // IP 가져오기를 Promise.race로 더 안전하게 처리
-    const ipPromise = getClientIP();
-    const timeoutPromise = new Promise<string>((resolve) => {
-      setTimeout(() => resolve('timeout-fallback'), 5000); // 5초 후 fallback
-    });
+    // 인앱에서의 네트워크 제약 회피: 통계 수집 최소화 처리 (필요 시 서버 사이드 수집으로 대체)
+    if (isKakaoInApp()) {
+      console.log('🟡 카카오 인앱 브라우저 감지: 통계 수집 스킵');
+      return { success: true };
+    }
     
-    const clientIP = await Promise.race([ipPromise, timeoutPromise]);
+    const clientIP = await getClientIP();
     const userAgent = getUserAgent();
-    const referrer = document.referrer || undefined;
+    const referrer = typeof document !== 'undefined' && document.referrer ? document.referrer : undefined;
     const viewedAt = Timestamp.now();
     
     console.log('📊 조회 데이터:', {
@@ -163,7 +152,7 @@ export const recordPromotionView = async (
           viewedAt,
           referrer
         };
-
+        
         // 고유 IP 목록 업데이트
         const updatedUniqueIPs = existingStats.uniqueIPs.includes(clientIP) 
           ? existingStats.uniqueIPs 
@@ -479,3 +468,15 @@ export const getDashboardStats = async (): Promise<CrudResult<{
     };
   }
 };
+
+
+export default {
+  recordPromotionView,
+  getPromotionStats,
+  getPromotionStatsSummary,
+  deletePromotionStats,
+  getTopViewedPromotions,
+  getTopUserPromotions,
+  getDashboardStats
+};
+ 

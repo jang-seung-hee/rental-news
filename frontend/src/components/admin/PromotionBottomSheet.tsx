@@ -13,14 +13,12 @@ interface PromotionBottomSheetProps {
   isOpen: boolean;
   onClose: () => void;
   selectedMenu: string | null;
-  disableHistory?: boolean;
 }
 
 const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
   isOpen,
   onClose,
-  selectedMenu,
-  disableHistory = false
+  selectedMenu
 }) => {
   const menuItems = [
     { id: 'application', title: '신청방법?' },
@@ -113,7 +111,7 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
 
   // 모바일 뒤로가기 버튼 처리
   useEffect(() => {
-    if (isOpen && !disableHistory) {
+    if (isOpen) {
       // 바텀시트가 열릴 때 history에 상태 추가
       const handlePopState = (event: PopStateEvent) => {
         // 뒤로가기 버튼이 눌렸을 때 바텀시트가 열려있으면 닫기
@@ -135,7 +133,7 @@ const PromotionBottomSheet: React.FC<PromotionBottomSheetProps> = ({
         window.removeEventListener('popstate', handlePopState);
       };
     }
-  }, [isOpen, handleCloseBottomSheet, disableHistory]);
+  }, [isOpen, handleCloseBottomSheet]);
 
   const getMenuTitle = (menuId: string) => {
     const menu = menuItems.find(item => item.id === menuId);

@@ -12,14 +12,11 @@ import '../utils/promotionViewLightMode.css';
 const PromotionViewPage: React.FC = () => {
   const { identifier } = useParams<{ identifier: string }>();
   const [searchParams] = useSearchParams();
-  const debug = searchParams.get('debug') === '1';
-  const disableStats = searchParams.get('disableStats') === '1';
   const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [systemSettings, setSystemSettings] = useState<any>(null);
   const viewRecordedRef = useRef<string | null>(null); // 조회 기록 중복 방지
-  const isKakaoInApp = typeof navigator !== 'undefined' && /KAKAOTALK/i.test(navigator.userAgent);
 
   // 프로모션 데이터 로드 (slug 또는 ID 기반)
   const loadPromotion = useCallback(async () => {
@@ -42,27 +39,11 @@ const PromotionViewPage: React.FC = () => {
         if (viewRecordedRef.current !== result.data.id) {
           viewRecordedRef.current = result.data.id;
           
-          // 카카오톡에서는 통계 수집을 완전히 건너뛰어 성능 우선
-          if (isKakaoInApp) {
-            if (debug) console.log('[kakao] 통계 수집 건너뛰기 - 성능 우선');
-            return; // 카카오톡에서는 아예 통계 수집 안 함
-          }
-          
-          // 일반 브라우저에서만 통계 수집
-          if (!disableStats) {
-            const promotionId = result.data.id;
-            const scheduleRecord = () => {
-              if (debug) console.log('[stats] recordPromotionView start');
-              recordPromotionView(promotionId).then(() => {
-                if (debug) console.log('[stats] recordPromotionView done');
-              }).catch(error => {
-                console.warn('프로모션 조회 기록 실패 (백그라운드 처리):', error);
-              });
-            };
-            
-            // 일반 브라우저에서는 즉시 실행
-            setTimeout(scheduleRecord, 100); // 최소 지연만 적용
-          }
+          // 프로모션 조회 기록 (비동기적으로 처리하여 페이지 로딩에 영향 없음)
+          recordPromotionView(result.data.id).catch((error: unknown) => {
+            console.warn('프로모션 조회 기록 실패:', error);
+            // 조회 기록 실패는 사용자에게 알리지 않음 (백그라운드 처리)
+          });
         }
       } else {
         setError(result.error || '프로모션을 찾을 수 없습니다.');
@@ -72,28 +53,17 @@ const PromotionViewPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [identifier, isKakaoInApp, debug, disableStats]);
+  }, [identifier]);
 
   // 시스템 설정 로드
   const loadSystemSettings = useCallback(async () => {
-    // 카카오톡에서는 시스템 설정 로드도 건너뛰기
-    if (isKakaoInApp) {
-      if (debug) console.log('[kakao] 시스템 설정 로드 건너뛰기');
-      setSystemSettings({
-        siteName: '렌탈톡톡',
-        defaultTitle: '렌탈톡톡 월간 소식',
-        defaultDescription: '최신 렌탈 정보와 프로모션을 확인하세요'
-      });
-      return;
-    }
-    
     try {
       const settings = await getSystemSettings();
       setSystemSettings(settings);
     } catch (err) {
       console.error('시스템 설정을 불러올 수 없습니다:', err);
     }
-  }, [isKakaoInApp, debug]);
+  }, []);
 
   // 초기 로드
   useEffect(() => {
@@ -103,8 +73,7 @@ const PromotionViewPage: React.FC = () => {
 
   // 메타태그 직접 설정 (React Helmet 보완용)
   useEffect(() => {
-    // 카카오 인앱에서는 head 조작을 최소화 (안정성 우선)
-    if (promotion && systemSettings && !isKakaoInApp) {
+    if (promotion && systemSettings) {
       const title = systemSettings?.defaultTitle || `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
       const description = systemSettings?.defaultDescription || promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
       
@@ -150,7 +119,7 @@ const PromotionViewPage: React.FC = () => {
         console.log('✅ 파비콘 설정 완료');
       }
     }
-  }, [promotion, systemSettings, isKakaoInApp]);
+  }, [promotion, systemSettings]);
 
   // 메타태그 생성
   const generateMetaTags = () => {
@@ -239,14 +208,9 @@ const PromotionViewPage: React.FC = () => {
 
   return (
     <>
-      {!isKakaoInApp && generateMetaTags()}
-      <div className={`promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 promotion-view-bg ${isKakaoInApp ? 'kakaotalk-safe' : ''}`}>
-        <CustomTag 
-          promotion={promotion} 
-          hideElements={hideElements} 
-          systemSettings={systemSettings}
-          disableHistory={isKakaoInApp}
-        />
+      {generateMetaTags()}
+      <div className="promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 promotion-view-bg">
+        <CustomTag promotion={promotion} hideElements={hideElements} systemSettings={systemSettings} />
       </div>
     </>
   );
