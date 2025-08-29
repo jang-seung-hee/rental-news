@@ -68,10 +68,12 @@ const isKakaoInApp = (): boolean => {
 // 클라이언트 IP 가져오기 함수
 const getClientIP = async (): Promise<string> => {
   try {
-    // 개발 환경 체크
+    // 개발 환경 체크 (디버깅용으로 netlify도 포함)
     const isDevelopment = process.env.NODE_ENV === 'development' || 
                          window.location.hostname === 'localhost' ||
-                         window.location.hostname === '127.0.0.1';
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname.includes('.netlify.app') ||
+                         window.location.hostname.includes('.ngrok');
     
     if (isDevelopment) {
       // 개발 환경에서는 고정 IP 사용 (같은 세션에서는 동일한 IP)
