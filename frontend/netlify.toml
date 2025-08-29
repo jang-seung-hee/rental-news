@@ -3,11 +3,6 @@
   command = "npm install --legacy-peer-deps && npm run build"
   publish = "build"
 
-# 카카오톡 인앱 브라우저 호환성 설정
-[build.environment]
-  # Node.js 버전 고정 (호환성)
-  NODE_VERSION = "18"
-
 # Edge Functions: 모든 경로에 대해 크롤러 접근 시 시스템 설정 기반 OG 메타 반환
 [[edge_functions]]
   path = "/view/*"

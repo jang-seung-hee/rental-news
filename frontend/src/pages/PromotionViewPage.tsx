@@ -9,6 +9,18 @@ import CustomTag from '../components/admin/CustomTag';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import '../utils/promotionViewLightMode.css';
 
+// 카카오 인앱 및 WebView 감지
+const isInAppWebView = (): boolean => {
+  try {
+    const ua = navigator.userAgent || '';
+    const kakao = /KAKAOTALK|KAKAOBROWSER|KakaoTalk|kakao/i.test(ua);
+    const webview = /wv\)|WebView/i.test(ua) || ((window as any).chrome === undefined && typeof (window as any).orientation !== 'undefined');
+    return kakao || webview;
+  } catch {
+    return false;
+  }
+};
+
 const PromotionViewPage: React.FC = () => {
   const { identifier } = useParams<{ identifier: string }>();
   const [searchParams] = useSearchParams();
@@ -78,6 +90,8 @@ const PromotionViewPage: React.FC = () => {
   // 메타태그 직접 설정 (React Helmet 보완용)
   useEffect(() => {
     if (promotion && systemSettings) {
+      // 인앱(WebView)에서는 헤드/파비콘 직접 조작을 생략해 안정성 확보
+      if (isInAppWebView()) return;
       const title = systemSettings?.defaultTitle || `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
       const description = systemSettings?.defaultDescription || promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
       
