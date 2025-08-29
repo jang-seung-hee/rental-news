@@ -95,7 +95,7 @@ export const recordPromotionView = async (
           ip: clientIP,
           userAgent,
           viewedAt,
-          referrer
+          ...(referrer && { referrer }) // referrer가 있을 때만 포함
         }],
         lastUpdated: viewedAt
       };
@@ -119,7 +119,7 @@ export const recordPromotionView = async (
           ip: clientIP,
           userAgent,
           viewedAt,
-          referrer
+          ...(referrer && { referrer }) // referrer가 있을 때만 포함
         };
 
         // 고유 IP 목록 업데이트
