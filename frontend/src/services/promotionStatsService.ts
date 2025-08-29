@@ -238,10 +238,13 @@ export const getPromotionStatsSummary = async (
       
       querySnapshot.forEach((doc) => {
         const stats = doc.data() as PromotionViewStats;
+        // uniqueIPs 배열의 길이로 실제 고유 IP 수 계산
+        const actualUniqueIPCount = stats.uniqueIPs ? stats.uniqueIPs.length : 0;
+        
         statsSummary[stats.promotionId] = {
           promotionId: stats.promotionId,
           totalViews: stats.totalViews,
-          uniqueIPCount: stats.uniqueIPCount
+          uniqueIPCount: actualUniqueIPCount
         };
       });
     }
@@ -312,10 +315,13 @@ export const getTopViewedPromotions = async (
 
     querySnapshot.forEach((doc) => {
       const stats = doc.data() as PromotionViewStats;
+      // uniqueIPs 배열의 길이로 실제 고유 IP 수 계산
+      const actualUniqueIPCount = stats.uniqueIPs ? stats.uniqueIPs.length : 0;
+      
       topPromotions.push({
         promotionId: stats.promotionId,
         totalViews: stats.totalViews,
-        uniqueIPCount: stats.uniqueIPCount
+        uniqueIPCount: actualUniqueIPCount
       });
     });
 
@@ -347,10 +353,13 @@ export const getTopUserPromotions = async (
 
     querySnapshot.forEach((doc) => {
       const stats = doc.data() as PromotionViewStats;
+      // uniqueIPs 배열의 길이로 실제 고유 IP 수 계산
+      const actualUniqueIPCount = stats.uniqueIPs ? stats.uniqueIPs.length : 0;
+      
       topPromotions.push({
         promotionId: stats.promotionId,
         totalViews: stats.totalViews,
-        uniqueIPCount: stats.uniqueIPCount
+        uniqueIPCount: actualUniqueIPCount
       });
     });
 
