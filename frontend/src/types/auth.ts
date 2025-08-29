@@ -3,6 +3,7 @@ import { Timestamp } from 'firebase/firestore';
 
 // 관리자 사용자 정보 타입
 export interface AdminUser {
+  id?: string; // Firestore 문서 ID
   uid: string;
   email: string;
   role: 'admin';

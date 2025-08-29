@@ -3,11 +3,13 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
+import { useConfirm } from '../hooks/useConfirm';
 import PromotionTable from '../components/admin/PromotionTable';
 
-import { Promotion, PromotionFilter, PromotionSort } from '../types';
-import { getPromotions, deletePromotion } from '../services/promotionService';
-import { getCurrentMonth } from '../utils/utils';
+import { Promotion, PromotionFilter, PromotionSort, PromotionStatsSummary } from '../types';
+import { getPromotions } from '../services/promotionService';
+import { getPromotionStats } from '../services/promotionStatsService';
+
 
 interface PromotionListProps {
   onEdit: (promotion: Promotion) => void;
@@ -21,15 +23,72 @@ const PromotionList: React.FC<PromotionListProps> = ({
   onAdd
 }) => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [promotionStats, setPromotionStats] = useState<{ [promotionId: string]: PromotionStatsSummary }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<PromotionFilter>({ month: getCurrentMonth() });
+  const [filter, setFilter] = useState<PromotionFilter>({});
   const [sort, setSort] = useState<PromotionSort>({ field: 'createdAt', direction: 'desc' });
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [isPersistEnabled, setIsPersistEnabled] = useState(false);
   const lastDocRef = useRef<any>(null);
+  const { confirm, ConfirmComponent } = useConfirm();
 
   const pageSize = 10;
+
+  // 로컬스토리지 키
+  const STORAGE_KEY = 'promotion-list-filters';
+  const PERSIST_KEY = 'promotion-list-persist-enabled';
+
+  // 검색 조건을 로컬스토리지에 저장
+  const saveFiltersToStorage = useCallback(() => {
+    const filtersToSave = {
+      searchTerm,
+      filter,
+      sort
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtersToSave));
+  }, [searchTerm, filter, sort]);
+
+  // 로컬스토리지에서 검색 조건 불러오기
+  const loadFiltersFromStorage = useCallback(() => {
+    try {
+      const savedFilters = localStorage.getItem(STORAGE_KEY);
+      if (savedFilters) {
+        const parsed = JSON.parse(savedFilters);
+        setSearchTerm(parsed.searchTerm || '');
+        setFilter(parsed.filter || {});
+        setSort(parsed.sort || { field: 'createdAt', direction: 'desc' });
+      }
+    } catch (error) {
+      console.error('Failed to load filters from storage:', error);
+    }
+  }, []);
+
+  // 기본값으로 초기화
+  const resetToDefault = useCallback(() => {
+    setSearchTerm('');
+    setFilter({});
+    setSort({ field: 'createdAt', direction: 'desc' });
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  // 컴포넌트 마운트 시 저장된 설정 확인 및 복원
+  useEffect(() => {
+    const persistEnabled = localStorage.getItem(PERSIST_KEY) === 'true';
+    setIsPersistEnabled(persistEnabled);
+    
+    if (persistEnabled) {
+      loadFiltersFromStorage();
+    }
+  }, [loadFiltersFromStorage]);
+
+  // 검색 조건이 변경될 때마다 저장 (고정이 활성화된 경우)
+  useEffect(() => {
+    if (isPersistEnabled) {
+      saveFiltersToStorage();
+    }
+  }, [isPersistEnabled, saveFiltersToStorage]);
 
   // 프로모션 목록 조회
   const loadPromotions = useCallback(async (reset = false) => {
@@ -40,13 +99,21 @@ const PromotionList: React.FC<PromotionListProps> = ({
       const result = await getPromotions(filter, sort, pageSize, reset ? null : lastDocRef.current);
       
       if (result.success && result.data) {
+        const newPromotions = result.data.promotions;
+        
         if (reset) {
-          setPromotions(result.data.promotions);
+          setPromotions(newPromotions);
         } else {
-          setPromotions(prev => [...prev, ...result.data!.promotions]);
+          setPromotions(prev => [...prev, ...newPromotions]);
         }
         setHasNextPage(result.data.hasNextPage);
         lastDocRef.current = result.data.lastDoc;
+        
+        // 프로모션 통계 로드
+        if (newPromotions.length > 0) {
+          const promotionIds = newPromotions.map(p => p.id);
+          loadPromotionStats(promotionIds, reset);
+        }
       } else {
         setError(result.error || '프로모션 목록을 불러올 수 없습니다.');
       }
@@ -56,6 +123,42 @@ const PromotionList: React.FC<PromotionListProps> = ({
       setIsLoading(false);
     }
   }, [filter, sort, pageSize]);
+
+  // 프로모션 통계 로드 (개별 조회로 변경하여 팝업과 통일)
+  const loadPromotionStats = useCallback(async (promotionIds: string[], reset = false) => {
+    try {
+      const newStats: { [promotionId: string]: PromotionStatsSummary } = {};
+      
+      // 각 프로모션별로 개별 조회 (팝업과 동일한 함수 사용)
+      for (const promotionId of promotionIds) {
+        const result = await getPromotionStats(promotionId);
+        
+        if (result.success && result.data) {
+          newStats[promotionId] = {
+            promotionId: result.data.promotionId,
+            totalViews: result.data.totalViews,
+            uniqueIPCount: result.data.uniqueIPCount
+          };
+        } else {
+          // 통계가 없는 프로모션에 대해 기본값 설정
+          newStats[promotionId] = {
+            promotionId,
+            totalViews: 0,
+            uniqueIPCount: 0
+          };
+        }
+      }
+      
+      if (reset) {
+        setPromotionStats(newStats);
+      } else {
+        setPromotionStats(prev => ({ ...prev, ...newStats }));
+      }
+    } catch (error) {
+      console.warn('프로모션 통계 로드 실패:', error);
+      // 통계 로드 실패는 사용자에게 알리지 않음 (선택적 기능)
+    }
+  }, []);
 
   // 초기 로드
   useEffect(() => {
@@ -88,7 +191,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   };
 
   // 정렬 처리
-  const handleSort = (field: 'createdAt' | 'updatedAt' | 'title' | 'month') => {
+  const handleSort = (field: 'createdAt' | 'updatedAt' | 'title' | 'month' | 'code') => {
     const newSort: PromotionSort = {
       field,
       direction: sort.field === field && sort.direction === 'asc' ? 'desc' : 'asc'
@@ -96,24 +199,26 @@ const PromotionList: React.FC<PromotionListProps> = ({
     setSort(newSort);
   };
 
-  // 삭제 처리
-  const handleDelete = async (promotionId: string) => {
-    if (!window.confirm('정말로 이 프로모션을 삭제하시겠습니까?')) {
-      return;
-    }
 
-    try {
-      await deletePromotion(promotionId);
-      setPromotions(prev => prev.filter(p => p.id !== promotionId));
-    } catch (err) {
-      setError('프로모션 삭제에 실패했습니다.');
-    }
-  };
 
   // 더 보기
   const handleLoadMore = () => {
     if (hasNextPage && !isLoading) {
       loadPromotions(false);
+    }
+  };
+
+  // 검색 조건 고정 토글
+  const handlePersistToggle = (enabled: boolean) => {
+    setIsPersistEnabled(enabled);
+    localStorage.setItem(PERSIST_KEY, enabled.toString());
+    
+    if (enabled) {
+      // 고정 활성화 시 현재 조건 저장
+      saveFiltersToStorage();
+    } else {
+      // 고정 비활성화 시 기본값으로 초기화
+      resetToDefault();
     }
   };
 
@@ -151,8 +256,20 @@ const PromotionList: React.FC<PromotionListProps> = ({
 
       {/* 검색 및 필터 */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>검색 및 필터</CardTitle>
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="persistFilters"
+              checked={isPersistEnabled}
+              onChange={(e) => handlePersistToggle(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="persistFilters" className="text-sm font-medium text-gray-700 cursor-pointer">
+              검색 조건 고정
+            </label>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -212,6 +329,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
                 <option value="createdAt-asc">오래된순</option>
                 <option value="title-asc">제목순</option>
                 <option value="month-desc">월순</option>
+                <option value="code-asc">코드순</option>
               </select>
             </div>
           </div>
@@ -228,8 +346,8 @@ const PromotionList: React.FC<PromotionListProps> = ({
       {/* 프로모션 테이블 */}
       <PromotionTable
         promotions={promotions}
+        promotionStats={promotionStats}
         onEdit={onEdit}
-        onDelete={handleDelete}
         onView={onView}
         isLoading={isLoading}
         onPromotionUpdate={() => loadPromotions(true)}
@@ -248,6 +366,9 @@ const PromotionList: React.FC<PromotionListProps> = ({
           </Button>
         </div>
       )}
+
+      {/* 커스텀 확인창 */}
+      <ConfirmComponent />
     </div>
   );
 };

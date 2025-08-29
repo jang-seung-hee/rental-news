@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Promotion } from '../types';
 import { getPromotionBySlugOrId } from '../services/promotionService';
 import { getSystemSettings } from '../services/systemSettingsService';
+import { recordPromotionView } from '../services/promotionStatsService';
 import CustomTag from '../components/admin/CustomTag';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import '../utils/promotionViewLightMode.css';
@@ -15,6 +16,7 @@ const PromotionViewPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [systemSettings, setSystemSettings] = useState<any>(null);
+  const viewRecordedRef = useRef<string | null>(null); // 조회 기록 중복 방지
 
   // 프로모션 데이터 로드 (slug 또는 ID 기반)
   const loadPromotion = useCallback(async () => {
@@ -32,6 +34,17 @@ const PromotionViewPage: React.FC = () => {
       
       if (result.success && result.data) {
         setPromotion(result.data);
+        
+        // 중복 기록 방지: 같은 프로모션 ID에 대해 한 번만 기록
+        if (viewRecordedRef.current !== result.data.id) {
+          viewRecordedRef.current = result.data.id;
+          
+          // 프로모션 조회 기록 (비동기적으로 처리하여 페이지 로딩에 영향 없음)
+          recordPromotionView(result.data.id).catch(error => {
+            console.warn('프로모션 조회 기록 실패:', error);
+            // 조회 기록 실패는 사용자에게 알리지 않음 (백그라운드 처리)
+          });
+        }
       } else {
         setError(result.error || '프로모션을 찾을 수 없습니다.');
       }

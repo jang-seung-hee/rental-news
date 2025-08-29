@@ -31,6 +31,7 @@ import {
   CrudResult 
 } from '../types';
 import { generateSlug, ensureUniqueSlug } from '../utils/utils';
+import { deletePromotionStats } from './promotionStatsService';
 
 const COLLECTION_NAME = 'promotions';
 
@@ -129,12 +130,10 @@ export const getPromotions = async (
       }
     }
 
-    // 정렬 적용 (isActive 필터가 있을 때는 정렬 제외)
-    if (!filter?.isActive) {
-      const sortField = sort?.field || 'createdAt';
-      const sortDirection = sort?.direction || 'desc';
-      q = query(q, orderBy(sortField, sortDirection));
-    }
+    // 정렬 적용 (서버 사이드 정렬)
+    const sortField = sort?.field || 'createdAt';
+    const sortDirection = sort?.direction || 'desc';
+    q = query(q, orderBy(sortField, sortDirection));
 
     // 페이지네이션 적용 (검색어가 있을 때는 더 많은 데이터를 가져옴)
     const limitSize = filter?.searchTerm ? 50 : pageSize;
@@ -166,6 +165,8 @@ export const getPromotions = async (
       );
     }
 
+
+
     // 검색어가 있을 때는 페이지네이션 비활성화
     const hasNextPage = filter?.searchTerm 
       ? false 
@@ -182,6 +183,12 @@ export const getPromotions = async (
       }
     };
   } catch (error) {
+    console.error('🔥 Firestore getPromotions error:', error);
+    console.error('🔥 Error message:', (error as any)?.message);
+    console.error('🔥 Error code:', (error as any)?.code);
+    if ((error as any)?.message?.includes('index')) {
+      console.error('🔗 Missing index detected! Check the error message for the creation link.');
+    }
     return {
       success: false,
       error: handleFirebaseError(error)
@@ -345,6 +352,41 @@ export const updatePromotion = async (
   }
 };
 
+// 프로모션 활성 상태 업데이트
+export const updatePromotionStatus = async (
+  id: string,
+  isActive: boolean
+): Promise<CrudResult<void>> => {
+  try {
+    const docRef = getDocumentRef(COLLECTION_NAME, id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return {
+        success: false,
+        error: '프로모션을 찾을 수 없습니다.'
+      };
+    }
+
+    // 업데이트 데이터 준비
+    const updateData = addUpdateTimestamp({
+      isActive
+    });
+
+    await updateDoc(docRef, updateData);
+
+    return {
+      success: true,
+      affectedCount: 1
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+};
+
 // 슬러그 업데이트
 export const updatePromotionSlug = async (
   id: string,
@@ -437,6 +479,14 @@ export const deletePromotion = async (id: string): Promise<CrudResult<void>> => 
     }
 
     await deleteDoc(docRef);
+
+    // 관련 통계 데이터 삭제
+    try {
+      await deletePromotionStats(id);
+    } catch (error) {
+      console.warn('프로모션 통계 삭제 실패:', error);
+      // 통계 삭제 실패는 무시하고 진행
+    }
 
     return {
       success: true,

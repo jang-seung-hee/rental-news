@@ -5,11 +5,15 @@ import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import PromotionForm from '../components/admin/PromotionForm';
 import { Promotion } from '../types';
-import { getPromotionById } from '../services/promotionService';
+import { getPromotionById, deletePromotion } from '../services/promotionService';
+import { useConfirm } from '../hooks/useConfirm';
+import { useToast } from '../hooks/use-toast';
 
 const PromotionEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { confirm, ConfirmComponent } = useConfirm();
+  const { toast } = useToast();
   
   const [promotion, setPromotion] = useState<Promotion | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +62,46 @@ const PromotionEdit: React.FC = () => {
     navigate('/promotions');
   };
 
+  // 삭제 처리
+  const handleDelete = async () => {
+    if (!promotion) return;
+
+    const confirmed = await confirm({
+      title: '프로모션 삭제',
+      message: `정말로 "${promotion.title}" 프로모션을 삭제하시겠습니까?\n삭제된 프로모션은 복구할 수 없습니다.`,
+      confirmText: '삭제',
+      cancelText: '취소'
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const result = await deletePromotion(promotion.id);
+      
+      if (result.success) {
+        toast({
+          title: "삭제 완료",
+          description: `"${promotion.title}" 프로모션이 삭제되었습니다.`,
+        });
+        navigate('/promotions');
+      } else {
+        toast({
+          title: "삭제 실패",
+          description: result.error || "프로모션 삭제에 실패했습니다.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "삭제 실패",
+        description: "프로모션 삭제 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -102,6 +146,13 @@ const PromotionEdit: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">프로모션 수정</h1>
           <p className="text-gray-600 mt-2">프로모션 정보를 수정하세요</p>
         </div>
+        <Button
+          onClick={handleDelete}
+          variant="outline"
+          className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+        >
+          프로모션 삭제
+        </Button>
       </div>
 
       <PromotionForm
@@ -109,6 +160,9 @@ const PromotionEdit: React.FC = () => {
         onSuccess={handleEditSuccess}
         onCancel={handleCancel}
       />
+
+      {/* 커스텀 확인창 */}
+      <ConfirmComponent />
     </div>
   );
 };

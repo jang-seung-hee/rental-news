@@ -479,7 +479,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               )}
 
               {/* 1. 프로모션 정보 섹션 */}
-              <div className="border border-gray-200 rounded-lg p-6 bg-blue-50">
+              <div className="border border-gray-200 rounded-lg p-6 bg-blue-100">
                 <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
                   <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">1</span>
                   프로모션 정보
@@ -603,44 +603,18 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                     </Label>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="shortUrl">단축 URL</Label>
-                    <Input
-                      id="shortUrl"
-                      {...register('shortUrl')}
-                      placeholder="https://example.com"
-                      className={errors.shortUrl ? 'border-red-500' : ''}
-                    />
-                    {errors.shortUrl && (
-                      <p className="text-sm text-red-500">{errors.shortUrl.message}</p>
-                    )}
-                    <p className="text-sm text-gray-500">
-                      프로모션의 단축 URL을 입력하세요. (선택사항)
-                    </p>
-                  </div>
+
                 </div>
               </div>
 
               {/* 2. 프로모션 콘텐츠 섹션 */}
-              <div className="border border-gray-200 rounded-lg p-6 bg-green-50">
+              <div className="border border-gray-200 rounded-lg p-6 bg-green-100">
                 <h3 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
                   <span className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">2</span>
                   프로모션 콘텐츠
                 </h3>
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="slug">URL 슬러그 미리보기</Label>
-                                          <Input
-                        id="slug-preview"
-                        value={watch('slug') || ''}
-                        disabled
-                        className="bg-gray-100"
-                        placeholder="수동 입력 또는 기존 프로모션 복사로 설정"
-                      />
-                    <p className="text-sm text-gray-500">
-                      이 슬러그는 프로모션 뷰 페이지의 URL에 사용됩니다. 수동으로 입력하거나 기존 프로모션 복사로 설정하세요.
-                    </p>
-                  </div>
+
 
                   <div className="space-y-2">
                     <Label htmlFor="greeting">인사말 *</Label>
@@ -648,7 +622,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                       id="greeting"
                       {...register('greeting')}
                       placeholder="고객에게 전할 인사말을 입력하세요"
-                      rows={3}
+                      style={{ height: '300px' }}
                       className={errors.greeting ? 'border-red-500' : ''}
                     />
                     {errors.greeting && (
@@ -678,7 +652,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                       id="closing"
                       {...register('closing')}
                       placeholder="프로모션 마무리 멘트를 입력하세요"
-                      rows={3}
+                      style={{ height: '300px' }}
                       className={errors.closing ? 'border-red-500' : ''}
                     />
                     {errors.closing && (
@@ -692,7 +666,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                       id="contact"
                       {...register('contact')}
                       placeholder="예: 02-1234-5678, 카톡: @company"
-                      rows={3}
+                      style={{ height: '200px' }}
                       className={errors.contact ? 'border-red-500' : ''}
                     />
                     {errors.contact && (
@@ -703,7 +677,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
               </div>
 
               {/* 3. 추가정보 섹션 */}
-              <div className="border border-gray-200 rounded-lg p-6 bg-purple-50">
+              <div className="border border-gray-200 rounded-lg p-6 bg-purple-100">
                 <h3 className="text-lg font-semibold text-purple-800 mb-4 flex items-center">
                   <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">3</span>
                   추가정보

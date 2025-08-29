@@ -5,7 +5,6 @@ import { Card, CardContent } from '../ui/card';
 import { 
   HomeIcon, 
   DocumentTextIcon, 
-  UsersIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
@@ -36,12 +35,7 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
       icon: DocumentTextIcon,
       description: '프로모션 목록 조회 및 관리'
     },
-    {
-      path: '/customers',
-      label: '고객 관리',
-      icon: UsersIcon,
-      description: '고객 정보 관리'
-    },
+
     {
       path: '/settings',
       label: '설정',

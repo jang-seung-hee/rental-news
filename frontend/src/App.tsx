@@ -10,7 +10,8 @@ import PromotionDetail from './pages/PromotionDetail';
 import PromotionNew from './pages/PromotionNew';
 import PromotionEdit from './pages/PromotionEdit';
 import PromotionViewPage from './pages/PromotionViewPage';
-import CustomerList from './pages/CustomerList';
+import PromotionStatsPage from './pages/PromotionStats';
+
 import SystemSettingsPage from './pages/SystemSettings';
 import NotFound from './pages/NotFound';
 
@@ -190,7 +191,8 @@ const AppContent: React.FC = () => {
               <Route path="/promotions/new" element={<PromotionNew />} />
               <Route path="/promotions/:id" element={<PromotionDetailWrapper />} />
               <Route path="/promotions/:id/edit" element={<PromotionEdit />} />
-              <Route path="/customers" element={<CustomerList />} />
+              <Route path="/promotions/stats" element={<PromotionStatsPage />} />
+
               <Route path="/settings" element={<SystemSettingsPage />} />
               <Route path="/404" element={<NotFound />} />
               <Route path="*" element={<Navigate to="/404" replace />} />

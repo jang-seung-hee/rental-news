@@ -7,10 +7,17 @@ import {
   PlusIcon, 
   ChartBarIcon,
   CalendarIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  EyeIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 import { getActivePromotions, getPromotions } from '../services/promotionService';
-import { Promotion } from '../types';
+import { 
+  getDashboardStats, 
+  getTopViewedPromotions, 
+  getTopUserPromotions 
+} from '../services/promotionStatsService';
+import { Promotion, PromotionStatsSummary } from '../types';
 import { StatsCardSkeleton, ListSkeleton } from '../components/common/SkeletonLoader';
 
 const Dashboard: React.FC = () => {
@@ -19,8 +26,17 @@ const Dashboard: React.FC = () => {
     activePromotions: 0,
     thisMonthPromotions: 0
   });
+  const [viewStats, setViewStats] = useState({
+    yesterday: { totalViews: 0, uniqueIPCount: 0 },
+    today: { totalViews: 0, uniqueIPCount: 0 },
+    thisMonth: { totalViews: 0, uniqueIPCount: 0 }
+  });
+  const [topViewedPromotion, setTopViewedPromotion] = useState<PromotionStatsSummary | null>(null);
+  const [topUserPromotion, setTopUserPromotion] = useState<PromotionStatsSummary | null>(null);
+  const [promotionTitles, setPromotionTitles] = useState<{ [id: string]: string }>({});
   const [recentPromotions, setRecentPromotions] = useState<Promotion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -46,20 +62,58 @@ const Dashboard: React.FC = () => {
           ? allPromotionsResult.data?.promotions.slice(0, 5) || []
           : [];
 
+        // 프로모션 제목 매핑 생성
+        const titles: { [id: string]: string } = {};
+        if (allPromotionsResult.success && allPromotionsResult.data?.promotions) {
+          allPromotionsResult.data.promotions.forEach(p => {
+            titles[p.id] = p.title;
+          });
+        }
+
         setStats({
           totalPromotions,
           activePromotions,
           thisMonthPromotions
         });
         setRecentPromotions(recent);
+        setPromotionTitles(titles);
       } catch (error) {
-        // 에러 발생 시 무시하고 진행
+        console.error('대시보드 데이터 로딩 실패:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
+    const loadViewStats = async () => {
+      try {
+        setIsStatsLoading(true);
+        
+        // 날짜별 전체 통계 조회
+        const dashboardStatsResult = await getDashboardStats();
+        if (dashboardStatsResult.success && dashboardStatsResult.data) {
+          setViewStats(dashboardStatsResult.data);
+        }
+
+        // 가장 열람 많은 프로모션 조회
+        const topViewedResult = await getTopViewedPromotions(1);
+        if (topViewedResult.success && topViewedResult.data && topViewedResult.data.length > 0) {
+          setTopViewedPromotion(topViewedResult.data[0]);
+        }
+
+        // 가장 이용자 많은 프로모션 조회
+        const topUserResult = await getTopUserPromotions(1);
+        if (topUserResult.success && topUserResult.data && topUserResult.data.length > 0) {
+          setTopUserPromotion(topUserResult.data[0]);
+        }
+      } catch (error) {
+        console.error('통계 데이터 로딩 실패:', error);
+      } finally {
+        setIsStatsLoading(false);
+      }
+    };
+
     loadDashboardData();
+    loadViewStats();
   }, []);
 
   const formatDate = (timestamp: any) => {
@@ -135,46 +189,177 @@ const Dashboard: React.FC = () => {
         </Button>
       </div>
 
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">전체 프로모션</CardTitle>
-            <DocumentTextIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPromotions}</div>
-            <p className="text-xs text-muted-foreground">
-              등록된 프로모션 총 개수
-            </p>
-          </CardContent>
-        </Card>
+      {/* 프로모션 조회 통계 */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-900">프로모션 조회 통계</h2>
+        
+        {/* 프로모션 관리 통계 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">전체 프로모션</CardTitle>
+              <DocumentTextIcon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalPromotions}</div>
+              <p className="text-xs text-muted-foreground">
+                등록된 프로모션 총 개수
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">활성 프로모션</CardTitle>
-            <ChartBarIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activePromotions}</div>
-            <p className="text-xs text-muted-foreground">
-              현재 활성화된 프로모션
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">활성 프로모션</CardTitle>
+              <ChartBarIcon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.activePromotions}</div>
+              <p className="text-xs text-muted-foreground">
+                현재 활성화된 프로모션
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">이번 달 프로모션</CardTitle>
-            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.thisMonthPromotions}</div>
-            <p className="text-xs text-muted-foreground">
-              이번 달 등록된 프로모션
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">이번 달 프로모션</CardTitle>
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.thisMonthPromotions}</div>
+              <p className="text-xs text-muted-foreground">
+                이번 달 등록된 프로모션
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* 일별 조회 통계 */}
+        <div className="pt-2">
+          <h3 className="text-lg font-medium text-gray-800 mb-3">일별 조회 현황</h3>
+          {isStatsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+              <StatsCardSkeleton />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* 어제 열람수 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">어제 열람수</CardTitle>
+                <EyeIcon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">
+                  {viewStats.yesterday.totalViews}건 / {viewStats.yesterday.uniqueIPCount}명
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  전일 프로모션 조회 현황
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* 오늘 열람수 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">오늘 열람수</CardTitle>
+                <EyeIcon className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  {viewStats.today.totalViews}건 / {viewStats.today.uniqueIPCount}명
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  오늘 프로모션 조회 현황
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* 이번달 합계 */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">이번달 합계</CardTitle>
+                <UsersIcon className="h-4 w-4 text-purple-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-purple-600">
+                  {viewStats.thisMonth.totalViews}건 / {viewStats.thisMonth.uniqueIPCount}명
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  이번달 누적 조회 현황
+                </p>
+              </CardContent>
+            </Card>
+            </div>
+          )}
+        </div>
+
+        {/* 인기 프로모션 정보 */}
+        <div className="pt-2">
+          <h3 className="text-lg font-medium text-gray-800 mb-3">인기 프로모션</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 가장 열람 많은 프로모션 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <ChartBarIcon className="h-4 w-4 mr-2 text-blue-600" />
+                가장 열람 많은 프로모션
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isStatsLoading ? (
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ) : topViewedPromotion ? (
+                <div>
+                  <div className="font-medium text-gray-900 truncate">
+                    {promotionTitles[topViewedPromotion.promotionId] || '제목 없음'}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {topViewedPromotion.totalViews}회 조회 / {topViewedPromotion.uniqueIPCount}명 이용
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-500">조회 데이터가 없습니다</div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 가장 이용자 많은 프로모션 */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center">
+                <UsersIcon className="h-4 w-4 mr-2 text-green-600" />
+                가장 이용자 많은 프로모션
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isStatsLoading ? (
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ) : topUserPromotion ? (
+                <div>
+                  <div className="font-medium text-gray-900 truncate">
+                    {promotionTitles[topUserPromotion.promotionId] || '제목 없음'}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {topUserPromotion.uniqueIPCount}명 이용 / {topUserPromotion.totalViews}회 조회
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-500">이용자 데이터가 없습니다</div>
+              )}
+            </CardContent>
+          </Card>
+          </div>
+        </div>
       </div>
 
       {/* 빠른 액션 */}

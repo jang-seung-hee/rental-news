@@ -16,6 +16,7 @@ import SettingsTabs from '../components/admin/settings/SettingsTabs';
 import SiteBasicInfoTab from '../components/admin/settings/SiteBasicInfoTab';
 import SharingInfoTab from '../components/admin/settings/SharingInfoTab';
 import InactivePromotionTab from '../components/admin/settings/InactivePromotionTab';
+import AdminManagementTab from '../components/admin/settings/AdminManagementTab';
 
 // 폼 유효성 검사 스키마
 const systemSettingsSchema = z.object({
@@ -228,18 +229,21 @@ const SystemSettingsPage: React.FC = () => {
               />
             )}
             {activeTab === 'inactive-promotion' && <InactivePromotionTab />}
+            {activeTab === 'admin-management' && <AdminManagementTab />}
           </div>
 
-          {/* 저장 버튼 */}
-          <div className="flex justify-end gap-4 pt-6 border-t">
-            <Button
-              type="submit"
-              disabled={isSaving || !isDirty}
-              className="min-w-[120px]"
-            >
-              {isSaving ? '저장 중...' : '저장'}
-            </Button>
-          </div>
+          {/* 저장 버튼 - 관리자 관리 탭에서는 숨김 */}
+          {activeTab !== 'admin-management' && (
+            <div className="flex justify-end gap-4 pt-6 border-t">
+              <Button
+                type="submit"
+                disabled={isSaving || !isDirty}
+                className="min-w-[120px]"
+              >
+                {isSaving ? '저장 중...' : '저장'}
+              </Button>
+            </div>
+          )}
         </form>
       </FormProvider>
 

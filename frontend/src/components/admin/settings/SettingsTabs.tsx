@@ -22,6 +22,11 @@ const SettingsTabs: React.FC<SettingsTabsProps> = ({ activeTab, onTabChange }) =
       id: 'inactive-promotion',
       label: '비활성화된 프로모션 표시 정보',
       description: '안내 메시지 설정'
+    },
+    {
+      id: 'admin-management',
+      label: '관리자 계정 관리',
+      description: '관리자 추가/삭제'
     }
   ];
 

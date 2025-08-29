@@ -349,19 +349,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </button>
           <button
             type="button"
-            onClick={handleFullscreenToggle}
-            className="toolbar-btn"
-            title={fullscreen ? "전체화면 해제" : "전체화면"}
-          >
-            {fullscreen ? "⛶ 전체화면 해제" : "⛶ 전체화면"}
-          </button>
-          <button
-            type="button"
             onClick={() => setShowCustomTagPopup(true)}
             className="toolbar-btn"
             title="커스텀 태그"
           >
             🏷️ 커스텀 TAG
+          </button>
+          <button
+            type="button"
+            onClick={handleFullscreenToggle}
+            className="toolbar-btn"
+            title={fullscreen ? "전체화면 해제" : "전체화면"}
+          >
+            {fullscreen ? "⛶ 전체화면 해제" : "⛶ 전체화면"}
           </button>
         </div>
       )}

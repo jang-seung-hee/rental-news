@@ -82,7 +82,7 @@ export interface PromotionFilter {
 
 // 프로모션 정렬 옵션 타입
 export interface PromotionSort {
-  field: 'createdAt' | 'updatedAt' | 'title' | 'month';
+  field: 'createdAt' | 'updatedAt' | 'title' | 'month' | 'code';
   direction: 'asc' | 'desc';
 }
 
@@ -137,4 +137,30 @@ export interface PromotionValidationErrors {
   otherProduct4?: string;
   contact?: string;
   shortUrl?: string;
+}
+
+// 프로모션 조회 통계 타입
+export interface PromotionViewStats {
+  id: string;                         // 통계 문서 ID
+  promotionId: string;                // 프로모션 ID
+  totalViews: number;                 // 총 조회수
+  uniqueIPs: string[];                // 고유 IP 목록
+  uniqueIPCount: number;              // 고유 IP 수
+  viewHistory: PromotionViewRecord[]; // 조회 기록
+  lastUpdated: Timestamp;             // 마지막 업데이트 일시
+}
+
+// 프로모션 조회 기록 타입
+export interface PromotionViewRecord {
+  ip: string;                         // 클라이언트 IP
+  userAgent: string;                  // 클라이언트 환경 (User-Agent)
+  viewedAt: Timestamp;                // 조회 일시
+  referrer?: string;                  // 리퍼러 URL (선택사항)
+}
+
+// 프로모션 조회 통계 요약 타입 (목록에서 사용)
+export interface PromotionStatsSummary {
+  promotionId: string;
+  totalViews: number;
+  uniqueIPCount: number;
 } 

@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
-import { Promotion } from '../../types';
+import { Promotion, PromotionStatsSummary } from '../../types';
 import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useToast } from '../../hooks/use-toast';
+import { useConfirm } from '../../hooks/useConfirm';
 import ShortUrlDialog from '../common/ShortUrlDialog';
-import { updateShortUrl, updatePromotionSlug } from '../../services/promotionService';
+import PromotionStatsDialog from './PromotionStatsDialog';
+import { updateShortUrl, updatePromotionSlug, updatePromotionStatus } from '../../services/promotionService';
 
 interface PromotionTableProps {
   promotions: Promotion[];
+  promotionStats?: { [promotionId: string]: PromotionStatsSummary };
   onEdit: (promotion: Promotion) => void;
-  onDelete: (promotionId: string) => void;
   onView: (promotion: Promotion) => void;
   isLoading?: boolean;
   onPromotionUpdate?: () => void; // 프로모션 업데이트 후 목록 새로고침용
@@ -20,13 +22,14 @@ interface PromotionTableProps {
 
 const PromotionTable: React.FC<PromotionTableProps> = ({
   promotions,
+  promotionStats = {},
   onEdit,
-  onDelete,
   onView,
   isLoading = false,
   onPromotionUpdate
 }) => {
   const { toast } = useToast();
+  const { confirm, ConfirmComponent } = useConfirm();
   const [shortUrlDialog, setShortUrlDialog] = useState<{
     isOpen: boolean;
     promotion: Promotion | null;
@@ -44,6 +47,17 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
     promotion: null,
     slugValue: ''
   });
+
+
+  const [statsDialog, setStatsDialog] = useState<{
+    isOpen: boolean;
+    promotion: Promotion | null;
+  }>({
+    isOpen: false,
+    promotion: null
+  });
+
+
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return '-';
@@ -145,6 +159,74 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
     });
   };
 
+  const openStatsDialog = (promotion: Promotion) => {
+    setStatsDialog({ isOpen: true, promotion });
+  };
+
+  const closeStatsDialog = () => {
+    setStatsDialog({ isOpen: false, promotion: null });
+  };
+
+  // 활성 상태 변경 핸들러
+  const handleStatusChange = async (promotionId: string, newStatus: boolean, promotionTitle: string, currentStatus: boolean) => {
+    const statusText = newStatus ? '활성' : '비활성';
+    const confirmMessage = `"${promotionTitle}" 프로모션을 ${statusText} 상태로 변경하시겠습니까?`;
+    
+    // 커스텀 확인창 표시
+    const confirmed = await confirm({
+      title: '상태 변경 확인',
+      message: confirmMessage,
+      confirmText: '변경',
+      cancelText: '취소'
+    });
+
+    if (!confirmed) {
+      // 사용자가 취소한 경우, 드롭다운을 원래 상태로 되돌리기 위해 리렌더링 트리거
+      if (onPromotionUpdate) {
+        onPromotionUpdate();
+      }
+      return;
+    }
+
+    try {
+      const result = await updatePromotionStatus(promotionId, newStatus);
+      
+      if (result.success) {
+        toast({
+          title: "상태가 변경되었습니다",
+          description: `"${promotionTitle}" 프로모션이 ${statusText} 상태로 변경되었습니다.`,
+        });
+        
+        // 목록 새로고침
+        if (onPromotionUpdate) {
+          onPromotionUpdate();
+        }
+      } else {
+        toast({
+          title: "상태 변경 실패",
+          description: result.error || "상태 변경에 실패했습니다.",
+          variant: "destructive",
+        });
+        
+        // 실패 시에도 원래 상태로 되돌리기
+        if (onPromotionUpdate) {
+          onPromotionUpdate();
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "상태 변경 실패",
+        description: "상태 변경 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+      
+      // 오류 시에도 원래 상태로 되돌리기
+      if (onPromotionUpdate) {
+        onPromotionUpdate();
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -188,61 +270,74 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-45">코드</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-20">활성</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-180">제목</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-30">월</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-70">타겟</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-40">생성일</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-50">슬러그URL</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-35">링크복사</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-20">삭제</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-40">코드/생성일</th>
+                  <th className="text-center py-3 px-4 font-medium text-gray-700 w-40">활성</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-700 w-200">제목/타겟</th>
+                  <th className="text-center py-3 px-4 font-medium text-gray-700 w-40">열람수/이용자수</th>
+                  <th className="text-center py-3 px-4 font-medium text-gray-700 w-40">월</th>
+                  <th className="text-center py-3 px-4 font-medium text-gray-700 w-40">슬러그URL</th>
+                  <th className="text-center py-3 px-4 font-medium text-gray-700 w-40">미리보기</th>
+                  <th className="text-center py-3 px-4 font-medium text-gray-700 w-40">링크복사</th>
                 </tr>
               </thead>
               <tbody>
                 {promotions.map((promotion) => (
                   <tr key={promotion.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4">
-                      <span className="font-mono text-sm text-gray-600">
-                        {promotion.code}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex justify-center">
-                        <Badge
-                          variant={promotion.isActive ? "default" : "secondary"}
-                          className={`${promotion.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"} text-xs px-1.5 py-0.5`}
-                        >
-                          {promotion.isActive ? '활성' : '비활성'}
-                        </Badge>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="max-w-72">
-                        <div 
-                          className="font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600 hover:underline"
-                          onClick={() => window.location.href = `/promotions/${promotion.id}/edit`}
-                        >
-                          {promotion.title}
+                      <div className="space-y-1">
+                        <div className="font-mono text-sm font-medium text-gray-900">
+                          {promotion.code}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          (작성일 : {formatDate(promotion.createdAt)})
                         </div>
                       </div>
                     </td>
+                    <td className="py-3 px-4 text-center">
+                      <div className="flex justify-center">
+                        <select
+                          value={promotion.isActive ? 'active' : 'inactive'}
+                          onChange={(e) => handleStatusChange(promotion.id, e.target.value === 'active', promotion.title, promotion.isActive ?? false)}
+                          className={`text-xs px-2 py-1 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            promotion.isActive 
+                              ? 'bg-green-100 text-green-800 border-green-200' 
+                              : 'bg-gray-100 text-gray-800 border-gray-200'
+                          }`}
+                        >
+                          <option value="active">활성</option>
+                          <option value="inactive">비활성</option>
+                        </select>
+                      </div>
+                    </td>
                     <td className="py-3 px-4">
+                      <div className="max-w-80 space-y-1">
+                        <div 
+                          className="font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600 hover:underline"
+                          onClick={() => window.open(`/promotions/${promotion.id}/edit`, '_blank')}
+                        >
+                          {promotion.title}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          (타겟고객 : {promotion.target})
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <div className="text-xs cursor-pointer hover:underline" onClick={() => openStatsDialog(promotion)} title="상세 통계 보기">
+                        <span className="font-medium text-blue-600">
+                          {promotionStats[promotion.id]?.totalViews || 0}
+                        </span>
+                        <span className="text-gray-500">
+                          / {promotionStats[promotion.id]?.uniqueIPCount || 0}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-center">
                       <span className="text-sm text-gray-600">
                         {formatMonth(promotion.month)}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
-                      <span className="text-sm text-gray-600">
-                        {promotion.target}
-                      </span>
-                    </td>
-                                         <td className="py-3 px-4">
-                       <span className="text-sm text-gray-500">
-                         {formatDate(promotion.createdAt)}
-                       </span>
-                     </td>
-                     <td className="py-3 px-4">
+                    <td className="py-3 px-4 text-center">
                       <Button
                         size="sm"
                         variant="outline"
@@ -250,12 +345,27 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                         className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-xs w-36 truncate"
                         title={`${window.location.origin}/view/${promotion.slug || promotion.id}`}
                       >
-                        <span className="truncate block w-full text-left">
+                        <span className="truncate block w-full text-center">
                           {promotion.slug || promotion.id}
                         </span>
                       </Button>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 text-center">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const url = promotion.slug 
+                            ? `${window.location.origin}/view/${promotion.slug}`
+                            : `${window.location.origin}/view/${promotion.id}`;
+                          window.open(url, '_blank');
+                        }}
+                        className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                      >
+                        미리보기
+                      </Button>
+                    </td>
+                    <td className="py-3 px-4 text-center">
                       <Button
                         size="sm"
                         variant="outline"
@@ -263,17 +373,6 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                         className="text-blue-600 border-blue-200 hover:bg-blue-50"
                       >
                         링크복사
-                      </Button>
-                    </td>
-
-                    <td className="py-3 px-4">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onDelete(promotion.id)}
-                        className="text-red-600 border-red-200 hover:bg-red-50"
-                      >
-                        삭제
                       </Button>
                     </td>
                   </tr>
@@ -289,30 +388,61 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <Badge
-                        variant={promotion.isActive ? "default" : "secondary"}
-                        className={promotion.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
+                      <select
+                        value={promotion.isActive ? 'active' : 'inactive'}
+                        onChange={(e) => handleStatusChange(promotion.id, e.target.value === 'active', promotion.title, promotion.isActive ?? false)}
+                        className={`text-xs px-2 py-1 rounded-md border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          promotion.isActive 
+                            ? 'bg-green-100 text-green-800 border-green-200' 
+                            : 'bg-gray-100 text-gray-800 border-gray-200'
+                        }`}
                       >
-                        {promotion.isActive ? '활성' : '비활성'}
-                      </Badge>
+                        <option value="active">활성</option>
+                        <option value="inactive">비활성</option>
+                      </select>
                       <div 
                         className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 hover:underline"
-                        onClick={() => window.location.href = `/promotions/${promotion.id}/edit`}
+                        onClick={() => window.open(`/promotions/${promotion.id}/edit`, '_blank')}
                       >
                         {promotion.title}
                       </div>
                     </div>
-                    <div className="text-sm text-gray-500 font-mono">{promotion.code}</div>
+                    <div className="space-y-1">
+                      <div className="text-sm text-gray-500 font-mono">{promotion.code}</div>
+                      <div className="text-xs text-gray-500">(작성일 : {formatDate(promotion.createdAt)})</div>
+                      <div className="text-xs text-gray-500">(타겟고객 : {promotion.target})</div>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-600 space-y-1">
                   <div>월: {formatMonth(promotion.month)}</div>
-                  <div>타겟: {promotion.target}</div>
-                  <div>생성일: {formatDate(promotion.createdAt)}</div>
+                  <div className="flex items-center space-x-2">
+                    <span>열람수:</span>
+                    <span className="font-medium text-blue-600 cursor-pointer hover:underline" onClick={() => openStatsDialog(promotion)} title="상세 통계 보기">
+                      {promotionStats[promotion.id]?.totalViews || 0}
+                    </span>
+                    <span>/</span>
+                    <span className="font-medium text-green-600 cursor-pointer hover:underline" onClick={() => openStatsDialog(promotion)} title="상세 통계 보기">
+                      {promotionStats[promotion.id]?.uniqueIPCount || 0}명
+                    </span>
+                  </div>
                 </div>
                 
                 <div className="flex space-x-2 pt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      const url = promotion.slug 
+                        ? `${window.location.origin}/view/${promotion.slug}`
+                        : `${window.location.origin}/view/${promotion.id}`;
+                      window.open(url, '_blank');
+                    }}
+                    className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
+                  >
+                    미리보기
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
@@ -343,17 +473,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                     </Button>
                   )}
                 </div>
-                
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => onDelete(promotion.id)}
-                    className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                  >
-                    삭제
-                  </Button>
-                </div>
+
               </div>
             ))}
           </div>
@@ -487,6 +607,14 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
           </div>
         </div>
       )}
+
+      {/* 통계 팝업 */}
+      {statsDialog.isOpen && statsDialog.promotion && (
+        <PromotionStatsDialog isOpen={statsDialog.isOpen} onClose={closeStatsDialog} promotion={statsDialog.promotion} />
+      )}
+
+      {/* 커스텀 확인창 */}
+      <ConfirmComponent />
     </>
   );
 };

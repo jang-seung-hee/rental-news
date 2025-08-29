@@ -36,7 +36,7 @@ const InactivePromotionNotice: React.FC<InactivePromotionNoticeProps> = ({
               안내사항
             </p>
             <p className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {systemSettings?.inactivePromotionGuide || '허준 팀장에게 현재 진행중인 프로모션으로 새로 안내해 달라고 하세요.'}
+              {systemSettings?.inactivePromotionGuide || '해당 프로모션은 마감되었으므로 접수를 하실 수 없으니, 다시시 연락 주시면 진행중인 프로모션으로 링크 드리겠습니다. '}
             </p>
           </div>
         </div>
