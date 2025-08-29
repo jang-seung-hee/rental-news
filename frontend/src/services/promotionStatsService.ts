@@ -39,15 +39,61 @@ const getClientIP = async (): Promise<string> => {
       return '127.0.0.1'; // 개발용 고정 IP
     }
     
-    // 프로덕션 환경에서는 실제 IP 가져오기
-    const response = await fetch('https://api.ipify.org?format=json');
-    const data = await response.json();
-    return data.ip || 'localhost';
+    // 프로덕션 환경에서는 실제 IP 가져오기 (타임아웃 설정)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5초 타임아웃
+    
+    try {
+      const response = await fetch('https://api.ipify.org?format=json', {
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data.ip || generateFallbackIP();
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
+    }
   } catch (error) {
     console.warn('IP 주소를 가져올 수 없습니다:', error);
-    // 개발 환경에서는 고정 IP 반환
-    return '127.0.0.1';
+    // 실패 시 대체 IP 생성 (모바일 환경에서도 작동)
+    return generateFallbackIP();
   }
+};
+
+// 대체 IP 생성 함수 (고유성 보장)
+const generateFallbackIP = (): string => {
+  // 브라우저 정보와 시간을 조합하여 고유한 식별자 생성
+  const userAgent = navigator.userAgent || '';
+  const timestamp = Date.now();
+  const screenInfo = `${window.screen.width}x${window.screen.height}`;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  
+  // 간단한 해시 생성
+  const combined = userAgent + timestamp + screenInfo + timezone;
+  let hash = 0;
+  for (let i = 0; i < combined.length; i++) {
+    const char = combined.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // 32비트 정수로 변환
+  }
+  
+  // IP 형식으로 변환 (192.168.x.x 형태)
+  const num = Math.abs(hash);
+  const a = 192;
+  const b = 168;
+  const c = (num % 254) + 1;
+  const d = ((num >> 8) % 254) + 1;
+  
+  return `${a}.${b}.${c}.${d}`;
 };
 
 // User-Agent 정보 가져오기
@@ -61,6 +107,14 @@ export const recordPromotionView = async (
 ): Promise<CrudResult<void>> => {
   try {
     console.log('🔥 프로모션 조회 기록 시작:', promotionId);
+    console.log('📱 환경 정보:', {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      isMobile: /Mobi|Android/i.test(navigator.userAgent),
+      isKakao: /KAKAOTALK/i.test(navigator.userAgent),
+      screen: `${window.screen.width}x${window.screen.height}`,
+      hostname: window.location.hostname
+    });
     
     const clientIP = await getClientIP();
     const userAgent = getUserAgent();
