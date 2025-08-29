@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useCallback, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Promotion } from '../types';
 import { getPromotionBySlugOrId } from '../services/promotionService';
 import { getSystemSettings } from '../services/systemSettingsService';
 import { recordPromotionView } from '../services/promotionStatsService';
+import CustomTag from '../components/admin/CustomTag';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import '../utils/promotionViewLightMode.css';
-
-const CustomTag = lazy(() => import('../components/admin/CustomTag'));
 
 const PromotionViewPage: React.FC = () => {
   const { identifier } = useParams<{ identifier: string }>();
@@ -77,13 +76,24 @@ const PromotionViewPage: React.FC = () => {
 
   // 시스템 설정 로드
   const loadSystemSettings = useCallback(async () => {
+    // 카카오톡에서는 시스템 설정 로드도 건너뛰기
+    if (isKakaoInApp) {
+      if (debug) console.log('[kakao] 시스템 설정 로드 건너뛰기');
+      setSystemSettings({
+        siteName: '렌탈톡톡',
+        defaultTitle: '렌탈톡톡 월간 소식',
+        defaultDescription: '최신 렌탈 정보와 프로모션을 확인하세요'
+      });
+      return;
+    }
+    
     try {
       const settings = await getSystemSettings();
       setSystemSettings(settings);
     } catch (err) {
       console.error('시스템 설정을 불러올 수 없습니다:', err);
     }
-  }, []);
+  }, [isKakaoInApp, debug]);
 
   // 초기 로드
   useEffect(() => {
@@ -231,14 +241,12 @@ const PromotionViewPage: React.FC = () => {
     <>
       {!isKakaoInApp && generateMetaTags()}
       <div className={`promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 promotion-view-bg ${isKakaoInApp ? 'kakaotalk-safe' : ''}`}>
-        <Suspense fallback={<div className="p-6 text-center text-gray-600">화면 준비 중...</div>}>
-          <CustomTag 
-            promotion={promotion} 
-            hideElements={hideElements} 
-            systemSettings={systemSettings}
-            disableHistory={isKakaoInApp}
-          />
-        </Suspense>
+        <CustomTag 
+          promotion={promotion} 
+          hideElements={hideElements} 
+          systemSettings={systemSettings}
+          disableHistory={isKakaoInApp}
+        />
       </div>
     </>
   );
