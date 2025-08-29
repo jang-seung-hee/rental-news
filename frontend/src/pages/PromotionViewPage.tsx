@@ -43,32 +43,26 @@ const PromotionViewPage: React.FC = () => {
         if (viewRecordedRef.current !== result.data.id) {
           viewRecordedRef.current = result.data.id;
           
-          // 프로모션 조회 기록 (완전히 비동기적으로 처리하여 페이지 로딩에 영향 없음)
-          // setTimeout을 사용하여 다음 이벤트 루프에서 실행
-          const promotionId = result.data.id;
-          const scheduleRecord = () => {
-            if (disableStats) {
-              if (debug) console.log('[stats] disabled via query param');
-              return;
-            }
-            if (debug) console.log('[stats] recordPromotionView start');
-            recordPromotionView(promotionId).then(() => {
-              if (debug) console.log('[stats] recordPromotionView done');
-            }).catch(error => {
-              console.warn('프로모션 조회 기록 실패 (백그라운드 처리):', error);
-            });
-          };
+          // 카카오톡에서는 통계 수집을 완전히 건너뛰어 성능 우선
           if (isKakaoInApp) {
-            // 카카오 인앱에서는 초기 렌더 안정화 이후로 지연
-            const delay = 1500;
-            if ('requestIdleCallback' in window) {
-              // @ts-ignore
-              requestIdleCallback(scheduleRecord, { timeout: delay });
-            } else {
-              setTimeout(scheduleRecord, delay);
-            }
-          } else {
-            setTimeout(scheduleRecord, 0);
+            if (debug) console.log('[kakao] 통계 수집 건너뛰기 - 성능 우선');
+            return; // 카카오톡에서는 아예 통계 수집 안 함
+          }
+          
+          // 일반 브라우저에서만 통계 수집
+          if (!disableStats) {
+            const promotionId = result.data.id;
+            const scheduleRecord = () => {
+              if (debug) console.log('[stats] recordPromotionView start');
+              recordPromotionView(promotionId).then(() => {
+                if (debug) console.log('[stats] recordPromotionView done');
+              }).catch(error => {
+                console.warn('프로모션 조회 기록 실패 (백그라운드 처리):', error);
+              });
+            };
+            
+            // 일반 브라우저에서는 즉시 실행
+            setTimeout(scheduleRecord, 100); // 최소 지연만 적용
           }
         }
       } else {
