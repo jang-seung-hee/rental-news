@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense, lazy } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { Promotion } from '../types';
 import { getPromotionBySlugOrId } from '../services/promotionService';
 import { getSystemSettings } from '../services/systemSettingsService';
 import { recordPromotionView } from '../services/promotionStatsService';
-import CustomTag from '../components/admin/CustomTag';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import '../utils/promotionViewLightMode.css';
+
+const CustomTag = lazy(() => import('../components/admin/CustomTag'));
 
 const PromotionViewPage: React.FC = () => {
   const { identifier } = useParams<{ identifier: string }>();
@@ -17,6 +18,7 @@ const PromotionViewPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [systemSettings, setSystemSettings] = useState<any>(null);
   const viewRecordedRef = useRef<string | null>(null); // 조회 기록 중복 방지
+  const isKakaoInApp = typeof navigator !== 'undefined' && /KAKAOTALK/i.test(navigator.userAgent);
 
   // 프로모션 데이터 로드 (slug 또는 ID 기반)
   const loadPromotion = useCallback(async () => {
@@ -42,12 +44,24 @@ const PromotionViewPage: React.FC = () => {
           // 프로모션 조회 기록 (완전히 비동기적으로 처리하여 페이지 로딩에 영향 없음)
           // setTimeout을 사용하여 다음 이벤트 루프에서 실행
           const promotionId = result.data.id;
-          setTimeout(() => {
+          const scheduleRecord = () => {
             recordPromotionView(promotionId).catch(error => {
               console.warn('프로모션 조회 기록 실패 (백그라운드 처리):', error);
               // 조회 기록 실패는 사용자에게 알리지 않음 (선택적 기능)
             });
-          }, 0);
+          };
+          if (isKakaoInApp) {
+            // 카카오 인앱에서는 초기 렌더 안정화 이후로 지연
+            const delay = 1500;
+            if ('requestIdleCallback' in window) {
+              // @ts-ignore
+              requestIdleCallback(scheduleRecord, { timeout: delay });
+            } else {
+              setTimeout(scheduleRecord, delay);
+            }
+          } else {
+            setTimeout(scheduleRecord, 0);
+          }
         }
       } else {
         setError(result.error || '프로모션을 찾을 수 없습니다.');
@@ -77,7 +91,8 @@ const PromotionViewPage: React.FC = () => {
 
   // 메타태그 직접 설정 (React Helmet 보완용)
   useEffect(() => {
-    if (promotion && systemSettings) {
+    // 카카오 인앱에서는 head 조작을 최소화 (안정성 우선)
+    if (promotion && systemSettings && !isKakaoInApp) {
       const title = systemSettings?.defaultTitle || `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
       const description = systemSettings?.defaultDescription || promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
       
@@ -123,7 +138,7 @@ const PromotionViewPage: React.FC = () => {
         console.log('✅ 파비콘 설정 완료');
       }
     }
-  }, [promotion, systemSettings]);
+  }, [promotion, systemSettings, isKakaoInApp]);
 
   // 메타태그 생성
   const generateMetaTags = () => {
@@ -212,9 +227,16 @@ const PromotionViewPage: React.FC = () => {
 
   return (
     <>
-      {generateMetaTags()}
-      <div className="promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 promotion-view-bg">
-        <CustomTag promotion={promotion} hideElements={hideElements} systemSettings={systemSettings} />
+      {!isKakaoInApp && generateMetaTags()}
+      <div className={`promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 promotion-view-bg ${isKakaoInApp ? 'kakaotalk-safe' : ''}`}>
+        <Suspense fallback={<div className="p-6 text-center text-gray-600">화면 준비 중...</div>}>
+          <CustomTag 
+            promotion={promotion} 
+            hideElements={hideElements} 
+            systemSettings={systemSettings}
+            disableHistory={isKakaoInApp}
+          />
+        </Suspense>
       </div>
     </>
   );

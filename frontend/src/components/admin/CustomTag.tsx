@@ -17,9 +17,10 @@ interface CustomTagProps {
   promotion: Promotion;
   hideElements?: string | null;
   systemSettings?: any;
+  disableHistory?: boolean; // 인앱 안전 모드에서 하위 컴포넌트의 history 제어 비활성화
 }
 
-const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSettings: propSystemSettings }) => {
+const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSettings: propSystemSettings, disableHistory = false }) => {
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [otherProducts, setOtherProducts] = useState<{ [key: string]: { id: string; code: string; title: string } }>({});

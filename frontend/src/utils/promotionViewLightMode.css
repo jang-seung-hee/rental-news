@@ -8,6 +8,33 @@
   background: linear-gradient(to bottom right, #eff6ff, #dbeafe, #e0e7ff) !important;
 }
 
+/* 카카오톡 인앱 브라우저용 안전 모드 - 과도한 효과 최소화 */
+.promotion-view-light-mode.kakaotalk-safe .promotion-view-bg {
+  background: #ffffff !important;
+}
+
+.promotion-view-light-mode.kakaotalk-safe .card,
+.promotion-view-light-mode.kakaotalk-safe .card-content {
+  backdrop-filter: none !important;
+}
+
+.promotion-view-light-mode.kakaotalk-safe .bg-gradient-to-br,
+.promotion-view-light-mode.kakaotalk-safe .bg-gradient-to-r,
+.promotion-view-light-mode.kakaotalk-safe .bg-gradient-to-b,
+.promotion-view-light-mode.kakaotalk-safe .from-*,
+.promotion-view-light-mode.kakaotalk-safe .to-*,
+.promotion-view-light-mode.kakaotalk-safe .via-* {
+  background: none !important;
+}
+
+.promotion-view-light-mode.kakaotalk-safe .animate-spin {
+  animation-duration: 1.2s !important;
+}
+
+.promotion-view-light-mode.kakaotalk-safe img {
+  image-rendering: auto;
+}
+
 /* Sheet 컴포넌트 라이트모드 강제 적용 */
 .promotion-view-light-mode .sheet-content {
   background-color: white !important;
