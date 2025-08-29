@@ -1,13 +1,11 @@
 import { 
   getDocs, 
-  addDoc, 
   deleteDoc,
   query, 
   where, 
   orderBy, 
   limit,
   Timestamp,
-  updateDoc,
   setDoc,
   arrayUnion,
   increment
