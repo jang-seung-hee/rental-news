@@ -8,8 +8,7 @@ import {
   Timestamp,
   setDoc,
   arrayUnion,
-  increment,
-  getDoc
+  increment
 } from 'firebase/firestore';
 import { 
   getCollectionRef, 

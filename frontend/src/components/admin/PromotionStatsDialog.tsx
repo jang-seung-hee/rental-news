@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Promotion, PromotionViewStats } from '../../types';
 
-import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateHourRatios, aggregateReferrerRatios, aggregateWeekdayRatios, aggregateGroupedTimeRatios } from '../../utils/statsUtils';
+import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateReferrerRatios, aggregateWeekdayRatios, aggregateGroupedTimeRatios } from '../../utils/statsUtils';
 import { Button } from '../ui/button';
 
 interface Props {
@@ -22,7 +22,7 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
   const [end, setEnd] = useState<string>(() => new Date().toISOString().slice(0, 10));
 
   // 통계 데이터 로드 함수
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -35,12 +35,12 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
     } finally {
       setLoading(false);
     }
-  };
+  }, [promotion.id]);
 
   useEffect(() => {
     if (!isOpen) return;
     loadStats();
-  }, [isOpen, promotion.id]);
+  }, [isOpen, promotion.id, loadStats]);
 
   const daily = useMemo(() => {
     if (!stats) return [];
