@@ -1,15 +1,13 @@
 import { 
   getDocs, 
   getDoc, 
-  addDoc, 
   deleteDoc, 
   query, 
   orderBy,
   setDoc
 } from 'firebase/firestore';
 import { 
-  createUserWithEmailAndPassword,
-  deleteUser
+  createUserWithEmailAndPassword
 } from 'firebase/auth';
 import { 
   getCollectionRef, 
