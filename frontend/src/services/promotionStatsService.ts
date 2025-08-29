@@ -50,8 +50,8 @@ const isKakaoInApp = (): boolean => {
     
     // 추가 감지: WebView 환경인지 확인
     const isWebView = /wv\)|WebView/i.test(ua) || 
-                     (window as any).chrome === undefined && 
-                     typeof (window as any).orientation !== 'undefined';
+                     ((window as any).chrome === undefined && 
+                     typeof (window as any).orientation !== 'undefined');
     
     if (isWebView) {
       console.log('🟡 WebView 환경 감지됨:', ua);
