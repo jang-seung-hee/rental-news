@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Promotion, PromotionViewStats } from '../../types';
-import { getPromotionStats } from '../../services/promotionStatsService';
-import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateHourRatios, aggregateReferrerRatios, aggregateWeekdayRatios } from '../../utils/statsUtils';
+
+import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateHourRatios, aggregateReferrerRatios, aggregateWeekdayRatios, aggregateGroupedTimeRatios } from '../../utils/statsUtils';
 import { Button } from '../ui/button';
 
 interface Props {
@@ -21,22 +21,25 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
   });
   const [end, setEnd] = useState<string>(() => new Date().toISOString().slice(0, 10));
 
+  // 통계 데이터 로드 함수
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { getPromotionStats } = await import('../../services/promotionStatsService');
+      const result = await getPromotionStats(promotion.id);
+      if (result.success) setStats(result.data || null);
+      else setError(result.error || '통계를 불러올 수 없습니다.');
+    } catch (e) {
+      setError('통계를 불러올 수 없습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isOpen) return;
-    const load = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const result = await getPromotionStats(promotion.id);
-        if (result.success) setStats(result.data || null);
-        else setError(result.error || '통계를 불러올 수 없습니다.');
-      } catch (e) {
-        setError('통계를 불러올 수 없습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    loadStats();
   }, [isOpen, promotion.id]);
 
   const daily = useMemo(() => {
@@ -138,7 +141,9 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
               </div>
               <div className="bg-green-50 border border-green-100 rounded p-3 text-center">
                 <div className="text-xs text-green-700">이용자수(고유 IP)</div>
-                <div className="text-xl font-semibold text-green-800">{stats?.uniqueIPCount || 0}</div>
+                <div className="text-xl font-semibold text-green-800">
+                  {stats?.uniqueIPs ? stats.uniqueIPs.length : 0}
+                </div>
               </div>
               <div className="bg-gray-50 border border-gray-100 rounded p-3 text-center">
                 <div className="text-xs text-gray-600">기간 일수</div>
@@ -202,8 +207,8 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                     const width = Math.round((r.count / maxCount) * 100);
                     return (
                       <div key={r.label} className="flex items-center mb-2">
-                        <div className="w-20 text-xs text-gray-600">{r.label}</div>
-                        <div className="flex-1 mx-2">
+                        <div className="w-28 text-xs text-gray-600 whitespace-nowrap">{r.label}</div>
+                        <div className="flex-1 ml-3 mr-2">
                           <div className="bg-gray-200 rounded h-4 relative">
                             <div 
                               className="bg-blue-500 h-4 rounded flex items-center justify-end pr-1" 
@@ -231,8 +236,8 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                     const width = Math.round((r.count / maxCount) * 100);
                     return (
                       <div key={r.label} className="flex items-center mb-2">
-                        <div className="w-8 text-xs text-gray-600">{r.label}</div>
-                        <div className="flex-1 mx-2">
+                        <div className="w-28 text-xs text-gray-600 whitespace-nowrap">{r.label}</div>
+                        <div className="flex-1 ml-3 mr-2">
                           <div className="bg-gray-200 rounded h-4 relative">
                             <div 
                               className="bg-green-500 h-4 rounded flex items-center justify-end pr-1" 
@@ -249,17 +254,17 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                 </div>
               </div>
 
-              {/* 시간대 비율 - 막대그래프 */}
+              {/* 시간대 비율 - 막대그래프 (요청된 커스텀 구간) */}
               <div>
                 <div className="text-sm font-medium text-gray-800 mb-2">시간대 비율</div>
                 <div className="border rounded p-3 max-h-64 overflow-y-auto">
-                  {aggregateHourRatios(stats?.viewHistory || []).filter(r => r.count > 0).map(r => {
-                    const maxCount = Math.max(1, ...aggregateHourRatios(stats?.viewHistory || []).map(x => x.count));
+                  {aggregateGroupedTimeRatios(stats?.viewHistory || []).filter(r => r.count > 0).map(r => {
+                    const maxCount = Math.max(1, ...aggregateGroupedTimeRatios(stats?.viewHistory || []).map(x => x.count));
                     const width = Math.round((r.count / maxCount) * 100);
                     return (
                       <div key={r.label} className="flex items-center mb-1">
-                        <div className="w-12 text-xs text-gray-600">{r.label}</div>
-                        <div className="flex-1 mx-2">
+                        <div className="w-28 text-xs text-gray-600 whitespace-nowrap">{r.label}</div>
+                        <div className="flex-1 ml-3 mr-2">
                           <div className="bg-gray-200 rounded h-3 relative">
                             <div 
                               className="bg-purple-500 h-3 rounded flex items-center justify-end pr-1" 

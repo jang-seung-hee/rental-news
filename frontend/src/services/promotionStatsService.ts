@@ -100,19 +100,13 @@ const getUserAgent = (): string => {
 };
 
 // 기존 통계 데이터 마이그레이션 함수
+// 동일 promotionId 를 가진 레거시 문서를 모두 "stats_<promotionId>" 문서로 병합하고 정리한다
 const migrateExistingStats = async (promotionId: string): Promise<void> => {
   try {
     const targetDocId = `stats_${promotionId}`;
     const targetDocRef = getDocumentRef(STATS_COLLECTION_NAME, targetDocId);
     
-    // 이미 새 형식의 문서가 있는지 확인
-    const targetDoc = await getDoc(targetDocRef);
-    if (targetDoc.exists()) {
-      // 이미 마이그레이션 완료
-      return;
-    }
-    
-    // 기존 문서들 중에서 해당 promotionId를 가진 문서 찾기
+    // 동일 promotionId 를 가진 모든 문서 조회 (레거시 포함)
     const q = query(
       getCollectionRef(STATS_COLLECTION_NAME),
       where('promotionId', '==', promotionId)
@@ -120,32 +114,60 @@ const migrateExistingStats = async (promotionId: string): Promise<void> => {
     
     const querySnapshot = await getDocs(q);
     
-    if (!querySnapshot.empty) {
-      // 기존 데이터를 새 문서로 복사
-      const existingDoc = querySnapshot.docs[0];
-      const existingData = existingDoc.data();
-      
-      console.log('📦 기존 통계 데이터 마이그레이션:', {
-        promotionId,
-        기존_데이터: {
-          totalViews: existingData.totalViews,
-          uniqueIPCount: existingData.uniqueIPs?.length || 0
-        }
-      });
-      
-      // 새 문서 형식으로 데이터 복사
+    if (querySnapshot.empty) {
+      // 아무 문서도 없으면 대상 문서를 초기 생성
       await setDoc(targetDocRef, {
-        promotionId: existingData.promotionId,
-        totalViews: existingData.totalViews || 0,
-        uniqueIPs: existingData.uniqueIPs || [],
-        viewHistory: existingData.viewHistory || [],
-        createdAt: existingData.createdAt || Timestamp.now(),
-        lastUpdated: existingData.lastUpdated || Timestamp.now(),
+        promotionId,
+        totalViews: 0,
+        uniqueIPs: [],
+        viewHistory: [],
+        createdAt: Timestamp.now(),
+        lastUpdated: Timestamp.now(),
         updatedAt: Timestamp.now()
-      });
-      
-      console.log('✅ 통계 데이터 마이그레이션 완료');
+      } as any, { merge: true });
+      return;
     }
+
+    // 병합 대상 수집
+    let sumTotalViews = 0;
+    const allUniqueIps = new Set<string>();
+    const allViewHistory: any[] = [];
+    let earliestCreatedAt: any = null;
+    let latestUpdatedAt: any = null;
+
+    querySnapshot.forEach((doc) => {
+      const d: any = doc.data();
+      sumTotalViews += d.totalViews || 0;
+      (d.uniqueIPs || []).forEach((ip: string) => allUniqueIps.add(ip));
+      (d.viewHistory || []).forEach((rec: any) => allViewHistory.push(rec));
+      if (!earliestCreatedAt || (d.createdAt && d.createdAt < earliestCreatedAt)) {
+        earliestCreatedAt = d.createdAt;
+      }
+      if (!latestUpdatedAt || (d.updatedAt && d.updatedAt > latestUpdatedAt)) {
+        latestUpdatedAt = d.updatedAt;
+      }
+    });
+
+    // 대상 문서로 병합 저장
+    await setDoc(targetDocRef, {
+      promotionId,
+      totalViews: sumTotalViews,
+      // arrayUnion 은 가변 길이를 받으므로 스프레드 사용 (개수가 많아도 일반적으로 안전한 크기)
+      uniqueIPs: arrayUnion(...Array.from(allUniqueIps)),
+      viewHistory: arrayUnion(...allViewHistory),
+      createdAt: earliestCreatedAt || Timestamp.now(),
+      lastUpdated: latestUpdatedAt || Timestamp.now(),
+      updatedAt: Timestamp.now()
+    } as any, { merge: true });
+
+    // 대상 문서 이외 레거시 문서 제거
+    const deletePromises = querySnapshot.docs
+      .filter(doc => doc.id !== targetDocId)
+      .map(doc => deleteDoc(doc.ref));
+    if (deletePromises.length > 0) {
+      await Promise.all(deletePromises);
+    }
+    console.log('✅ 통계 데이터 병합 및 정리 완료:', promotionId);
   } catch (error) {
     console.warn('⚠️ 기존 통계 데이터 마이그레이션 실패:', error);
     // 마이그레이션 실패해도 새 기록은 계속 진행
@@ -232,35 +254,41 @@ export const getPromotionStats = async (
   try {
     const q = query(
       getCollectionRef(STATS_COLLECTION_NAME),
-      where('promotionId', '==', promotionId),
-      limit(1)
+      where('promotionId', '==', promotionId)
     );
 
     const querySnapshot = await getDocs(q);
-    
     if (querySnapshot.empty) {
-      return {
-        success: true,
-        data: null
-      };
+      return { success: true, data: null };
     }
 
-    const doc = querySnapshot.docs[0];
-    const data = doc.data();
-    
-    // uniqueIPs 배열의 길이로 실제 고유 IP 수 계산
-    const actualUniqueIPCount = data.uniqueIPs ? data.uniqueIPs.length : 0;
-    
-    const stats: PromotionViewStats = {
-      id: doc.id,
-      ...data,
-      uniqueIPCount: actualUniqueIPCount // 실시간 계산된 값으로 덮어쓰기
-    } as PromotionViewStats;
+    // 동일 promotionId 문서가 여러 개 있을 경우 합산/병합하여 반환
+    let totalViews = 0;
+    const uniqueIpSet = new Set<string>();
+    const viewHistory: any[] = [];
+    let chosenId: string | null = null;
 
-    return {
-      success: true,
-      data: stats
-    };
+    querySnapshot.forEach((doc) => {
+      const d: any = doc.data();
+      if (!chosenId || doc.id === `stats_${promotionId}`) {
+        chosenId = doc.id; // 가능하면 정식 ID를 우선 채택
+      }
+      totalViews += d.totalViews || 0;
+      (d.uniqueIPs || []).forEach((ip: string) => uniqueIpSet.add(ip));
+      (d.viewHistory || []).forEach((rec: any) => viewHistory.push(rec));
+    });
+
+    const stats: PromotionViewStats = {
+      id: chosenId || querySnapshot.docs[0].id,
+      promotionId,
+      totalViews,
+      uniqueIPs: Array.from(uniqueIpSet),
+      uniqueIPCount: uniqueIpSet.size,
+      viewHistory,
+      lastUpdated: Timestamp.now() as any
+    } as any;
+
+    return { success: true, data: stats };
   } catch (error) {
     return {
       success: false,
@@ -300,15 +328,18 @@ export const getPromotionStatsSummary = async (
       const querySnapshot = await getDocs(q);
       
       querySnapshot.forEach((doc) => {
-        const stats = doc.data() as PromotionViewStats;
-        // uniqueIPs 배열의 길이로 실제 고유 IP 수 계산
-        const actualUniqueIPCount = stats.uniqueIPs ? stats.uniqueIPs.length : 0;
-        
-        statsSummary[stats.promotionId] = {
-          promotionId: stats.promotionId,
-          totalViews: stats.totalViews,
-          uniqueIPCount: actualUniqueIPCount
-        };
+        const d = doc.data() as any;
+        const pid = d.promotionId;
+        if (!statsSummary[pid]) {
+          statsSummary[pid] = { promotionId: pid, totalViews: 0, uniqueIPCount: 0 };
+        }
+        // 합산 및 고유 IP 집합화
+        statsSummary[pid].totalViews += d.totalViews || 0;
+        const prevCount = statsSummary[pid].uniqueIPCount || 0;
+        // 임시로 set을 숨겨 저장 (최종 반환 전에 개수 계산)
+        (statsSummary as any)[`__ips_${pid}`] = (statsSummary as any)[`__ips_${pid}`] || new Set<string>();
+        (d.uniqueIPs || []).forEach((ip: string) => (statsSummary as any)[`__ips_${pid}`].add(ip));
+        statsSummary[pid].uniqueIPCount = Math.max(prevCount, (statsSummary as any)[`__ips_${pid}`].size);
       });
     }
 

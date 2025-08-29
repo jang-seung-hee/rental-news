@@ -8,7 +8,7 @@ import PromotionTable from '../components/admin/PromotionTable';
 
 import { Promotion, PromotionFilter, PromotionSort, PromotionStatsSummary } from '../types';
 import { getPromotions } from '../services/promotionService';
-import { getPromotionStats } from '../services/promotionStatsService';
+
 
 
 interface PromotionListProps {
@@ -120,35 +120,23 @@ const PromotionList: React.FC<PromotionListProps> = ({
     }
   }, [filter, sort, pageSize]);
 
-  // 프로모션 통계 로드 (개별 조회로 변경하여 팝업과 통일)
+  // 프로모션 통계 로드 (배치 조회로 최적화)
   const loadPromotionStats = useCallback(async (promotionIds: string[], reset = false) => {
     try {
-      const newStats: { [promotionId: string]: PromotionStatsSummary } = {};
+      // getPromotionStatsSummary 사용 (실시간 uniqueIPCount 계산)
+      const { getPromotionStatsSummary } = await import('../services/promotionStatsService');
+      const result = await getPromotionStatsSummary(promotionIds);
       
-      // 각 프로모션별로 개별 조회 (팝업과 동일한 함수 사용)
-      for (const promotionId of promotionIds) {
-        const result = await getPromotionStats(promotionId);
+      if (result.success && result.data) {
+        const newStats = result.data;
         
-        if (result.success && result.data) {
-          newStats[promotionId] = {
-            promotionId: result.data.promotionId,
-            totalViews: result.data.totalViews,
-            uniqueIPCount: result.data.uniqueIPCount
-          };
+        if (reset) {
+          setPromotionStats(newStats);
         } else {
-          // 통계가 없는 프로모션에 대해 기본값 설정
-          newStats[promotionId] = {
-            promotionId,
-            totalViews: 0,
-            uniqueIPCount: 0
-          };
+          setPromotionStats(prev => ({ ...prev, ...newStats }));
         }
-      }
-      
-      if (reset) {
-        setPromotionStats(newStats);
       } else {
-        setPromotionStats(prev => ({ ...prev, ...newStats }));
+        console.warn('프로모션 통계 로드 실패:', result.error);
       }
     } catch (error) {
       console.warn('프로모션 통계 로드 실패:', error);
