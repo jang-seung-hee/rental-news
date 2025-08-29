@@ -1,6 +1,8 @@
 import { 
   getDocs, 
+  getDoc, 
   addDoc, 
+  updateDoc, 
   deleteDoc,
   query, 
   where, 
@@ -12,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { 
   getCollectionRef, 
+  getDocumentRef, 
   addTimestamps, 
   addUpdateTimestamp, 
   handleFirebaseError 
@@ -26,45 +29,6 @@ import {
 
 const STATS_COLLECTION_NAME = 'promotionStats';
 
-// 카카오 인앱 브라우저 감지 (강화된 버전)
-const isKakaoInApp = (): boolean => {
-  try {
-    const ua = navigator.userAgent || '';
-    // 카카오톡 인앱 브라우저의 다양한 패턴 감지
-    const kakaoPatterns = [
-      /KAKAOTALK/i,      // 일반적인 카카오톡 패턴
-      /KAKAOBROWSER/i,   // 카카오 브라우저
-      /kakao/i,          // 카카오 관련 키워드
-      /KakaoTalk/i,      // 대소문자 구분 패턴
-      /KakaoStory/i,     // 카카오스토리
-      /KakaoChannel/i    // 카카오 채널
-    ];
-    
-    // 하나라도 매칭되면 인앱으로 판단
-    const isKakao = kakaoPatterns.some(pattern => pattern.test(ua));
-    
-    if (isKakao) {
-      console.log('🟡 카카오 인앱 브라우저 감지됨:', ua);
-      return true;
-    }
-    
-    // 추가 감지: WebView 환경인지 확인
-    const isWebView = /wv\)|WebView/i.test(ua) || 
-                     ((window as any).chrome === undefined && 
-                     typeof (window as any).orientation !== 'undefined');
-    
-    if (isWebView) {
-      console.log('🟡 WebView 환경 감지됨:', ua);
-      return true; // WebView 환경도 안전하게 스킵
-    }
-    
-    return false;
-  } catch (error) {
-    console.warn('브라우저 감지 실패:', error);
-    return false;
-  }
-};
-
 // 클라이언트 IP 가져오기 함수
 const getClientIP = async (): Promise<string> => {
   try {
@@ -78,51 +42,20 @@ const getClientIP = async (): Promise<string> => {
       return '127.0.0.1'; // 개발용 고정 IP
     }
     
-    // 카카오 인앱 브라우저에서는 외부 IP 조회가 차단/지연될 수 있으므로 즉시 폴백
-    if (isKakaoInApp()) {
-      console.log('🟡 카카오 인앱 환경: IP 조회 스킵');
-      return '0.0.0.0';
-    }
-    
-    // 프로덕션 환경에서는 실제 IP 가져오기 (더 빠른 타임아웃 적용)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      console.log('⏰ IP 조회 타임아웃 (800ms)');
-      controller.abort();
-    }, 800); // 800ms로 더 빠른 타임아웃
-    
-    try {
-      const response = await fetch('https://api.ipify.org?format=json', { 
-        signal: controller.signal,
-        mode: 'cors',
-        cache: 'no-cache'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      const ip = data.ip || 'localhost';
-      console.log('✅ IP 조회 성공:', ip);
-      return ip;
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    // 프로덕션 환경에서는 실제 IP 가져오기
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip || 'localhost';
   } catch (error) {
     console.warn('IP 주소를 가져올 수 없습니다:', error);
-    // 개발 환경에서는 고정 IP 반환, 프로덕션에서는 로컬 표시
-    return process.env.NODE_ENV === 'development' ? '127.0.0.1' : '0.0.0.0';
+    // 개발 환경에서는 고정 IP 반환
+    return '127.0.0.1';
   }
 };
 
 // User-Agent 정보 가져오기
 const getUserAgent = (): string => {
-  try {
-    return navigator.userAgent || 'unknown';
-  } catch {
-    return 'unknown';
-  }
+  return navigator.userAgent || 'unknown';
 };
 
 // 프로모션 조회 기록
@@ -131,30 +64,10 @@ export const recordPromotionView = async (
 ): Promise<CrudResult<void>> => {
   try {
     console.log('🔥 프로모션 조회 기록 시작:', promotionId);
-    console.log('🔍 User-Agent:', navigator.userAgent);
-    
-    // 인앱에서의 네트워크 제약 회피: 통계 수집 최소화 처리 (필요 시 서버 사이드 수집으로 대체)
-    const isInApp = isKakaoInApp();
-    console.log('🔍 인앱 브라우저 감지 결과:', isInApp);
-    
-    if (isInApp) {
-      console.log('🟡 카카오 인앱 브라우저 감지: 통계 수집 스킵');
-      return { success: true };
-    }
-    
-    // 추가 안전장치: 전체 처리 시간 제한 (3초)
-    const overallTimeout = new Promise<CrudResult<void>>((_, reject) => {
-      setTimeout(() => {
-        console.log('⏰ 전체 통계 수집 타임아웃 (3초)');
-        reject(new Error('Statistics collection timeout'));
-      }, 3000);
-    });
-    
-    const statsCollection = (async () => {
     
     const clientIP = await getClientIP();
     const userAgent = getUserAgent();
-    const referrer = typeof document !== 'undefined' && document.referrer ? document.referrer : undefined;
+    const referrer = document.referrer || undefined;
     const viewedAt = Timestamp.now();
     
     console.log('📊 조회 데이터:', {
@@ -211,7 +124,7 @@ export const recordPromotionView = async (
           viewedAt,
           referrer
         };
-        
+
         // 고유 IP 목록 업데이트
         const updatedUniqueIPs = existingStats.uniqueIPs.includes(clientIP) 
           ? existingStats.uniqueIPs 
@@ -235,20 +148,15 @@ export const recordPromotionView = async (
       });
     }
 
-      console.log('🎉 프로모션 조회 기록 완료!');
-      return {
-        success: true
-      };
-    })();
-    
-    // 타임아웃과 실제 수집 중 먼저 완료되는 것 반환
-    return await Promise.race([statsCollection, overallTimeout]);
-    
+    console.log('🎉 프로모션 조회 기록 완료!');
+    return {
+      success: true
+    };
   } catch (error) {
     console.error('프로모션 조회 기록 실패:', error);
-    // 통계 수집 실패해도 페이지는 정상 동작하도록 성공 반환
     return {
-      success: true // 통계 실패는 사용자 경험에 영향 주지 않음
+      success: false,
+      error: handleFirebaseError(error)
     };
   }
 };
@@ -486,6 +394,7 @@ export const getDashboardStats = async (): Promise<CrudResult<{
       
       // 각 프로모션의 viewHistory를 확인하여 날짜별 집계
       stats.viewHistory.forEach((record) => {
+        const recordDate = record.viewedAt.toDate();
         const recordTimestamp = record.viewedAt;
 
         // 어제 데이터

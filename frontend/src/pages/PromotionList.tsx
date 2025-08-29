@@ -32,7 +32,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isPersistEnabled, setIsPersistEnabled] = useState(false);
   const lastDocRef = useRef<any>(null);
-  const { ConfirmComponent } = useConfirm();
+  const { confirm, ConfirmComponent } = useConfirm();
 
   const pageSize = 10;
 
@@ -90,6 +90,40 @@ const PromotionList: React.FC<PromotionListProps> = ({
     }
   }, [isPersistEnabled, saveFiltersToStorage]);
 
+  // 프로모션 목록 조회
+  const loadPromotions = useCallback(async (reset = false) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const result = await getPromotions(filter, sort, pageSize, reset ? null : lastDocRef.current);
+      
+      if (result.success && result.data) {
+        const newPromotions = result.data.promotions;
+        
+        if (reset) {
+          setPromotions(newPromotions);
+        } else {
+          setPromotions(prev => [...prev, ...newPromotions]);
+        }
+        setHasNextPage(result.data.hasNextPage);
+        lastDocRef.current = result.data.lastDoc;
+        
+        // 프로모션 통계 로드
+        if (newPromotions.length > 0) {
+          const promotionIds = newPromotions.map(p => p.id);
+          loadPromotionStats(promotionIds, reset);
+        }
+      } else {
+        setError(result.error || '프로모션 목록을 불러올 수 없습니다.');
+      }
+    } catch (err) {
+      setError('오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filter, sort, pageSize]);
+
   // 프로모션 통계 로드 (개별 조회로 변경하여 팝업과 통일)
   const loadPromotionStats = useCallback(async (promotionIds: string[], reset = false) => {
     try {
@@ -125,40 +159,6 @@ const PromotionList: React.FC<PromotionListProps> = ({
       // 통계 로드 실패는 사용자에게 알리지 않음 (선택적 기능)
     }
   }, []);
-
-  // 프로모션 목록 조회
-  const loadPromotions = useCallback(async (reset = false) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const result = await getPromotions(filter, sort, pageSize, reset ? null : lastDocRef.current);
-      
-      if (result.success && result.data) {
-        const newPromotions = result.data.promotions;
-        
-        if (reset) {
-          setPromotions(newPromotions);
-        } else {
-          setPromotions(prev => [...prev, ...newPromotions]);
-        }
-        setHasNextPage(result.data.hasNextPage);
-        lastDocRef.current = result.data.lastDoc;
-        
-        // 프로모션 통계 로드
-        if (newPromotions.length > 0) {
-          const promotionIds = newPromotions.map(p => p.id);
-          loadPromotionStats(promotionIds, reset);
-        }
-      } else {
-        setError(result.error || '프로모션 목록을 불러올 수 없습니다.');
-      }
-    } catch (err) {
-      setError('오류가 발생했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filter, sort, pageSize, loadPromotionStats]);
 
   // 초기 로드
   useEffect(() => {

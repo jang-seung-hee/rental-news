@@ -9,18 +9,6 @@ import CustomTag from '../components/admin/CustomTag';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import '../utils/promotionViewLightMode.css';
 
-// 카카오 인앱 및 WebView 감지
-const isInAppWebView = (): boolean => {
-  try {
-    const ua = navigator.userAgent || '';
-    const kakao = /KAKAOTALK|KAKAOBROWSER|KakaoTalk|kakao/i.test(ua);
-    const webview = /wv\)|WebView/i.test(ua) || ((window as any).chrome === undefined && typeof (window as any).orientation !== 'undefined');
-    return kakao || webview;
-  } catch {
-    return false;
-  }
-};
-
 const PromotionViewPage: React.FC = () => {
   const { identifier } = useParams<{ identifier: string }>();
   const [searchParams] = useSearchParams();
@@ -52,14 +40,10 @@ const PromotionViewPage: React.FC = () => {
           viewRecordedRef.current = result.data.id;
           
           // 프로모션 조회 기록 (비동기적으로 처리하여 페이지 로딩에 영향 없음)
-          // 카카오톡 인앱 브라우저에서도 안전하게 처리
-          const promotionId = result.data.id;
-          setTimeout(() => {
-            recordPromotionView(promotionId).catch((error: unknown) => {
-              console.warn('프로모션 조회 기록 실패:', error);
-              // 조회 기록 실패는 사용자에게 알리지 않음 (백그라운드 처리)
-            });
-          }, 100); // 100ms 지연으로 메인 렌더링과 분리
+          recordPromotionView(result.data.id).catch(error => {
+            console.warn('프로모션 조회 기록 실패:', error);
+            // 조회 기록 실패는 사용자에게 알리지 않음 (백그라운드 처리)
+          });
         }
       } else {
         setError(result.error || '프로모션을 찾을 수 없습니다.');
@@ -90,8 +74,6 @@ const PromotionViewPage: React.FC = () => {
   // 메타태그 직접 설정 (React Helmet 보완용)
   useEffect(() => {
     if (promotion && systemSettings) {
-      // 인앱(WebView)에서는 헤드/파비콘 직접 조작을 생략해 안정성 확보
-      if (isInAppWebView()) return;
       const title = systemSettings?.defaultTitle || `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
       const description = systemSettings?.defaultDescription || promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
       

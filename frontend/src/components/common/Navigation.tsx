@@ -33,7 +33,7 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
       path: '/promotions',
       label: '프로모션 목록',
       icon: DocumentTextIcon,
-      description: '프로모션 목록 조회 및 관리'
+      description: '프로모션 조회 및 관리'
     },
 
     {

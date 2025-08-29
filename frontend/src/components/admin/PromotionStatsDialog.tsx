@@ -110,6 +110,9 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                 const year = today.getFullYear();
                 const month = today.getMonth(); // 0-based (0=1월, 7=8월)
                 
+                // 이번달 1일 (로컬 시간 기준)
+                const startOfMonth = new Date(year, month, 1);
+                
                 // YYYY-MM-DD 형식으로 변환
                 const startStr = `${year}-${String(month + 1).padStart(2, '0')}-01`;
                 const endStr = today.toISOString().slice(0, 10);

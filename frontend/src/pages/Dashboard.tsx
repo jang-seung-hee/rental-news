@@ -189,55 +189,55 @@ const Dashboard: React.FC = () => {
         </Button>
       </div>
 
-      {/* 프로모션 조회 통계 */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">프로모션 조회 통계</h2>
-        
         {/* 프로모션 관리 통계 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">전체 프로모션</CardTitle>
-              <DocumentTextIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalPromotions}</div>
-              <p className="text-xs text-muted-foreground">
-                등록된 프로모션 총 개수
-              </p>
-            </CardContent>
-          </Card>
+        <div className="space-y-3">
+          <h3 className="text-lg font-medium text-gray-800">프로모션 관리 현황</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">전체 프로모션</CardTitle>
+                <DocumentTextIcon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalPromotions}</div>
+                <p className="text-xs text-muted-foreground">
+                  등록된 프로모션 총 개수
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">활성 프로모션</CardTitle>
-              <ChartBarIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activePromotions}</div>
-              <p className="text-xs text-muted-foreground">
-                현재 활성화된 프로모션
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">활성 프로모션</CardTitle>
+                <ChartBarIcon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.activePromotions}</div>
+                <p className="text-xs text-muted-foreground">
+                  현재 활성화된 프로모션
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">이번 달 프로모션</CardTitle>
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.thisMonthPromotions}</div>
-              <p className="text-xs text-muted-foreground">
-                이번 달 등록된 프로모션
-              </p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">이번 달 프로모션</CardTitle>
+                <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.thisMonthPromotions}</div>
+                <p className="text-xs text-muted-foreground">
+                  이번 달 등록된 프로모션
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
         
         {/* 일별 조회 통계 */}
-        <div className="pt-2">
-          <h3 className="text-lg font-medium text-gray-800 mb-3">일별 조회 현황</h3>
+        <div className="space-y-3">
+          <h3 className="text-lg font-medium text-gray-800">일별 조회 현황</h3>
           {isStatsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <StatsCardSkeleton />
@@ -246,118 +246,118 @@ const Dashboard: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* 어제 열람수 */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">어제 열람수</CardTitle>
-                <EyeIcon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">
-                  {viewStats.yesterday.totalViews}건 / {viewStats.yesterday.uniqueIPCount}명
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  전일 프로모션 조회 현황
-                </p>
-              </CardContent>
-            </Card>
+              {/* 어제 열람수 */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">어제 열람수</CardTitle>
+                  <EyeIcon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {viewStats.yesterday.totalViews}건 / {viewStats.yesterday.uniqueIPCount}명
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    전일 프로모션 조회 현황
+                  </p>
+                </CardContent>
+              </Card>
 
-            {/* 오늘 열람수 */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">오늘 열람수</CardTitle>
-                <EyeIcon className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {viewStats.today.totalViews}건 / {viewStats.today.uniqueIPCount}명
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  오늘 프로모션 조회 현황
-                </p>
-              </CardContent>
-            </Card>
+              {/* 오늘 열람수 */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">오늘 열람수</CardTitle>
+                  <EyeIcon className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    {viewStats.today.totalViews}건 / {viewStats.today.uniqueIPCount}명
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    오늘 프로모션 조회 현황
+                  </p>
+                </CardContent>
+              </Card>
 
-            {/* 이번달 합계 */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">이번달 합계</CardTitle>
-                <UsersIcon className="h-4 w-4 text-purple-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-purple-600">
-                  {viewStats.thisMonth.totalViews}건 / {viewStats.thisMonth.uniqueIPCount}명
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  이번달 누적 조회 현황
-                </p>
-              </CardContent>
-            </Card>
+              {/* 이번달 합계 */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">이번달 합계</CardTitle>
+                  <UsersIcon className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {viewStats.thisMonth.totalViews}건 / {viewStats.thisMonth.uniqueIPCount}명
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    이번달 누적 조회 현황
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           )}
         </div>
 
         {/* 인기 프로모션 정보 */}
-        <div className="pt-2">
-          <h3 className="text-lg font-medium text-gray-800 mb-3">인기 프로모션</h3>
+        <div className="space-y-3">
+          <h3 className="text-lg font-medium text-gray-800">인기 프로모션</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 가장 열람 많은 프로모션 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center">
-                <ChartBarIcon className="h-4 w-4 mr-2 text-blue-600" />
-                가장 열람 많은 프로모션
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isStatsLoading ? (
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ) : topViewedPromotion ? (
-                <div>
-                  <div className="font-medium text-gray-900 truncate">
-                    {promotionTitles[topViewedPromotion.promotionId] || '제목 없음'}
+            {/* 가장 열람 많은 프로모션 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <ChartBarIcon className="h-4 w-4 mr-2 text-blue-600" />
+                  가장 열람 많은 프로모션
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isStatsLoading ? (
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {topViewedPromotion.totalViews}회 조회 / {topViewedPromotion.uniqueIPCount}명 이용
+                ) : topViewedPromotion ? (
+                  <div>
+                    <div className="font-medium text-gray-900 truncate">
+                      {promotionTitles[topViewedPromotion.promotionId] || '제목 없음'}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {topViewedPromotion.totalViews}회 조회 / {topViewedPromotion.uniqueIPCount}명 이용
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-gray-500">조회 데이터가 없습니다</div>
-              )}
-            </CardContent>
-          </Card>
+                ) : (
+                  <div className="text-gray-500">조회 데이터가 없습니다</div>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* 가장 이용자 많은 프로모션 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center">
-                <UsersIcon className="h-4 w-4 mr-2 text-green-600" />
-                가장 이용자 많은 프로모션
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isStatsLoading ? (
-                <div className="animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-              ) : topUserPromotion ? (
-                <div>
-                  <div className="font-medium text-gray-900 truncate">
-                    {promotionTitles[topUserPromotion.promotionId] || '제목 없음'}
+            {/* 가장 이용자 많은 프로모션 */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <UsersIcon className="h-4 w-4 mr-2 text-green-600" />
+                  가장 이용자 많은 프로모션
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isStatsLoading ? (
+                  <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {topUserPromotion.uniqueIPCount}명 이용 / {topUserPromotion.totalViews}회 조회
+                ) : topUserPromotion ? (
+                  <div>
+                    <div className="font-medium text-gray-900 truncate">
+                      {promotionTitles[topUserPromotion.promotionId] || '제목 없음'}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {topUserPromotion.uniqueIPCount}명 이용 / {topUserPromotion.totalViews}회 조회
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="text-gray-500">이용자 데이터가 없습니다</div>
-              )}
-            </CardContent>
-          </Card>
+                ) : (
+                  <div className="text-gray-500">이용자 데이터가 없습니다</div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
