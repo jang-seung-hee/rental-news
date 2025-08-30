@@ -1,0 +1,225 @@
+/* 관리자 모드 타이포그래피 통일 스타일 */
+
+/* ===============================
+   페이지 타이틀 (Page Title)
+   =============================== */
+.admin-page-title {
+  @apply text-2xl font-bold text-gray-900 leading-tight;
+}
+
+/* ===============================
+   섹션 타이틀 (Section Title) 
+   =============================== */
+.admin-section-title {
+  @apply text-lg font-semibold text-gray-800 leading-snug;
+}
+
+/* ===============================
+   서브 섹션 타이틀 (Sub Section Title)
+   =============================== */
+.admin-subsection-title {
+  @apply text-base font-medium text-gray-700 leading-relaxed;
+}
+
+/* ===============================
+   설명글 (Description)
+   =============================== */
+.admin-description {
+  @apply text-sm text-gray-600 leading-relaxed;
+}
+
+/* ===============================
+   본문 (Body Text)
+   =============================== */
+.admin-body-text {
+  @apply text-sm text-gray-900 leading-relaxed;
+}
+
+/* ===============================
+   보조 텍스트 (Caption/Helper Text)
+   =============================== */
+.admin-caption {
+  @apply text-xs text-gray-500 leading-normal;
+}
+
+/* ===============================
+   라벨 (Form Labels)
+   =============================== */
+.admin-label {
+  @apply text-sm font-medium text-gray-700 leading-relaxed;
+}
+
+/* ===============================
+   메트릭/숫자 강조 (Metrics/Numbers)
+   =============================== */
+.admin-metric-large {
+  @apply text-2xl font-bold text-gray-900 leading-tight;
+}
+
+.admin-metric-medium {
+  @apply text-xl font-semibold text-gray-900 leading-tight;
+}
+
+.admin-metric-small {
+  @apply text-lg font-medium text-gray-900 leading-tight;
+}
+
+/* ===============================
+   상태 표시 (Status Text)
+   =============================== */
+.admin-status-active {
+  @apply text-sm font-medium text-green-700 leading-normal;
+}
+
+.admin-status-inactive {
+  @apply text-sm font-medium text-red-700 leading-normal;
+}
+
+.admin-status-pending {
+  @apply text-sm font-medium text-yellow-700 leading-normal;
+}
+
+.admin-status-neutral {
+  @apply text-sm font-medium text-gray-700 leading-normal;
+}
+
+/* ===============================
+   버튼 텍스트 (Button Text)
+   =============================== */
+.admin-button-text {
+  @apply text-sm font-medium leading-normal;
+}
+
+/* ===============================
+   테이블 헤더 (Table Headers)
+   =============================== */
+.admin-table-header {
+  @apply text-xs font-semibold text-gray-600 uppercase tracking-wider leading-normal;
+}
+
+/* ===============================
+   테이블 셀 (Table Cells)
+   =============================== */
+.admin-table-cell {
+  @apply text-sm text-gray-900 leading-relaxed;
+}
+
+/* ===============================
+   링크 (Links)
+   =============================== */
+.admin-link {
+  @apply text-sm text-blue-600 hover:text-blue-800 font-medium leading-relaxed;
+}
+
+/* ===============================
+   에러 메시지 (Error Messages)
+   =============================== */
+.admin-error {
+  @apply text-sm text-red-600 font-medium leading-relaxed;
+}
+
+/* ===============================
+   성공 메시지 (Success Messages)
+   =============================== */
+.admin-success {
+  @apply text-sm text-green-600 font-medium leading-relaxed;
+}
+
+/* ===============================
+   경고 메시지 (Warning Messages)
+   =============================== */
+.admin-warning {
+  @apply text-sm text-yellow-600 font-medium leading-relaxed;
+}
+
+/* ===============================
+   정보 메시지 (Info Messages)
+   =============================== */
+.admin-info {
+  @apply text-sm text-blue-600 font-medium leading-relaxed;
+}
+
+/* ===============================
+   카드 제목 (Card Titles)
+   =============================== */
+.admin-card-title {
+  @apply text-base font-semibold text-gray-800 leading-snug;
+}
+
+/* ===============================
+   통계 제목 (Stats Labels)
+   =============================== */
+.admin-stats-label {
+  @apply text-xs font-medium text-gray-600 leading-normal;
+}
+
+/* ===============================
+   통계 값 (Stats Values)
+   =============================== */
+.admin-stats-value {
+  @apply text-2xl font-bold text-gray-900 leading-tight;
+}
+
+/* ===============================
+   브레드크럼 (Breadcrumb)
+   =============================== */
+.admin-breadcrumb {
+  @apply text-sm text-gray-500 leading-relaxed;
+}
+
+.admin-breadcrumb-current {
+  @apply text-sm text-gray-900 font-medium leading-relaxed;
+}
+
+/* ===============================
+   탭 (Tabs)
+   =============================== */
+.admin-tab {
+  @apply text-sm font-medium text-gray-700 leading-normal;
+}
+
+.admin-tab-active {
+  @apply text-sm font-medium text-blue-600 leading-normal;
+}
+
+/* ===============================
+   로딩/플레이스홀더 텍스트
+   =============================== */
+.admin-loading {
+  @apply text-sm text-gray-500 leading-relaxed;
+}
+
+/* ===============================
+   특수 강조 텍스트
+   =============================== */
+.admin-highlight {
+  @apply text-sm font-semibold text-gray-900 bg-yellow-100 px-2 py-1 rounded leading-relaxed;
+}
+
+/* ===============================
+   폰트 패밀리 통일 (전체 관리자 모드)
+   =============================== */
+.admin-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ===============================
+   반응형 타이포그래피 조정
+   =============================== */
+@media (max-width: 640px) {
+  .admin-page-title {
+    @apply text-xl;
+  }
+  
+  .admin-section-title {
+    @apply text-base;
+  }
+  
+  .admin-metric-large {
+    @apply text-xl;
+  }
+  
+  .admin-metric-medium {
+    @apply text-lg;
+  }
+}

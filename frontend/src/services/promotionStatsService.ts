@@ -8,7 +8,10 @@ import {
   Timestamp,
   setDoc,
   arrayUnion,
-  increment
+  increment,
+  updateDoc,
+  doc,
+  getDoc
 } from 'firebase/firestore';
 import { 
   getCollectionRef, 
@@ -468,6 +471,60 @@ export const getTopUserPromotions = async (
   }
 };
 
+// 모든 프로모션의 통계(병합 후) 조회
+export const getAllPromotionStats = async (): Promise<CrudResult<PromotionViewStats[]>> => {
+  try {
+    const qAll = query(getCollectionRef(STATS_COLLECTION_NAME));
+    const snapshot = await getDocs(qAll);
+
+    // promotionId 단위로 병합
+    const merged: { [promotionId: string]: PromotionViewStats } = {} as any;
+
+    snapshot.forEach((doc) => {
+      const d = doc.data() as any;
+      const pid = d.promotionId;
+      if (!pid) return;
+
+      if (!merged[pid]) {
+        merged[pid] = {
+          id: doc.id,
+          promotionId: pid,
+          totalViews: d.totalViews || 0,
+          uniqueIPs: Array.isArray(d.uniqueIPs) ? d.uniqueIPs.slice() : [],
+          uniqueIPCount: Array.isArray(d.uniqueIPs) ? d.uniqueIPs.length : (d.uniqueIPCount || 0),
+          viewHistory: Array.isArray(d.viewHistory) ? d.viewHistory.slice() : [],
+          lastUpdated: d.updatedAt || d.lastUpdated || Timestamp.now()
+        } as PromotionViewStats;
+      } else {
+        const target = merged[pid];
+        target.totalViews += d.totalViews || 0;
+        const set = new Set<string>(target.uniqueIPs);
+        (d.uniqueIPs || []).forEach((ip: string) => set.add(ip));
+        target.uniqueIPs = Array.from(set);
+        target.uniqueIPCount = target.uniqueIPs.length;
+        if (Array.isArray(d.viewHistory)) {
+          target.viewHistory = target.viewHistory.concat(d.viewHistory);
+        }
+        // 최신 업데이트 시간 반영
+        const newUpdated = d.updatedAt || d.lastUpdated;
+        if (newUpdated && (!target.lastUpdated || newUpdated.toMillis?.() > (target.lastUpdated as any)?.toMillis?.())) {
+          target.lastUpdated = newUpdated;
+        }
+      }
+    });
+
+    return {
+      success: true,
+      data: Object.values(merged)
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+};
+
 // 날짜별 전체 통계 조회 (어제, 오늘, 이번달)
 export const getDashboardStats = async (): Promise<CrudResult<{
   yesterday: { totalViews: number; uniqueIPCount: number; };
@@ -543,6 +600,60 @@ export const getDashboardStats = async (): Promise<CrudResult<{
       }
     };
   } catch (error) {
+    return {
+      success: false,
+      error: handleFirebaseError(error)
+    };
+  }
+};
+
+/**
+ * 특정 프로모션의 조회/이용자 통계 리셋
+ * @param promotionId 리셋할 프로모션 ID
+ * @returns 리셋 결과
+ */
+export const resetPromotionStats = async (promotionId: string): Promise<CrudResult<void>> => {
+  try {
+    // 프로모션 통계 문서 찾기 (getPromotionStats와 동일한 방식)
+    const q = query(
+      getCollectionRef(STATS_COLLECTION_NAME),
+      where('promotionId', '==', promotionId)
+    );
+
+    const querySnapshot = await getDocs(q);
+    
+    const resetData = {
+      totalViews: 0,
+      uniqueIPs: [],
+      viewHistory: [],
+      updatedAt: Timestamp.now()
+    };
+
+    if (!querySnapshot.empty) {
+      // 해당 promotionId를 가진 모든 문서를 리셋 (중복 문서 문제 해결)
+      const resetPromises = querySnapshot.docs.map(doc => 
+        updateDoc(doc.ref, resetData)
+      );
+      
+      await Promise.all(resetPromises);
+      console.log(`프로모션 ${promotionId}의 통계 ${querySnapshot.docs.length}개 문서가 모두 리셋되었습니다.`);
+    } else {
+      // 통계 문서가 없으면 새로 생성
+      const newDocRef = getDocumentRef(STATS_COLLECTION_NAME, promotionId);
+      await setDoc(newDocRef, {
+        promotionId,
+        ...resetData,
+        createdAt: Timestamp.now()
+      });
+      console.log(`프로모션 ${promotionId}의 통계 문서가 새로 생성되어 리셋되었습니다.`);
+    }
+    
+    return {
+      success: true,
+      data: undefined
+    };
+  } catch (error) {
+    console.error('통계 리셋 실패:', error);
     return {
       success: false,
       error: handleFirebaseError(error)

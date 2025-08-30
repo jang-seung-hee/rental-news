@@ -3,6 +3,8 @@ import { Promotion, PromotionViewStats } from '../../types';
 
 import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateReferrerRatios, aggregateWeekdayRatios, aggregateGroupedTimeRatios } from '../../utils/statsUtils';
 import { Button } from '../ui/button';
+import { Alert, AlertDescription } from '../ui/alert';
+import { useToast } from '../../hooks/use-toast';
 
 interface Props {
   isOpen: boolean;
@@ -14,6 +16,9 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<PromotionViewStats | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const { toast } = useToast();
   const [start, setStart] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() - 6);
@@ -36,6 +41,43 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
       setLoading(false);
     }
   }, [promotion.id]);
+
+  // 통계 리셋 함수
+  const handleResetStats = async () => {
+    try {
+      setIsResetting(true);
+      const { resetPromotionStats } = await import('../../services/promotionStatsService');
+      const result = await resetPromotionStats(promotion.id);
+      
+      if (result.success) {
+        toast({
+          title: "통계 리셋 완료",
+          description: `"${promotion.title}" 프로모션의 열람/이용자 수가 리셋되었습니다.`,
+          duration: 3000,
+        });
+        
+        // 통계 데이터 다시 로드
+        await loadStats();
+        setShowResetConfirm(false);
+      } else {
+        toast({
+          title: "리셋 실패",
+          description: result.error || "통계 리셋에 실패했습니다.",
+          variant: "destructive",
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "리셋 실패",
+        description: "통계 리셋 중 오류가 발생했습니다.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -326,6 +368,56 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* 통계 리셋 섹션 */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="text-sm font-medium text-red-800 mb-2">⚠️ 개발자 도구</div>
+                <p className="text-sm text-red-700 mb-4">
+                  이 프로모션의 모든 열람/이용자 통계를 리셋합니다. 
+                  <br />
+                  <strong>이 작업은 되돌릴 수 없으니 신중하게 진행하세요.</strong>
+                </p>
+                
+                {!showResetConfirm ? (
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => setShowResetConfirm(true)}
+                  >
+                    통계 리셋
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <Alert variant="destructive">
+                      <AlertDescription>
+                        정말로 "{promotion.title}" 프로모션의 모든 통계를 리셋하시겠습니까?
+                        <br />
+                        모든 열람 기록과 이용자 데이터가 삭제됩니다.
+                      </AlertDescription>
+                    </Alert>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={handleResetStats}
+                        disabled={isResetting}
+                      >
+                        {isResetting ? '리셋 중...' : '확인 - 리셋 실행'}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowResetConfirm(false)}
+                        disabled={isResetting}
+                      >
+                        취소
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </>
         )}

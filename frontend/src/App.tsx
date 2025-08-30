@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
 import './App.css';
 import './globals.css';
+import './styles/admin-typography.css';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -162,7 +163,7 @@ const AppContent: React.FC = () => {
 
   // 관리자 권한이 있는 경우 메인 레이아웃 표시
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 admin-container">
       <div className="flex flex-col lg:flex-row">
         {/* 사이드바 네비게이션 */}
         <div className="w-full lg:w-64 bg-white shadow-sm border-b lg:border-b-0 lg:border-r border-gray-200 min-h-screen">

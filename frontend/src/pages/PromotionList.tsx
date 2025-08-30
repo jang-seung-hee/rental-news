@@ -238,8 +238,8 @@ const PromotionList: React.FC<PromotionListProps> = ({
       {/* 헤더 */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">프로모션 관리</h1>
-          <p className="text-gray-600 mt-1">프로모션 목록을 조회하고 관리할 수 있습니다.</p>
+          <h1 className="admin-page-title">프로모션 관리</h1>
+          <p className="admin-description mt-1">프로모션 목록을 조회하고 관리할 수 있습니다.</p>
         </div>
         <Button onClick={onAdd} className="bg-blue-600 hover:bg-blue-700">
           새 프로모션 등록
@@ -249,7 +249,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
       {/* 검색 및 필터 */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>검색 및 필터</CardTitle>
+          <CardTitle className="admin-card-title">검색 및 필터</CardTitle>
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
@@ -258,7 +258,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
               onChange={(e) => handlePersistToggle(e.target.checked)}
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
-            <label htmlFor="persistFilters" className="text-sm font-medium text-gray-700 cursor-pointer">
+            <label htmlFor="persistFilters" className="admin-label cursor-pointer">
               검색 조건 고정
             </label>
           </div>
@@ -267,7 +267,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* 검색 */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">검색</label>
+              <label className="admin-label">검색</label>
               <Input
                 placeholder="제목, 코드, 내용으로 검색..."
                 value={searchTerm}
@@ -277,9 +277,9 @@ const PromotionList: React.FC<PromotionListProps> = ({
 
             {/* 월 필터 */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">월</label>
+              <label className="admin-label">월</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 admin-body-text"
                 onChange={(e) => handleMonthFilter(e.target.value)}
                 value={filter.month || ''}
               >
@@ -294,9 +294,9 @@ const PromotionList: React.FC<PromotionListProps> = ({
 
             {/* 상태 필터 */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">상태</label>
+              <label className="admin-label">상태</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 admin-body-text"
                 onChange={(e) => handleStatusFilter(e.target.value)}
                 value={filter.isActive === true ? 'active' : filter.isActive === false ? 'inactive' : ''}
               >
@@ -308,9 +308,9 @@ const PromotionList: React.FC<PromotionListProps> = ({
 
             {/* 정렬 */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">정렬</label>
+              <label className="admin-label">정렬</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 admin-body-text"
                 onChange={(e) => {
                   const [field] = e.target.value.split('-');
                   handleSort(field as any);

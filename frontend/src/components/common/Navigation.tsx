@@ -6,7 +6,8 @@ import {
   HomeIcon, 
   DocumentTextIcon, 
   Cog6ToothIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
 import { useAdminAuth } from '../../hooks/useAdminAuth';
 
@@ -19,7 +20,21 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
   const { isAdmin, signOut } = useAdminAuth();
 
   const isActive = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path);
+    const currentPath = location.pathname;
+    
+    // 정확한 경로 일치
+    if (currentPath === path) return true;
+    
+    // 루트 경로는 정확히 일치할 때만 활성화
+    if (path === '/') return false;
+    
+    // '/promotions' 경로의 특별 처리: '/promotions/stats'와 구분
+    if (path === '/promotions') {
+      return currentPath.startsWith('/promotions/') && currentPath !== '/promotions/stats';
+    }
+    
+    // 다른 경로들은 하위 경로 매칭
+    return currentPath.startsWith(path + '/');
   };
 
   const navItems = [
@@ -35,7 +50,12 @@ const Navigation: React.FC<NavigationProps> = ({ className }) => {
       icon: DocumentTextIcon,
       description: '프로모션 조회 및 관리'
     },
-
+    {
+      path: '/promotions/stats',
+      label: '프로모션 통계',
+      icon: ChartBarIcon,
+      description: '전체 프로모션 통계 분석'
+    },
     {
       path: '/settings',
       label: '설정',

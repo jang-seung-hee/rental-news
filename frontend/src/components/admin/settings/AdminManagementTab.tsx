@@ -4,6 +4,7 @@ import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Alert, AlertDescription } from '../../ui/alert';
+import { useToast } from '../../../hooks/use-toast';
 import { 
   Dialog, 
   DialogContent, 
@@ -36,7 +37,6 @@ const AdminManagementTab: React.FC = () => {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   
   // 새 관리자 추가 관련 상태
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -46,6 +46,7 @@ const AdminManagementTab: React.FC = () => {
   
   const { user } = useAdminAuth();
   const { confirm, ConfirmComponent } = useConfirm();
+  const { toast } = useToast();
 
   // 관리자 목록 로드
   const loadAdmins = async () => {
@@ -80,12 +81,15 @@ const AdminManagementTab: React.FC = () => {
     try {
       setIsCreating(true);
       setError(null);
-      setSuccess(null);
 
       const result = await createAdmin(newAdminEmail, newAdminPassword, user.uid);
       
       if (result.success) {
-        setSuccess('새 관리자가 성공적으로 추가되었습니다.');
+        toast({
+          title: "관리자 추가 완료",
+          description: "새 관리자가 성공적으로 추가되었습니다.",
+          duration: 3000,
+        });
         setNewAdminEmail('');
         setNewAdminPassword('');
         setIsAddDialogOpen(false);
@@ -124,12 +128,15 @@ const AdminManagementTab: React.FC = () => {
 
     try {
       setError(null);
-      setSuccess(null);
 
       const result = await deleteAdmin(adminToDelete.uid, user.uid);
       
       if (result.success) {
-        setSuccess('관리자가 성공적으로 삭제되었습니다.');
+        toast({
+          title: "관리자 삭제 완료",
+          description: "관리자가 성공적으로 삭제되었습니다.",
+          duration: 3000,
+        });
         await loadAdmins(); // 목록 새로고침
       } else {
         setError(result.error || '관리자 삭제에 실패했습니다.');
@@ -239,12 +246,6 @@ const AdminManagementTab: React.FC = () => {
         <Alert variant="destructive">
           <ExclamationTriangleIcon className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert>
-          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 
