@@ -9,9 +9,7 @@ import {
   setDoc,
   arrayUnion,
   increment,
-  updateDoc,
-  doc,
-  getDoc
+  updateDoc
 } from 'firebase/firestore';
 import { 
   getCollectionRef, 
