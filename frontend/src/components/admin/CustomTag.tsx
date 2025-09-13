@@ -3,6 +3,8 @@ import { Promotion } from '../../types';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import LazyImage from '../common/LazyImage';
+import promotionViewTitleImage from '../../assets/promotionViewTitle_resize.png';
+import closePromotionViewTitleImage from '../../assets/ClosePromotionViewTitle_resize.png';
 
 import { renderPromotionContent, renderGreetingClosingContent } from '../../utils/promotionContentUtils';
 import { getOtherProductsInfo } from '../../services/promotionService';
@@ -117,7 +119,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
           {/* 하단 오른쪽 이미지 추가 */}
           <div className="absolute bottom-0 right-0 z-0">
             <img 
-              src={promotion.isActive ? "/promotionViewTitle_resize.png" : "/ClosePromotionViewTitle_resize.png"} 
+              src={promotion.isActive ? promotionViewTitleImage : closePromotionViewTitleImage} 
               alt="프로모션 뷰 타이틀" 
               className="w-auto h-36 object-contain"
             />
