@@ -217,7 +217,7 @@ const PromotionViewPage: React.FC = () => {
               <img 
                 src={linkErrorImage}
                 alt="링크 오류" 
-                className="mx-auto mb-4 max-w-full h-auto"
+                className="mx-auto mb-4 max-w-[70%] h-auto"
               />
             </div>
             <Alert variant="destructive">
