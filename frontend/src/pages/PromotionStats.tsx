@@ -92,7 +92,7 @@ const PromotionStatsPage: React.FC = () => {
   const endDate = useMemo(() => new Date(end), [end]);
 
   const filterByRange = useCallback((records: ViewRecordLike[], s: Date, e: Date): ViewRecordLike[] => {
-    const startClamped = new Date(s.getFullYear(), s.getMonth(), s.getDate());
+    const startClamped = new Date(s.getFullYear(), s.getMonth(), s.getDate(), 0, 0, 0, 0);
     const endClamped = new Date(e.getFullYear(), e.getMonth(), e.getDate(), 23, 59, 59, 999);
     return records.filter(r => {
       const dt = (r.viewedAt as any)?.toDate?.() ? (r.viewedAt as any).toDate() : (r.viewedAt as Date);
@@ -160,7 +160,9 @@ const PromotionStatsPage: React.FC = () => {
       if (!isDateFilterMode) return s.viewHistory && s.viewHistory.length > 0;
       return (s.viewHistory || []).some((r: any) => {
         const dt = (r.viewedAt as any)?.toDate?.() ? r.viewedAt.toDate() : r.viewedAt;
-        return dt >= startDate && dt <= endDate;
+        const startClamped = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0, 0);
+        const endClamped = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999);
+        return dt >= startClamped && dt <= endClamped;
       });
     }).length;
     
@@ -188,7 +190,9 @@ const PromotionStatsPage: React.FC = () => {
         // 날짜 필터가 있으면 날짜 범위 체크, 없으면 모든 데이터
         let includeRecord = true;
         if (isDateFilterMode) {
-          includeRecord = dt >= startDate && dt <= endDate;
+          const startClamped = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0, 0);
+          const endClamped = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999);
+          includeRecord = dt >= startClamped && dt <= endClamped;
         }
         
         if (includeRecord) {
@@ -307,26 +311,68 @@ const PromotionStatsPage: React.FC = () => {
                   <button
                     onClick={() => {
                       const today = new Date();
-                      const startDate = new Date(today);
-                      startDate.setDate(today.getDate() - 6);
-                      setStart(startDate.toISOString().slice(0, 10));
+                      setStart(today.toISOString().slice(0, 10));
                       setEnd(today.toISOString().slice(0, 10));
                     }}
                     className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
                   >
-                    최근 7일
+                    오늘
                   </button>
                   <button
                     onClick={() => {
                       const today = new Date();
-                      const startDate = new Date(today);
-                      startDate.setDate(today.getDate() - 29);
-                      setStart(startDate.toISOString().slice(0, 10));
-                      setEnd(today.toISOString().slice(0, 10));
+                      const startOfWeek = new Date(today);
+                      const day = today.getDay();
+                      const diff = today.getDate() - day + (day === 0 ? -6 : 1); // 월요일
+                      startOfWeek.setDate(diff);
+                      const endOfWeek = new Date(startOfWeek);
+                      endOfWeek.setDate(startOfWeek.getDate() + 6); // 일요일
+                      setStart(startOfWeek.toISOString().slice(0, 10));
+                      setEnd(endOfWeek.toISOString().slice(0, 10));
                     }}
                     className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors"
                   >
-                    최근 30일
+                    이번주
+                  </button>
+                  <button
+                    onClick={() => {
+                      const today = new Date();
+                      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                      const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                      setStart(startOfMonth.toISOString().slice(0, 10));
+                      setEnd(endOfMonth.toISOString().slice(0, 10));
+                    }}
+                    className="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors"
+                  >
+                    이번달
+                  </button>
+                  <button
+                    onClick={() => {
+                      const today = new Date();
+                      const startOfLastWeek = new Date(today);
+                      const day = today.getDay();
+                      const diff = today.getDate() - day - 6; // 지난주 월요일
+                      startOfLastWeek.setDate(diff);
+                      const endOfLastWeek = new Date(startOfLastWeek);
+                      endOfLastWeek.setDate(startOfLastWeek.getDate() + 6); // 지난주 일요일
+                      setStart(startOfLastWeek.toISOString().slice(0, 10));
+                      setEnd(endOfLastWeek.toISOString().slice(0, 10));
+                    }}
+                    className="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full hover:bg-yellow-200 transition-colors"
+                  >
+                    지난주
+                  </button>
+                  <button
+                    onClick={() => {
+                      const today = new Date();
+                      const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                      const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                      setStart(startOfLastMonth.toISOString().slice(0, 10));
+                      setEnd(endOfLastMonth.toISOString().slice(0, 10));
+                    }}
+                    className="px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded-full hover:bg-orange-200 transition-colors"
+                  >
+                    지난달
                   </button>
                   <button
                     onClick={() => {

@@ -212,8 +212,15 @@ const PromotionViewPage: React.FC = () => {
         </Helmet>
         <div className="promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
           <div className="max-w-md w-full">
+            <div className="text-center mb-4">
+              <img 
+                src="/linkError_resize.png" 
+                alt="링크 오류" 
+                className="mx-auto mb-4 max-w-full h-auto"
+              />
+            </div>
             <Alert variant="destructive">
-              <AlertDescription className="text-base">
+              <AlertDescription className="text-lg">
                 {error || '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'}
               </AlertDescription>
             </Alert>
