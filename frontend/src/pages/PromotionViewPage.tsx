@@ -214,7 +214,7 @@ const PromotionViewPage: React.FC = () => {
           <div className="max-w-md w-full">
             <div className="text-center mb-4">
               <img 
-                src="/linkError_resize.png" 
+                src={`${process.env.PUBLIC_URL}/linkError_resize.png`}
                 alt="링크 오류" 
                 className="mx-auto mb-4 max-w-full h-auto"
               />
