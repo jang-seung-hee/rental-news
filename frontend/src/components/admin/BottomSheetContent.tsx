@@ -94,13 +94,6 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({ selectedMenu })
         </div>
       </div>
       
-      <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-400">
-        <h4 className="text-lg font-bold text-purple-900 mb-2">SK매직 타사변경</h4>
-        <div className="text-base text-gray-700 space-y-2">
-          <p><span className="font-bold text-purple-700">SK매직 설치기사 방문 전에 기존 제품은 해지 후, 반납한 상태여야 SK매직 설치가 가능합니다</span>.</p>
-        </div>
-      </div>
-      
       <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-400">
         <h4 className="text-lg font-bold text-green-900 mb-2">기타 회사</h4>
         <div className="text-base text-gray-700 space-y-2">
@@ -111,6 +104,7 @@ const BottomSheetContent: React.FC<BottomSheetContentProps> = ({ selectedMenu })
       <div className="bg-red-50 rounded-lg p-4 border-l-4 border-red-400">
         <h4 className="text-lg font-bold text-red-900 mb-2">중요 주의사항</h4>
         <div className="text-base text-gray-700 space-y-2">
+          <p><span className="font-bold text-red-700">타사제품 신청 전 반드시 콜센터에 연락하여 의무사용 만료일과 반납비(3~6만원)를 미리 확인하세요</span>. 의무사용 만료 전 해지시 위약금이 발생할 수 있습니다.</p>
           <p><span className="font-bold text-red-700">5년 만기가 안되었고, 3년의무만 지난 제품은 꼭 원래 회사로 반납해야 합니다</span>. 다른회사 설치기사가 가지고 가면 분실료를 지불 해야 합니다.</p>
         </div>
       </div>
