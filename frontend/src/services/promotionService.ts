@@ -251,7 +251,7 @@ export const getPromotionById = async (id: string): Promise<CrudResult<Promotion
     if (!docSnap.exists()) {
       return {
         success: false,
-        error: '프로모션을 찾을 수 없습니다.'
+        error: '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'
       };
     }
 
@@ -295,7 +295,7 @@ export const getPromotionBySlug = async (slug: string): Promise<CrudResult<Promo
     if (querySnapshot.empty) {
       return {
         success: false,
-        error: '프로모션을 찾을 수 없습니다.'
+        error: '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'
       };
     }
 
@@ -329,7 +329,7 @@ export const updatePromotion = async (
     if (!docSnap.exists()) {
       return {
         success: false,
-        error: '프로모션을 찾을 수 없습니다.'
+        error: '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'
       };
     }
 
@@ -429,7 +429,7 @@ export const updatePromotionStatus = async (
     if (!docSnap.exists()) {
       return {
         success: false,
-        error: '프로모션을 찾을 수 없습니다.'
+        error: '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'
       };
     }
 
@@ -464,7 +464,7 @@ export const updatePromotionSlug = async (
     if (!docSnap.exists()) {
       return {
         success: false,
-        error: '프로모션을 찾을 수 없습니다.'
+        error: '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'
       };
     }
 
@@ -529,7 +529,7 @@ export const deletePromotion = async (id: string): Promise<CrudResult<void>> => 
     if (!docSnap.exists()) {
       return {
         success: false,
-        error: '프로모션을 찾을 수 없습니다.'
+        error: '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'
       };
     }
 
@@ -656,7 +656,7 @@ export const getPromotionBySlugOrId = async (identifier: string): Promise<CrudRe
     // 둘 다 찾지 못한 경우
     return {
       success: false,
-      error: '프로모션을 찾을 수 없습니다.'
+      error: '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'
     };
   } catch (error) {
     return {
@@ -878,7 +878,7 @@ export const updateShortUrl = async (
     if (!docSnap.exists()) {
       return {
         success: false,
-        error: '프로모션을 찾을 수 없습니다.'
+        error: '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'
       };
     }
 

@@ -21,7 +21,7 @@ const PromotionViewPage: React.FC = () => {
   // 프로모션 데이터 로드 (slug 또는 ID 기반)
   const loadPromotion = useCallback(async () => {
     if (!identifier) {
-      setError('프로모션 식별자가 없습니다.');
+      setError('프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요');
       setIsLoading(false);
       return;
     }
@@ -66,7 +66,7 @@ const PromotionViewPage: React.FC = () => {
           console.log('🔄 이미 기록된 프로모션:', result.data.id);
         }
       } else {
-        setError(result.error || '프로모션을 찾을 수 없습니다.');
+        setError(result.error || '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요');
       }
     } catch (err) {
       setError('프로모션을 불러올 수 없습니다.');
@@ -214,7 +214,7 @@ const PromotionViewPage: React.FC = () => {
           <div className="max-w-md w-full">
             <Alert variant="destructive">
               <AlertDescription>
-                {error || '프로모션을 찾을 수 없습니다.'}
+                {error || '프로모션을 찾을 수 없습니다.\n링크가 완전하지 않은 것 같으니, 문자를 받으셨다면 "모두보기"를 클릭하여 전체 링크가 나온 상태에서 클릭을 다시 해보세요'}
               </AlertDescription>
             </Alert>
           </div>
