@@ -691,8 +691,8 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
                     )}
                   </div>
 
-                  {/* 위지워그 에디터 */}
-                  <div className="space-y-2">
+                  {/* 위지워그 에디터 (관리자 수정 화면에서는 항상 라이트 모드 강제) */}
+                  <div className="space-y-2 admin-force-light">
                     <Label htmlFor="content">프로모션 내용 *</Label>
                     <RichTextEditor
                       value={watchedContent}
@@ -872,6 +872,36 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
             </>
           )}
         </form>
+        {/* 관리자 수정 화면 전용: 리치 텍스트 에디터 라이트 모드 강제 오버라이드 */}
+        <style>
+          {`
+          .admin-force-light .rich-text-editor,
+          .admin-force-light .rich-text-editor.fullscreen {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+          }
+          .admin-force-light .editor-toolbar,
+          .admin-force-light .rich-text-editor.fullscreen .editor-toolbar {
+            background-color: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+          }
+          .admin-force-light .editor-content {
+            background-color: #ffffff !important;
+            color: #111827 !important;
+          }
+          .admin-force-light .editor-content[data-placeholder]:empty:before {
+            color: #9ca3af !important;
+          }
+          .admin-force-light .color-picker-dropdown {
+            background-color: #ffffff !important;
+            border-color: #e2e8f0 !important;
+          }
+          .admin-force-light .toolbar-btn:hover {
+            background-color: #e2e8f0 !important;
+            color: #1e293b !important;
+          }
+          `}
+        </style>
       </CardContent>
     </Card>
   );

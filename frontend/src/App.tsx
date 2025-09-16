@@ -32,7 +32,7 @@ const PromotionListWrapper: React.FC = () => {
   const navigate = useNavigate();
   
   const handleEdit = (promotion: any) => {
-    navigate(`/promotions/${promotion.id}`);
+    navigate(`/promotions/${promotion.id}/edit`);
   };
   
   const handleView = (promotion: any) => {

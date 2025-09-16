@@ -313,7 +313,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                       <div className="max-w-80 space-y-1">
                         <div 
                           className="font-medium text-gray-900 truncate cursor-pointer hover:text-blue-600 hover:underline"
-                          onClick={() => window.open(`/promotions/${promotion.id}/edit`, '_blank')}
+                          onClick={() => onEdit(promotion)}
                         >
                           {promotion.title}
                         </div>
@@ -402,7 +402,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                       </select>
                       <div 
                         className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 hover:underline"
-                        onClick={() => window.open(`/promotions/${promotion.id}/edit`, '_blank')}
+                        onClick={() => onEdit(promotion)}
                       >
                         {promotion.title}
                       </div>
