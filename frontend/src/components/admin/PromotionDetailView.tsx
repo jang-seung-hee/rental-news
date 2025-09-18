@@ -158,7 +158,7 @@ const PromotionDetailView: React.FC<PromotionDetailViewProps> = ({
             <h3 className="font-semibold text-sm text-muted-foreground mb-2">프로모션 내용</h3>
             <div className="p-4 bg-muted rounded-lg">
               <div 
-                className="prose prose-sm max-w-none"
+                className="prose prose-normal max-w-none"
                 dangerouslySetInnerHTML={{ __html: renderPromotionContent(promotion.content) }}
               />
             </div>

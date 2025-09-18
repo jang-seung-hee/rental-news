@@ -17,12 +17,14 @@ interface PromotionSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   selectedProductCode: string | null;
+  textSize?: 'normal' | 'large' | 'xlarge';
 }
 
 const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
   isOpen,
   onClose,
-  selectedProductCode
+  selectedProductCode,
+  textSize = 'normal'
 }) => {
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
   const [isLoadingSelectedPromotion, setIsLoadingSelectedPromotion] = useState(false);
@@ -128,7 +130,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
                   </h3>
                 </div>
                 <div 
-                  className="prose prose-sm max-w-none text-gray-700 leading-relaxed promotion-sidebar-prose"
+                  className={`prose ${textSize === 'normal' ? 'prose-normal' : textSize === 'large' ? 'prose-large' : 'prose-xlarge'} max-w-none text-gray-700 leading-relaxed promotion-sidebar-prose`}
                   dangerouslySetInnerHTML={{ __html: renderPromotionContent(selectedPromotion.content) }}
                 />
               </CardContent>

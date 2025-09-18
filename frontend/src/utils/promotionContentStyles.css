@@ -73,17 +73,17 @@
   margin-bottom: 0;
 }
 
-.content-group {
+/* .content-group {
   line-height: 1.6;
-}
+} 라인 하이트는 prose 클래스에 위임 */
 
-.content-group p {
+/* .content-group p {
   margin-bottom: 0.75rem;
 }
 
 .content-group p:last-child {
   margin-bottom: 0;
-}
+} 마진은 prose 클래스에 위임 */
 
 /* 키워드 효과 스타일 - 비활성화됨 */
 /* 
@@ -329,7 +329,7 @@
 @media (max-width: 768px) {
   .content-group {
     padding: 0.5rem;
-    margin-bottom: 0.75rem;
+    /* margin-bottom: 0.75rem; 마진은 prose 클래스에 위임 */
   }
   
   .content-separator {
@@ -500,7 +500,7 @@
 .content-group .blue-title-label,
 .group-content .blue-title-label,
 .greeting-closing-content .blue-title-label {
-  font-size: 1.125em; /* 2포인트 키운 크기 (18px) */
+  /* font-size: 1.125em; 폰트 크기는 prose 클래스에 위임 */
   color: #1e40af; /* 파란색 */
   font-weight: 600;
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);

@@ -25,7 +25,7 @@
 .promotion-sidebar-light-mode .sheet-description {
   color: #111827 !important;
   text-align: left !important;
-  font-size: 1.125rem !important;
+  /* font-size: 1.125rem !important; 폰트 크기는 prose 클래스에 위임 */
   font-weight: 600 !important;
   line-height: 1.4 !important;
   margin-top: 0.75rem !important;
@@ -197,6 +197,7 @@
 .promotion-sidebar-prose .content-group {
   background: rgba(255, 255, 255, 0.8) !important;
   border-color: rgba(0, 0, 0, 0.1) !important;
+  /* 폰트 크기/라인하이트는 prose 클래스에 위임 */
 }
 
 /* 슬라이더 가로선 라이트모드 강제 적용 */
@@ -271,7 +272,7 @@
   .promotion-sidebar-light-mode .sheet-description {
     color: #111827 !important;
     text-align: left !important;
-    font-size: 1.125rem !important;
+    /* font-size: 1.125rem !important; 폰트 크기는 prose 클래스에 위임 */
     font-weight: 600 !important;
     line-height: 1.4 !important;
     margin-top: 0.75rem !important;
@@ -288,6 +289,7 @@
   .promotion-sidebar-prose .content-group {
     background: rgba(255, 255, 255, 0.8) !important;
     border-color: rgba(0, 0, 0, 0.1) !important;
+    /* 폰트 크기/라인하이트는 prose 클래스에 위임 */
   }
   
   .promotion-sidebar-prose .gray-group-box {
@@ -322,33 +324,22 @@
   }
 } 
 
-/* PC에서 슬라이더 글자 크기 조정 */
+/* PC에서 슬라이더 글자 크기 조정
+   - 동적 폰트 크기 컨트롤과 충돌하지 않도록 크기 고정 제거
+   - 색상/간격 등만 유지하고 타이포는 prose-* 클래스에 위임 */
 @media (min-width: 768px) {
   .promotion-sidebar-prose {
-    font-size: 0.875rem !important; /* 1포인트 줄임 (1rem -> 0.875rem) */
     line-height: 1.6 !important;
   }
-  
   .promotion-sidebar-prose p {
-    font-size: 0.875rem !important;
     line-height: 1.6 !important;
   }
-  
   .promotion-sidebar-prose h1,
   .promotion-sidebar-prose h2,
   .promotion-sidebar-prose h3,
   .promotion-sidebar-prose h4,
   .promotion-sidebar-prose h5,
   .promotion-sidebar-prose h6 {
-    font-size: 1rem !important;
     line-height: 1.5 !important;
   }
-  
-  .promotion-sidebar-prose .blue-title-label {
-    font-size: 1em !important; /* 1포인트 줄임 */
-  }
-  
-  .promotion-sidebar-prose .gray-group-box {
-    font-size: 0.875rem !important; /* 1포인트 줄임 */
-  }
-} 
+}

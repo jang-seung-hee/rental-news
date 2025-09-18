@@ -18,6 +18,14 @@ const PromotionViewPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [systemSettings, setSystemSettings] = useState<any>(null);
   const viewRecordedRef = useRef<string | null>(null); // 조회 기록 중복 방지
+  // 뷰어 폰트 크기 상태 (바텀시트 제외)
+  const [textSize, setTextSize] = useState<'normal' | 'large' | 'xlarge'>(() => {
+    try {
+      const saved = localStorage.getItem('promotionViewTextSize');
+      if (saved === 'normal' || saved === 'large' || saved === 'xlarge') return saved;
+    } catch {}
+    return 'normal';
+  });
 
   // 프로모션 데이터 로드 (slug 또는 ID 기반)
   const loadPromotion = useCallback(async () => {
@@ -91,6 +99,13 @@ const PromotionViewPage: React.FC = () => {
     loadPromotion();
     loadSystemSettings();
   }, [identifier, loadPromotion, loadSystemSettings]);
+
+  // 폰트 크기 영속화
+  useEffect(() => {
+    try {
+      localStorage.setItem('promotionViewTextSize', textSize);
+    } catch {}
+  }, [textSize]);
 
   // 메타태그 직접 설정 (React Helmet 보완용)
   useEffect(() => {
@@ -238,7 +253,31 @@ const PromotionViewPage: React.FC = () => {
     <>
       {generateMetaTags()}
       <div className="promotion-view-light-mode min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 promotion-view-bg">
-        <CustomTag promotion={promotion} hideElements={hideElements} systemSettings={systemSettings} />
+        {/* 상단 폰트 크기 컨트롤 (바텀시트 제외) */}
+        <div className="sticky top-0 z-30 w-full flex justify-center pt-3 pb-2 bg-gradient-to-br from-blue-50/80 to-blue-100/80 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
+          <div className="inline-flex items-center gap-1 rounded-xl border border-blue-200 bg-white/80 px-2 py-1 shadow-sm">
+            <span className="text-xs text-gray-600 mr-1">글자 크기</span>
+            <button
+              type="button"
+              onClick={() => setTextSize('normal')}
+              className={`px-3 py-1 rounded-md text-sm ${textSize === 'normal' ? 'bg-blue-600 text-white' : 'text-blue-700 hover:bg-blue-50'}`}
+              aria-pressed={textSize === 'normal'}
+            >보통</button>
+            <button
+              type="button"
+              onClick={() => setTextSize('large')}
+              className={`px-3 py-1 rounded-md text-base ${textSize === 'large' ? 'bg-blue-600 text-white' : 'text-blue-700 hover:bg-blue-50'}`}
+              aria-pressed={textSize === 'large'}
+            >크게</button>
+            <button
+              type="button"
+              onClick={() => setTextSize('xlarge')}
+              className={`px-3 py-1 rounded-md text-lg ${textSize === 'xlarge' ? 'bg-blue-600 text-white' : 'text-blue-700 hover:bg-blue-50'}`}
+              aria-pressed={textSize === 'xlarge'}
+            >더 크게</button>
+          </div>
+        </div>
+        <CustomTag promotion={promotion} hideElements={hideElements} systemSettings={systemSettings} textSize={textSize} />
       </div>
     </>
   );

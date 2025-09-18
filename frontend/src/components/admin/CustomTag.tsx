@@ -19,9 +19,10 @@ interface CustomTagProps {
   promotion: Promotion;
   hideElements?: string | null;
   systemSettings?: any;
+  textSize?: 'normal' | 'large' | 'xlarge';
 }
 
-const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSettings: propSystemSettings }) => {
+const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSettings: propSystemSettings, textSize = 'normal' }) => {
   const [selectedMenu, setSelectedMenu] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [otherProducts, setOtherProducts] = useState<{ [key: string]: { id: string; code: string; title: string } }>({});
@@ -181,8 +182,8 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
                    인사말
                  </h3>
                </div>
-               <div 
-                 className="prose prose-lg max-w-none text-gray-900 leading-relaxed"
+              <div 
+                className={`prose ${textSize === 'normal' ? 'prose-normal' : textSize === 'large' ? 'prose-large' : 'prose-xlarge'} max-w-none text-gray-900 leading-relaxed`}
                  dangerouslySetInnerHTML={{ __html: renderGreetingClosingContent(promotion.greeting) }}
                />
              </CardContent>
@@ -200,7 +201,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
                 </h3>
               </div>
               <div 
-                className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+                className={`prose ${textSize === 'normal' ? 'prose-normal' : textSize === 'large' ? 'prose-large' : 'prose-xlarge'} max-w-none text-gray-700 leading-relaxed`}
                 dangerouslySetInnerHTML={{ __html: renderPromotionContent(promotion.content) }}
               />
             </CardContent>
@@ -274,7 +275,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
                 </h3>
               </div>
               <div 
-                className="prose prose-lg max-w-none text-gray-900 leading-relaxed"
+                className={`prose ${textSize === 'normal' ? 'prose-normal' : textSize === 'large' ? 'prose-large' : 'prose-xlarge'} max-w-none text-gray-900 leading-relaxed`}
                 dangerouslySetInnerHTML={{ __html: renderGreetingClosingContent(promotion.closing) }}
               />
             </CardContent>
@@ -405,6 +406,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
         isOpen={isSlidePanelOpen}
         onClose={handleCloseSlidePanel}
         selectedProductCode={selectedProductCode}
+        textSize={textSize}
       />
     </div>
   );
