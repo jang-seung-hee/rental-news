@@ -54,6 +54,7 @@ export const aggregateViewsByDate = (
 };
 
 export interface RatioItem { label: string; count: number; ratio: number; }
+export interface DualCountItem { label: string; views: number; users: number; viewRatio: number; userRatio: number; }
 
 export const aggregateEnvironmentRatios = (viewHistory: ViewRecordLike[] = []): RatioItem[] => {
   const map: Record<string, number> = {};
@@ -85,6 +86,36 @@ export const aggregateWeekdayRatios = (viewHistory: ViewRecordLike[] = []): Rati
     total += 1;
   }
   return names.map(n => ({ label: n, count: map[n] || 0, ratio: total ? Math.round(((map[n] || 0) / total) * 1000) / 10 : 0 }));
+};
+
+// 요일별 열람수/이용자수(고유 IP) 동시 집계
+export const aggregateWeekdayViewsAndUsers = (viewHistory: ViewRecordLike[] = []): DualCountItem[] => {
+  const names = ['일', '월', '화', '수', '목', '금', '토'];
+  const viewCounts: Record<string, number> = {};
+  const userSets: Record<string, Set<string>> = {};
+  let totalViews = 0;
+  const totalUserSet = new Set<string>();
+
+  for (const rec of viewHistory) {
+    const date = rec.viewedAt instanceof Date ? rec.viewedAt : (rec.viewedAt as any)?.toDate?.() || new Date(rec.viewedAt as any);
+    if (!date) continue;
+    const key = names[date.getDay()];
+    viewCounts[key] = (viewCounts[key] || 0) + 1;
+    if (!userSets[key]) userSets[key] = new Set<string>();
+    userSets[key].add(rec.ip || 'unknown');
+    totalViews += 1;
+    totalUserSet.add(rec.ip || 'unknown');
+  }
+
+  const totalUsers = totalUserSet.size || 0;
+
+  return names.map(label => {
+    const views = viewCounts[label] || 0;
+    const users = (userSets[label]?.size) || 0;
+    const viewRatio = totalViews ? Math.round((views / totalViews) * 1000) / 10 : 0;
+    const userRatio = totalUsers ? Math.round((users / totalUsers) * 1000) / 10 : 0;
+    return { label, views, users, viewRatio, userRatio };
+  });
 };
 
 export const aggregateHourRatios = (viewHistory: ViewRecordLike[] = []): RatioItem[] => {
@@ -147,6 +178,62 @@ export const aggregateGroupedTimeRatios = (viewHistory: ViewRecordLike[] = []): 
     const count = counts[r.label] || 0;
     const ratio = total ? Math.round((count / total) * 1000) / 10 : 0;
     return { label: r.label, count, ratio };
+  });
+};
+
+// 사용자 지정 시간대 그룹으로 열람수/이용자수 동시 집계
+export const aggregateGroupedTimeViewsAndUsers = (viewHistory: ViewRecordLike[] = []): DualCountItem[] => {
+  type Range = { label: string; startMin: number; endMin: number };
+  const ranges: Range[] = [
+    { label: '07:01~10:00', startMin: 7 * 60 + 1, endMin: 10 * 60 },
+    { label: '10:01~12:00', startMin: 10 * 60 + 1, endMin: 12 * 60 },
+    { label: '12:01~13:00', startMin: 12 * 60 + 1, endMin: 13 * 60 },
+    { label: '13:01~15:00', startMin: 13 * 60 + 1, endMin: 15 * 60 },
+    { label: '15:01~17:00', startMin: 15 * 60 + 1, endMin: 17 * 60 },
+    { label: '17:01~18:00', startMin: 17 * 60 + 1, endMin: 18 * 60 },
+    { label: '18:01~22:00', startMin: 18 * 60 + 1, endMin: 22 * 60 },
+    { label: '22:01~07:00', startMin: 22 * 60 + 1, endMin: 7 * 60 }
+  ];
+
+  const viewCounts: Record<string, number> = Object.fromEntries(ranges.map(r => [r.label, 0]));
+  const userSets: Record<string, Set<string>> = Object.fromEntries(ranges.map(r => [r.label, new Set<string>()]));
+
+  let totalViews = 0;
+  const totalUserSet = new Set<string>();
+
+  for (const rec of viewHistory) {
+    const dt = rec.viewedAt instanceof Date ? rec.viewedAt : (rec.viewedAt as any)?.toDate?.() || new Date(rec.viewedAt as any);
+    if (!dt) continue;
+    const minutes = dt.getHours() * 60 + dt.getMinutes();
+    for (const r of ranges) {
+      if (r.startMin <= r.endMin) {
+        if (minutes >= r.startMin && minutes <= r.endMin) {
+          viewCounts[r.label] += 1;
+          userSets[r.label].add(rec.ip || 'unknown');
+          totalViews += 1;
+          totalUserSet.add(rec.ip || 'unknown');
+          break;
+        }
+      } else {
+        if (minutes >= r.startMin || minutes <= r.endMin) {
+          viewCounts[r.label] += 1;
+          userSets[r.label].add(rec.ip || 'unknown');
+          totalViews += 1;
+          totalUserSet.add(rec.ip || 'unknown');
+          break;
+        }
+      }
+    }
+  }
+
+  const totalUsers = totalUserSet.size || 0;
+
+  return ranges.map(r => {
+    const views = viewCounts[r.label] || 0;
+    const users = userSets[r.label]?.size || 0;
+    const viewRatio = totalViews ? Math.round((views / totalViews) * 1000) / 10 : 0;
+    const userRatio = totalUsers ? Math.round((users / totalUsers) * 1000) / 10 : 0;
+    return { label: r.label, views, users, viewRatio, userRatio };
   });
 };
 

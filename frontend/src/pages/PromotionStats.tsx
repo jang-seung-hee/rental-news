@@ -8,6 +8,8 @@ import {
   aggregateReferrerRatios,
   aggregateWeekdayRatios,
   aggregateGroupedTimeRatios,
+  aggregateWeekdayViewsAndUsers,
+  aggregateGroupedTimeViewsAndUsers,
   ViewRecordLike
 } from '../utils/statsUtils';
 
@@ -532,46 +534,74 @@ const PromotionStatsPage: React.FC = () => {
             <div>
               <div className="admin-subsection-title mb-2">요일 비율</div>
               <div className="border rounded p-3">
-                {aggregateWeekdayRatios(mergedRecordsInRange as any).map(r => {
-                  const maxCount = Math.max(1, ...aggregateWeekdayRatios(mergedRecordsInRange as any).map(x => x.count));
-                  const width = Math.round((r.count / maxCount) * 100);
-                  return (
-                    <div key={r.label} className="flex items-center mb-2">
-                      <div className="w-28 admin-caption whitespace-nowrap">{r.label}</div>
-                      <div className="flex-1 ml-3 mr-2">
-                        <div className="bg-gray-200 rounded h-4 relative">
-                          <div className="bg-green-500 h-4 rounded flex items-center justify-end pr-1" style={{ width: `${width}%` }}>
-                            <span className="text-white text-xs font-medium">{r.ratio}%</span>
+                {(() => {
+                  const items = aggregateWeekdayViewsAndUsers(mergedRecordsInRange as any);
+                  const maxCombined = Math.max(1, ...items.map(x => Math.max(x.views, x.users)));
+                  return items.map(r => {
+                    const viewsW = Math.round((r.views / maxCombined) * 100);
+                    const usersW = Math.round((r.users / maxCombined) * 100);
+                    return (
+                      <div key={r.label} className="mb-2">
+                        <div className="flex items-center">
+                          <div className="w-28 admin-caption whitespace-nowrap">{r.label}</div>
+                          <div className="flex-1 ml-3 mr-2">
+                            <div className="bg-gray-200 rounded h-4 mb-1">
+                              <div className="bg-blue-500 h-4 rounded" style={{ width: `${viewsW}%` }} />
+                            </div>
+                            <div className="bg-gray-200 rounded h-4">
+                              <div className="bg-green-500 h-4 rounded" style={{ width: `${usersW}%` }} />
+                            </div>
+                          </div>
+                          <div className="w-16 text-right">
+                            <div className="admin-caption text-blue-700">{r.views}</div>
+                            <div className="admin-caption text-green-700">{r.users}</div>
                           </div>
                         </div>
                       </div>
-                      <div className="w-8 admin-caption text-right">{r.count}</div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
+                <div className="flex justify-center mt-2 gap-4">
+                  <div className="flex items-center gap-1"><div className="w-3 h-3 bg-blue-500" /><span className="admin-caption">열람수</span></div>
+                  <div className="flex items-center gap-1"><div className="w-3 h-3 bg-green-500" /><span className="admin-caption">이용자수</span></div>
+                </div>
               </div>
             </div>
 
             <div>
               <div className="admin-subsection-title mb-2">시간대 비율</div>
               <div className="border rounded p-3 max-h-64 overflow-y-auto">
-                {aggregateGroupedTimeRatios(mergedRecordsInRange as any).filter(r => r.count > 0).map(r => {
-                  const maxCount = Math.max(1, ...aggregateGroupedTimeRatios(mergedRecordsInRange as any).map(x => x.count));
-                  const width = Math.round((r.count / maxCount) * 100);
-                  return (
-                    <div key={r.label} className="flex items-center mb-1">
-                      <div className="w-28 admin-caption whitespace-nowrap">{r.label}</div>
-                      <div className="flex-1 ml-3 mr-2">
-                        <div className="bg-gray-200 rounded h-3 relative">
-                          <div className="bg-purple-500 h-3 rounded flex items-center justify-end pr-1" style={{ width: `${width}%` }}>
-                            <span className="text-white text-[10px] font-medium">{r.ratio}%</span>
+                {(() => {
+                  const items = aggregateGroupedTimeViewsAndUsers(mergedRecordsInRange as any).filter(r => r.views > 0 || r.users > 0);
+                  const maxCombined = Math.max(1, ...items.map(x => Math.max(x.views, x.users)));
+                  return items.map(r => {
+                    const vw = Math.round((r.views / maxCombined) * 100);
+                    const uw = Math.round((r.users / maxCombined) * 100);
+                    return (
+                      <div key={r.label} className="mb-1">
+                        <div className="flex items-center">
+                          <div className="w-28 admin-caption whitespace-nowrap">{r.label}</div>
+                          <div className="flex-1 ml-3 mr-2">
+                            <div className="bg-gray-200 rounded h-3 mb-1">
+                              <div className="bg-blue-500 h-3 rounded" style={{ width: `${vw}%` }} />
+                            </div>
+                            <div className="bg-gray-200 rounded h-3">
+                              <div className="bg-green-500 h-3 rounded" style={{ width: `${uw}%` }} />
+                            </div>
+                          </div>
+                          <div className="w-12 text-right">
+                            <div className="admin-caption text-blue-700">{r.views}</div>
+                            <div className="admin-caption text-green-700">{r.users}</div>
                           </div>
                         </div>
                       </div>
-                      <div className="w-6 admin-caption text-right">{r.count}</div>
-                    </div>
-                  );
-                })}
+                    );
+                  });
+                })()}
+                <div className="flex justify-center mt-2 gap-4">
+                  <div className="flex items-center gap-1"><div className="w-3 h-3 bg-blue-500" /><span className="admin-caption">열람수</span></div>
+                  <div className="flex items-center gap-1"><div className="w-3 h-3 bg-green-500" /><span className="admin-caption">이용자수</span></div>
+                </div>
               </div>
             </div>
           </div>
