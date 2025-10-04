@@ -136,10 +136,13 @@ const SiteBasicInfoTab: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
+          <div 
+            className="space-y-2 overflow-y-auto"
+            style={{ maxHeight: '300px' }}
+          >
             {updateHistory.map((record, index) => (
               <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap flex-shrink-0">
                   {record.date}
                 </span>
                 <p className="admin-body-text text-gray-700 text-sm">{record.content}</p>
