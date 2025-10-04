@@ -6,8 +6,6 @@ import {
   aggregateViewsByDate,
   aggregateEnvironmentRatios,
   aggregateReferrerRatios,
-  aggregateWeekdayRatios,
-  aggregateGroupedTimeRatios,
   aggregateWeekdayViewsAndUsers,
   aggregateGroupedTimeViewsAndUsers,
   ViewRecordLike
@@ -313,8 +311,11 @@ const PromotionStatsPage: React.FC = () => {
                   <button
                     onClick={() => {
                       const today = new Date();
-                      setStart(today.toISOString().slice(0, 10));
-                      setEnd(today.toISOString().slice(0, 10));
+                      const localDate = today.getFullYear() + '-' + 
+                        String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                        String(today.getDate()).padStart(2, '0');
+                      setStart(localDate);
+                      setEnd(localDate);
                     }}
                     className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
                   >
@@ -329,8 +330,15 @@ const PromotionStatsPage: React.FC = () => {
                       startOfWeek.setDate(diff);
                       const endOfWeek = new Date(startOfWeek);
                       endOfWeek.setDate(startOfWeek.getDate() + 6); // 일요일
-                      setStart(startOfWeek.toISOString().slice(0, 10));
-                      setEnd(endOfWeek.toISOString().slice(0, 10));
+                      
+                      const formatLocalDate = (date: Date) => {
+                        return date.getFullYear() + '-' + 
+                          String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(date.getDate()).padStart(2, '0');
+                      };
+                      
+                      setStart(formatLocalDate(startOfWeek));
+                      setEnd(formatLocalDate(endOfWeek));
                     }}
                     className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors"
                   >
@@ -341,8 +349,15 @@ const PromotionStatsPage: React.FC = () => {
                       const today = new Date();
                       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
                       const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                      setStart(startOfMonth.toISOString().slice(0, 10));
-                      setEnd(endOfMonth.toISOString().slice(0, 10));
+                      
+                      const formatLocalDate = (date: Date) => {
+                        return date.getFullYear() + '-' + 
+                          String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(date.getDate()).padStart(2, '0');
+                      };
+                      
+                      setStart(formatLocalDate(startOfMonth));
+                      setEnd(formatLocalDate(endOfMonth));
                     }}
                     className="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition-colors"
                   >
@@ -357,8 +372,15 @@ const PromotionStatsPage: React.FC = () => {
                       startOfLastWeek.setDate(diff);
                       const endOfLastWeek = new Date(startOfLastWeek);
                       endOfLastWeek.setDate(startOfLastWeek.getDate() + 6); // 지난주 일요일
-                      setStart(startOfLastWeek.toISOString().slice(0, 10));
-                      setEnd(endOfLastWeek.toISOString().slice(0, 10));
+                      
+                      const formatLocalDate = (date: Date) => {
+                        return date.getFullYear() + '-' + 
+                          String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(date.getDate()).padStart(2, '0');
+                      };
+                      
+                      setStart(formatLocalDate(startOfLastWeek));
+                      setEnd(formatLocalDate(endOfLastWeek));
                     }}
                     className="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full hover:bg-yellow-200 transition-colors"
                   >
@@ -369,8 +391,15 @@ const PromotionStatsPage: React.FC = () => {
                       const today = new Date();
                       const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
                       const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-                      setStart(startOfLastMonth.toISOString().slice(0, 10));
-                      setEnd(endOfLastMonth.toISOString().slice(0, 10));
+                      
+                      const formatLocalDate = (date: Date) => {
+                        return date.getFullYear() + '-' + 
+                          String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(date.getDate()).padStart(2, '0');
+                      };
+                      
+                      setStart(formatLocalDate(startOfLastMonth));
+                      setEnd(formatLocalDate(endOfLastMonth));
                     }}
                     className="px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded-full hover:bg-orange-200 transition-colors"
                   >

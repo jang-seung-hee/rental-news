@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Promotion, PromotionViewStats } from '../../types';
 
-import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateReferrerRatios, aggregateWeekdayRatios, aggregateGroupedTimeRatios, aggregateWeekdayViewsAndUsers, aggregateGroupedTimeViewsAndUsers } from '../../utils/statsUtils';
+import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateReferrerRatios, aggregateWeekdayViewsAndUsers, aggregateGroupedTimeViewsAndUsers } from '../../utils/statsUtils';
 import { Button } from '../ui/button';
 import { Alert, AlertDescription } from '../ui/alert';
 import { useToast } from '../../hooks/use-toast';
@@ -130,8 +130,15 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                 const today = new Date();
                 const startDate = new Date(today);
                 startDate.setDate(today.getDate() - 6);
-                setStart(startDate.toISOString().slice(0, 10));
-                setEnd(today.toISOString().slice(0, 10));
+                
+                const formatLocalDate = (date: Date) => {
+                  return date.getFullYear() + '-' + 
+                    String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(date.getDate()).padStart(2, '0');
+                };
+                
+                setStart(formatLocalDate(startDate));
+                setEnd(formatLocalDate(today));
               }}
               className="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
             >
@@ -142,8 +149,15 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                 const today = new Date();
                 const startDate = new Date(today);
                 startDate.setDate(today.getDate() - 14);
-                setStart(startDate.toISOString().slice(0, 10));
-                setEnd(today.toISOString().slice(0, 10));
+                
+                const formatLocalDate = (date: Date) => {
+                  return date.getFullYear() + '-' + 
+                    String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(date.getDate()).padStart(2, '0');
+                };
+                
+                setStart(formatLocalDate(startDate));
+                setEnd(formatLocalDate(today));
               }}
               className="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition-colors"
             >
@@ -157,7 +171,9 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                 
                 // YYYY-MM-DD 형식으로 변환
                 const startStr = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-                const endStr = today.toISOString().slice(0, 10);
+                const endStr = today.getFullYear() + '-' + 
+                  String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                  String(today.getDate()).padStart(2, '0');
                 
                 console.log('🗓️ 이번달 선택:', { year, month: month + 1, startStr, endStr });
                 
