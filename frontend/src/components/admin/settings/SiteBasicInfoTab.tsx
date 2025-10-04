@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '../../ui/alert';
 import { useToast } from '../../../hooks/use-toast';
 import { saveSiteBasicInfo, getCurrentSettings } from '../../../services/systemSettingsTabService';
 import { SiteBasicInfo } from '../../../types/systemSettingsTabs';
+import { updateHistory } from '../../../data/updateHistory';
 
 // 폼 유효성 검사 스키마
 const siteBasicInfoSchema = z.object({
@@ -122,6 +123,28 @@ const SiteBasicInfoTab: React.FC = () => {
                 </p>
               )}
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 업데이트 기록 섹션 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="admin-card-title flex items-center gap-2">
+            <Badge variant="secondary">기록</Badge>
+            업데이트 기록
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {updateHistory.map((record, index) => (
+              <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 whitespace-nowrap">
+                  {record.date}
+                </span>
+                <p className="admin-body-text text-gray-700 text-sm">{record.content}</p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

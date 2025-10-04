@@ -101,7 +101,7 @@
 
   /* 커스텀 프로즈 클래스 (Tailwind Typography 대체) */
   .prose-normal {
-    font-size: 14px !important;
+    font-size: 16px !important;
     line-height: 1.75;
   }
   .prose-normal p {
@@ -121,7 +121,7 @@
   .prose-normal h6 { font-size: 1em; }
 
   .prose {
-    font-size: 14px !important;
+    font-size: 16px !important;
     line-height: 1.75;
   }
   .prose p {
@@ -141,7 +141,7 @@
   .prose h6 { font-size: 1em; }
 
   .prose-large {
-    font-size: 17px !important;
+    font-size: 18px !important;
     line-height: 1.7777778;
   }
   .prose-large p {
@@ -176,7 +176,7 @@
   .prose-lg h6 { font-size: 1em; }
 
   .prose-xlarge {
-    font-size: 19px !important;
+    font-size: 20px !important;
     line-height: 1.8;
   }
   .prose-xlarge p {
@@ -214,38 +214,38 @@
   .prose-normal .promotion-content-container,
   .prose-normal .content-group,
   .prose-normal .promotion-content-container *,
-  .prose-normal .content-group * { font-size: 14px !important; }
+  .prose-normal .content-group * { font-size: 16px !important; }
   .prose .promotion-content-container,
   .prose .content-group,
   .prose .promotion-content-container *,
-  .prose .content-group * { font-size: 14px !important; }
+  .prose .content-group * { font-size: 16px !important; }
   .prose-large .promotion-content-container,
   .prose-large .content-group,
   .prose-large .promotion-content-container *,
-  .prose-large .content-group * { font-size: 17px !important; }
+  .prose-large .content-group * { font-size: 18px !important; }
   .prose-xlarge .promotion-content-container,
   .prose-xlarge .content-group,
   .prose-xlarge .promotion-content-container *,
-  .prose-xlarge .content-group * { font-size: 19px !important; }
+  .prose-xlarge .content-group * { font-size: 20px !important; }
 
   /* 인라인 스타일 무시 (더 강력한 우선순위) */
   .prose-normal .promotion-content-container [style*="font-size"],
-  .prose-normal .content-group [style*="font-size"] { font-size: 14px !important; }
+  .prose-normal .content-group [style*="font-size"] { font-size: 16px !important; }
   .prose .promotion-content-container [style*="font-size"],
-  .prose .content-group [style*="font-size"] { font-size: 14px !important; }
+  .prose .content-group [style*="font-size"] { font-size: 16px !important; }
   .prose-large .promotion-content-container [style*="font-size"],
-  .prose-large .content-group [style*="font-size"] { font-size: 17px !important; }
+  .prose-large .content-group [style*="font-size"] { font-size: 18px !important; }
   .prose-xlarge .promotion-content-container [style*="font-size"],
-  .prose-xlarge .content-group [style*="font-size"] { font-size: 19px !important; }
+  .prose-xlarge .content-group [style*="font-size"] { font-size: 20px !important; }
 
   /* 디버깅용 강제 적용 (최고 우선순위) */
-  .prose-normal { font-size: 14px !important; }
+  .prose-normal { font-size: 16px !important; }
   .prose-normal * { font-size: inherit !important; }
-  .prose { font-size: 14px !important; }
+  .prose { font-size: 16px !important; }
   .prose * { font-size: inherit !important; }
-  .prose-large { font-size: 17px !important; }
+  .prose-large { font-size: 18px !important; }
   .prose-large * { font-size: inherit !important; }
-  .prose-xlarge { font-size: 19px !important; }
+  .prose-xlarge { font-size: 20px !important; }
   .prose-xlarge * { font-size: inherit !important; }
 
   /* 포커스 스타일 */

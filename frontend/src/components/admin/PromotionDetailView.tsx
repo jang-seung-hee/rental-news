@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { renderPromotionContent } from '../../utils/promotionContentUtils';
 import { getPromotionById } from '../../services/promotionService';
+import { copyToClipboard } from '../../utils/clipboardUtils';
 import '../../utils/promotionContentStyles.css';
 
 interface PromotionDetailViewProps {
@@ -254,8 +255,8 @@ const PromotionDetailView: React.FC<PromotionDetailViewProps> = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => {
-                    navigator.clipboard.writeText(promotion.shortUrl!);
+                  onClick={async () => {
+                    await copyToClipboard(promotion.shortUrl!);
                   }}
                   className="text-xs"
                 >

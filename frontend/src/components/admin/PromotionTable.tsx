@@ -10,6 +10,7 @@ import { useConfirm } from '../../hooks/useConfirm';
 import ShortUrlDialog from '../common/ShortUrlDialog';
 import PromotionStatsDialog from './PromotionStatsDialog';
 import { updateShortUrl, updatePromotionSlug, updatePromotionStatus } from '../../services/promotionService';
+import { copyToClipboard } from '../../utils/clipboardUtils';
 
 interface PromotionTableProps {
   promotions: Promotion[];
@@ -79,17 +80,19 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
     }
   };
 
-  const copyToClipboard = async (promotion: Promotion) => {
-    try {
-      const url = promotion.slug 
-        ? `${window.location.origin}/view/${promotion.slug}`
-        : `${window.location.origin}/view/${promotion.id}`;
-      await navigator.clipboard.writeText(url);
+  const copyPromotionLink = async (promotion: Promotion) => {
+    const url = promotion.slug 
+      ? `${window.location.origin}/view/${promotion.slug}`
+      : `${window.location.origin}/view/${promotion.id}`;
+    
+    const success = await copyToClipboard(url);
+    
+    if (success) {
       toast({
         title: "링크가 복사되었습니다",
         description: `클립보드에 프로모션 링크가 복사되었습니다.\n${url}`,
       });
-    } catch (error) {
+    } else {
       toast({
         title: "복사 실패",
         description: "링크 복사에 실패했습니다. 다시 시도해주세요.",
@@ -99,13 +102,14 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
   };
 
   const copyShortUrlToClipboard = async (shortUrl: string) => {
-    try {
-      await navigator.clipboard.writeText(shortUrl);
+    const success = await copyToClipboard(shortUrl);
+    
+    if (success) {
       toast({
         title: "단축 URL이 복사되었습니다",
         description: `클립보드에 단축 URL이 복사되었습니다.\n${shortUrl}`,
       });
-    } catch (error) {
+    } else {
       toast({
         title: "복사 실패",
         description: "단축 URL 복사에 실패했습니다. 다시 시도해주세요.",
@@ -369,7 +373,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => copyToClipboard(promotion)}
+                        onClick={() => copyPromotionLink(promotion)}
                         className="text-blue-600 border-blue-200 hover:bg-blue-50"
                       >
                         링크복사
@@ -446,7 +450,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => copyToClipboard(promotion)}
+                    onClick={() => copyPromotionLink(promotion)}
                     className="flex-1 text-blue-600 border-blue-200 hover:bg-blue-50"
                   >
                     링크복사

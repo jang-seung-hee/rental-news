@@ -112,7 +112,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
     <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen pb-32">
       {/* 헤더 섹션 */}
       {!hiddenElements.includes('title') && (
-        <div className="relative overflow-hidden rounded-b-4xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white p-8 shadow-2xl">
+        <div className="relative overflow-hidden rounded-b-4xl bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white p-4 shadow-2xl">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-20 translate-x-20"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-16 -translate-x-16"></div>
           <div className="absolute top-1/2 left-1/2 w-24 h-24 bg-white/5 rounded-full -translate-x-12 -translate-y-12"></div>
@@ -137,7 +137,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
               </Badge>
             </div>
             
-            <h1 className="text-3xl font-bold mb-3 leading-tight whitespace-pre-line">
+            <h1 className="text-2xl font-bold mb-3 leading-tight whitespace-pre-line">
               {promotion.title}
             </h1>
             
@@ -193,7 +193,7 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
         {/* 프로모션 내용 */}
         {promotion.isActive && (
           <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm rounded-2xl card">
-            <CardContent className="p-6 card-content">
+            <CardContent className="p-3 card-content">
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -215,10 +215,13 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
               <div className="flex items-center mb-4">
                 <div className="w-1 h-8 bg-gradient-to-b from-teal-500 to-teal-600 rounded-full mr-4"></div>
                 <h3 className="text-xl font-bold text-gray-900 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                  다른제품 혜택 더 보기
+                  다른 기능 제품 더 보기
                 </h3>
               </div>
-              <div className="space-y-3">
+              <p className="text-sm text-gray-500 mb-3 text-left">
+                아래 링크를 클릭하면 다른 기능 제품 혜택도 바로 확인할 수 있습니다.
+              </p>
+              <div className={`space-y-2 prose ${textSize === 'normal' ? 'prose-normal' : textSize === 'large' ? 'prose-large' : 'prose-xlarge'} max-w-none`}>
                 {isLoadingOtherProducts ? (
                   <div className="flex items-center justify-center py-4">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600"></div>
@@ -227,21 +230,26 @@ const CustomTag: React.FC<CustomTagProps> = ({ promotion, hideElements, systemSe
                 ) : (
                   Object.values(otherProducts).map((product) => (
                     <div key={product.id} className="group">
-                      <button
-                        onClick={() => handleOtherProductClick(product.id)}
-                        className="w-full text-left p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-200 hover:border-teal-300 hover:from-teal-100 hover:to-cyan-100 transition-all duration-200 group-hover:shadow-md"
-                      >
+                        <button
+                          onClick={() => handleOtherProductClick(product.id)}
+                          className="w-full text-left py-1 px-3 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg border border-teal-200 hover:border-teal-300 hover:from-teal-100 hover:to-cyan-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                          style={{
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(14, 165, 233, 0.1)'
+                          }}
+                        >
                         <div className="flex items-center justify-between">
                           <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-gray-900 group-hover:text-teal-700 transition-colors">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="text-xs font-mono bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full">
+                                {product.code}
+                              </span>
+                            </div>
+                            <h4 className="text-2xl font-semibold text-gray-900 group-hover:text-teal-700 transition-colors leading-tight" style={{fontSize: '24px !important'}}>
                               {product.title}
                             </h4>
-                            <p className="text-sm text-gray-600 font-mono mt-1">
-                              {product.code}
-                            </p>
                           </div>
                           <div className="flex items-center text-teal-600 group-hover:text-teal-700 transition-colors">
-                            <span className="text-sm font-medium mr-2">보기</span>
+                            <span className="font-medium mr-2">보기</span>
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                             </svg>

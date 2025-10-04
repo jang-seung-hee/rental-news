@@ -18,14 +18,8 @@ const PromotionViewPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [systemSettings, setSystemSettings] = useState<any>(null);
   const viewRecordedRef = useRef<string | null>(null); // 조회 기록 중복 방지
-  // 뷰어 폰트 크기 상태 (바텀시트 제외)
-  const [textSize, setTextSize] = useState<'normal' | 'large' | 'xlarge'>(() => {
-    try {
-      const saved = localStorage.getItem('promotionViewTextSize');
-      if (saved === 'normal' || saved === 'large' || saved === 'xlarge') return saved;
-    } catch {}
-    return 'normal';
-  });
+  // 뷰어 폰트 크기 상태 (바텀시트 제외) - 항상 초기값으로 설정
+  const [textSize, setTextSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
 
   // 프로모션 데이터 로드 (slug 또는 ID 기반)
   const loadPromotion = useCallback(async () => {
@@ -100,12 +94,7 @@ const PromotionViewPage: React.FC = () => {
     loadSystemSettings();
   }, [identifier, loadPromotion, loadSystemSettings]);
 
-  // 폰트 크기 영속화
-  useEffect(() => {
-    try {
-      localStorage.setItem('promotionViewTextSize', textSize);
-    } catch {}
-  }, [textSize]);
+  // 폰트 크기 영속화 제거 - 더 이상 로컬 저장하지 않음
 
   // 메타태그 직접 설정 (React Helmet 보완용)
   useEffect(() => {

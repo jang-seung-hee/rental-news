@@ -306,8 +306,12 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
 
     setIsCopyLoading(true);
     try {
-      const selectedPromotion = monthPromotions.find(p => p.id === selectedCopyCode);
-      if (selectedPromotion) {
+      // 선택된 프로모션의 전체 정보를 가져오기 위해 getPromotionById 사용
+      const { getPromotionById } = await import('../../services/promotionService');
+      const result = await getPromotionById(selectedCopyCode);
+      
+      if (result.success && result.data) {
+        const selectedPromotion = result.data;
         setValue('code', `${selectedPromotion.code}(copy)`);
         setValue('target', selectedPromotion.target);
         setValue('title', selectedPromotion.title);
@@ -322,6 +326,8 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
         setValue('contact', selectedPromotion.contact);
         setValue('imageUrl', selectedPromotion.imageUrl);
         setValue('isActive', selectedPromotion.isActive ?? true);
+      } else {
+        setError('선택한 프로모션을 찾을 수 없습니다.');
       }
     } catch (error) {
       // 프로모션 복사 중 오류 발생 시 무시하고 진행

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Promotion } from '../../types';
 import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
@@ -11,6 +11,7 @@ import {
 } from '../ui/sheet';
 import { renderPromotionContent } from '../../utils/promotionContentUtils';
 import { getPromotionById } from '../../services/promotionService';
+import { recordPromotionView } from '../../services/promotionStatsService';
 import '../../utils/promotionSidebarLightMode.css';
 
 interface PromotionSidebarProps {
@@ -28,6 +29,7 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
 }) => {
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
   const [isLoadingSelectedPromotion, setIsLoadingSelectedPromotion] = useState(false);
+  const countedPromotionIdsRef = useRef<Set<string>>(new Set());
 
   // 선택된 프로모션 로드
   useEffect(() => {
@@ -50,6 +52,19 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
 
     loadSelectedPromotion();
   }, [selectedProductCode]);
+
+  // 사이드바에서 선택된 프로모션 조회수 1회 증가 (중복 방지)
+  useEffect(() => {
+    const promotionId = selectedPromotion?.id;
+    if (!isOpen || !promotionId) return;
+    if (countedPromotionIdsRef.current.has(promotionId)) return;
+
+    countedPromotionIdsRef.current.add(promotionId);
+    recordPromotionView(promotionId).catch((error) => {
+      // 실패해도 UI 흐름에는 영향 주지 않음
+      console.error('사이드바 조회수 기록 실패:', error);
+    });
+  }, [isOpen, selectedPromotion?.id]);
 
   // 사이드바 닫기 핸들러
   const handleCloseSidebar = useCallback(() => {
@@ -122,15 +137,16 @@ const PromotionSidebar: React.FC<PromotionSidebarProps> = ({
             </div>
           ) : selectedPromotion ? (
             <Card className="border-0 shadow-sm bg-white/90 backdrop-blur-sm rounded-lg card promotion-sidebar-card">
-              <CardContent className="p-2 card-content">
+              <CardContent className="py-2 px-0 card-content">
                 <div className="flex items-center mb-2">
                   <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full mr-2"></div>
                   <h3 className="text-base font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     프로모션 내용
                   </h3>
                 </div>
+                {/* 글자크기 조절 대상에서 제외: 항상 보통(16px) 고정 */}
                 <div 
-                  className={`prose ${textSize === 'normal' ? 'prose-normal' : textSize === 'large' ? 'prose-large' : 'prose-xlarge'} max-w-none text-gray-700 leading-relaxed promotion-sidebar-prose`}
+                  className={`prose prose-normal max-w-none text-gray-700 leading-relaxed promotion-sidebar-prose`}
                   dangerouslySetInnerHTML={{ __html: renderPromotionContent(selectedPromotion.content) }}
                 />
               </CardContent>
