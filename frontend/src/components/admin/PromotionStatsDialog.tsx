@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Promotion, PromotionViewStats } from '../../types';
 
-import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateReferrerRatios, aggregateWeekdayViewsAndUsers, aggregateGroupedTimeViewsAndUsers } from '../../utils/statsUtils';
+import { aggregateViewsByDate, aggregateEnvironmentRatios, aggregateReferrerRatios, aggregateWeekdayViewsAndUsers, aggregateGroupedTimeViewsAndUsers, clampRange } from '../../utils/statsUtils';
 import { Button } from '../ui/button';
 import { Alert, AlertDescription } from '../ui/alert';
 import { useToast } from '../../hooks/use-toast';
@@ -84,12 +84,59 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
     loadStats();
   }, [isOpen, promotion.id, loadStats]);
 
+  const filteredViewHistory = useMemo(() => {
+    if (!stats) return [];
+
+    const parsedStart = new Date(start);
+    const parsedEnd = new Date(end);
+
+    if (Number.isNaN(parsedStart.valueOf()) || Number.isNaN(parsedEnd.valueOf())) {
+      return stats.viewHistory || [];
+    }
+
+    const { start: rangeStart, end: rangeEnd } = clampRange(parsedStart, parsedEnd);
+
+    return (stats.viewHistory || []).filter((record) => {
+      const viewedAt =
+        record.viewedAt instanceof Date
+          ? record.viewedAt
+          : record.viewedAt?.toDate?.() ?? new Date(record.viewedAt as any);
+
+      if (!(viewedAt instanceof Date) || Number.isNaN(viewedAt.valueOf())) {
+        return false;
+      }
+
+      return viewedAt >= rangeStart && viewedAt <= rangeEnd;
+    });
+  }, [stats, start, end]);
+
+  const filteredSummary = useMemo(() => {
+    if (!filteredViewHistory.length) {
+      return { totalViews: 0, uniqueIPCount: 0 };
+    }
+
+    const uniqueIPs = new Set<string>();
+    filteredViewHistory.forEach((record) => {
+      uniqueIPs.add(record.ip || 'unknown');
+    });
+
+    return {
+      totalViews: filteredViewHistory.length,
+      uniqueIPCount: uniqueIPs.size
+    };
+  }, [filteredViewHistory]);
+
   const daily = useMemo(() => {
     if (!stats) return [];
     const s = new Date(start);
     const e = new Date(end);
-    return aggregateViewsByDate(stats.viewHistory || [], s, e);
-  }, [stats, start, end]);
+    return aggregateViewsByDate(filteredViewHistory, s, e);
+  }, [stats, start, end, filteredViewHistory]);
+
+  const environmentRatios = useMemo(() => aggregateEnvironmentRatios(filteredViewHistory), [filteredViewHistory]);
+  const weekdayViewsAndUsers = useMemo(() => aggregateWeekdayViewsAndUsers(filteredViewHistory), [filteredViewHistory]);
+  const groupedTimeViewsAndUsers = useMemo(() => aggregateGroupedTimeViewsAndUsers(filteredViewHistory), [filteredViewHistory]);
+  const referrerRatios = useMemo(() => aggregateReferrerRatios(filteredViewHistory), [filteredViewHistory]);
 
   if (!isOpen) return null;
 
@@ -195,12 +242,12 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div className="bg-blue-50 border border-blue-100 rounded p-3 text-center">
                 <div className="text-xs text-blue-700">열람수</div>
-                <div className="text-xl font-semibold text-blue-800">{stats?.totalViews || 0}</div>
+                <div className="text-xl font-semibold text-blue-800">{filteredSummary.totalViews}</div>
               </div>
               <div className="bg-green-50 border border-green-100 rounded p-3 text-center">
                 <div className="text-xs text-green-700">이용자수(고유 IP)</div>
                 <div className="text-xl font-semibold text-green-800">
-                  {stats?.uniqueIPs ? stats.uniqueIPs.length : 0}
+                  {filteredSummary.uniqueIPCount}
                 </div>
               </div>
               <div className="bg-gray-50 border border-gray-100 rounded p-3 text-center">
@@ -260,8 +307,8 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
               <div>
                 <div className="text-sm font-medium text-gray-800 mb-2">클라이언트 환경 비율</div>
                 <div className="border rounded p-3">
-                  {aggregateEnvironmentRatios(stats?.viewHistory || []).map(r => {
-                    const maxCount = Math.max(1, ...aggregateEnvironmentRatios(stats?.viewHistory || []).map(x => x.count));
+                  {environmentRatios.map(r => {
+                    const maxCount = Math.max(1, ...environmentRatios.map(x => x.count));
                     const width = Math.round((r.count / maxCount) * 100);
                     return (
                       <div key={r.label} className="flex items-center mb-2">
@@ -290,7 +337,7 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                 <div className="text-sm font-medium text-gray-800 mb-2">요일 비율</div>
                 <div className="border rounded p-3">
                   {(() => {
-                    const items = aggregateWeekdayViewsAndUsers(stats?.viewHistory || []);
+                    const items = weekdayViewsAndUsers;
                     const maxCombined = Math.max(1, ...items.map(x => Math.max(x.views, x.users)));
                     return items.map(r => {
                       const vw = Math.round((r.views / maxCombined) * 100);
@@ -328,7 +375,7 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                 <div className="text-sm font-medium text-gray-800 mb-2">시간대 비율</div>
                 <div className="border rounded p-3 max-h-64 overflow-y-auto">
                   {(() => {
-                    const items = aggregateGroupedTimeViewsAndUsers(stats?.viewHistory || []).filter(r => r.views > 0 || r.users > 0);
+                    const items = groupedTimeViewsAndUsers.filter(r => r.views > 0 || r.users > 0);
                     const maxCombined = Math.max(1, ...items.map(x => Math.max(x.views, x.users)));
                     return items.map(r => {
                       const vw = Math.round((r.views / maxCombined) * 100);
@@ -374,7 +421,7 @@ const PromotionStatsDialog: React.FC<Props> = ({ isOpen, onClose, promotion }) =
                   </tr>
                 </thead>
                 <tbody>
-                  {aggregateReferrerRatios(stats?.viewHistory || []).map(r => (
+                  {referrerRatios.map(r => (
                     <tr key={r.label}>
                       <td className="p-2 border">{r.label}</td>
                       <td className="p-2 border text-right">{r.ratio}%</td>
