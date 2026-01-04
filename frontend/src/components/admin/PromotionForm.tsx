@@ -260,18 +260,20 @@ const PromotionForm: React.FC<PromotionFormProps> = ({
     ));
   };
 
-  // 월 옵션 생성 (현재 년도부터 2년 후까지)
+  // 월 옵션 생성 (이번 달 기준 과거 1년치, 미래 1년치 표시)
   const generateMonthOptions = () => {
     const options = [];
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
     
-    for (let year = currentYear; year <= currentYear + 2; year++) {
-      for (let month = 1; month <= 12; month++) {
-        const monthStr = month.toString().padStart(2, '0');
-        const value = `${year}-${monthStr}`;
-        const label = `${year}년 ${month}월`;
-        options.push({ value, label });
-      }
+    // 현재 달을 기준으로 -12개월부터 +12개월까지 순회
+    for (let i = -12; i <= 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const monthStr = month.toString().padStart(2, '0');
+      const value = `${year}-${monthStr}`;
+      const label = `${year}년 ${month}월`;
+      options.push({ value, label });
     }
     
     return options;
