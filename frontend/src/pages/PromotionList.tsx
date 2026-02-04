@@ -221,15 +221,6 @@ const PromotionList: React.FC<PromotionListProps> = ({
     setFilter(newFilter);
   };
 
-  // 정렬 처리
-  const handleSort = (field: 'createdAt' | 'updatedAt' | 'title' | 'month' | 'code') => {
-    const newSort: PromotionSort = {
-      field,
-      direction: sort.field === field && sort.direction === 'asc' ? 'desc' : 'asc'
-    };
-    setSort(newSort);
-  };
-
 
 
   // 더 보기
