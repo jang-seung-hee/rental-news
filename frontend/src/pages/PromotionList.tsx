@@ -3,8 +3,10 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
+
 import { useConfirm } from '../hooks/useConfirm';
 import PromotionTable from '../components/admin/PromotionTable';
+import BulkCopyDialog from '../components/admin/BulkCopyDialog';
 
 import { Promotion, PromotionFilter, PromotionSort, PromotionStatsSummary } from '../types';
 import { getPromotions } from '../services/promotionService';
@@ -28,16 +30,17 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<PromotionFilter>({});
-  const [sort, setSort] = useState<PromotionSort>({ field: 'createdAt', direction: 'desc' });
+  const [sort, setSort] = useState<PromotionSort>({ field: 'code', direction: 'asc' });
   const [hasNextPage, setHasNextPage] = useState(false);
   const [isPersistEnabled, setIsPersistEnabled] = useState(false);
+  const [isBulkCopyOpen, setIsBulkCopyOpen] = useState(false);
   const lastDocRef = useRef<any>(null);
   const { ConfirmComponent } = useConfirm();
 
   const pageSize = 10;
 
-  // 로컬스토리지 키
-  const STORAGE_KEY = 'promotion-list-filters';
+  // 로컬스토리지 키 (버전 업데이트로 인한 초기화)
+  const STORAGE_KEY = 'promotion-list-filters-v3';
   const PERSIST_KEY = 'promotion-list-persist-enabled';
 
   // 검색 조건을 로컬스토리지에 저장
@@ -58,7 +61,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
         const parsed = JSON.parse(savedFilters);
         setSearchTerm(parsed.searchTerm || '');
         setFilter(parsed.filter || {});
-        setSort(parsed.sort || { field: 'createdAt', direction: 'desc' });
+        setSort(parsed.sort || { field: 'code', direction: 'asc' });
       }
     } catch (error) {
       console.error('Failed to load filters from storage:', error);
@@ -69,7 +72,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const resetToDefault = useCallback(() => {
     setSearchTerm('');
     setFilter({});
-    setSort({ field: 'createdAt', direction: 'desc' });
+    setSort({ field: 'code', direction: 'asc' });
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
@@ -77,7 +80,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   useEffect(() => {
     const persistEnabled = localStorage.getItem(PERSIST_KEY) === 'true';
     setIsPersistEnabled(persistEnabled);
-    
+
     if (persistEnabled) {
       loadFiltersFromStorage();
     }
@@ -97,18 +100,54 @@ const PromotionList: React.FC<PromotionListProps> = ({
       setError(null);
 
       const result = await getPromotions(filter, sort, pageSize, reset ? null : lastDocRef.current);
-      
+
       if (result.success && result.data) {
-        const newPromotions = result.data.promotions;
-        
+        let filteredPromotions = result.data.promotions;
+
+        // 추가: 서버 정렬이 인덱스 미생성 등의 이유로 동작하지 않을 경우를 대비한 클라이언트 사이드 확정 정렬
+        if (sort.field) {
+          filteredPromotions = [...filteredPromotions].sort((a, b) => {
+            const field = sort.field as keyof Promotion;
+            const valA = String(a[field] || '');
+            const valB = String(b[field] || '');
+
+            let comparison = 0;
+            if (sort.field === 'code') {
+              // 코드순일 경우 (YYYYMM-X.Y) 파싱하여 숫자 기반으로 정렬
+              const parseCode = (c: string) => {
+                const parts = c.split('-');
+                const prefix = parts[0] || '';
+                const version = parts[1] || '';
+                const verParts = version.split('.').map(p => parseInt(p, 10) || 0);
+                return { prefix, major: verParts[0] || 0, minor: verParts[1] || 0 };
+              };
+
+              const aP = parseCode(valA);
+              const bP = parseCode(valB);
+
+              if (aP.prefix !== bP.prefix) {
+                comparison = aP.prefix.localeCompare(bP.prefix);
+              } else if (aP.major !== bP.major) {
+                comparison = aP.major - bP.major;
+              } else {
+                comparison = aP.minor - bP.minor;
+              }
+            } else {
+              comparison = valA.localeCompare(valB, undefined, { numeric: true });
+            }
+
+            return sort.direction === 'asc' ? comparison : -comparison;
+          });
+        }
+
         if (reset) {
-          setPromotions(newPromotions);
+          setPromotions(filteredPromotions);
         } else {
-          setPromotions(prev => [...prev, ...newPromotions]);
+          setPromotions(prev => [...prev, ...filteredPromotions]);
         }
         setHasNextPage(result.data.hasNextPage);
         lastDocRef.current = result.data.lastDoc;
-        
+
         // 통계는 별도 useEffect에서 처리
       } else {
         setError(result.error || '프로모션 목록을 불러올 수 없습니다.');
@@ -126,10 +165,10 @@ const PromotionList: React.FC<PromotionListProps> = ({
       // getPromotionStatsSummary 사용 (실시간 uniqueIPCount 계산)
       const { getPromotionStatsSummary } = await import('../services/promotionStatsService');
       const result = await getPromotionStatsSummary(promotionIds);
-      
+
       if (result.success && result.data) {
         const newStats = result.data;
-        
+
         if (reset) {
           setPromotionStats(newStats);
         } else {
@@ -204,7 +243,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const handlePersistToggle = (enabled: boolean) => {
     setIsPersistEnabled(enabled);
     localStorage.setItem(PERSIST_KEY, enabled.toString());
-    
+
     if (enabled) {
       // 고정 활성화 시 현재 조건 저장
       saveFiltersToStorage();
@@ -218,7 +257,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const generateMonthOptions = () => {
     const options = [];
     const currentYear = new Date().getFullYear();
-    
+
     for (let year = currentYear - 1; year <= currentYear + 1; year++) {
       for (let month = 1; month <= 12; month++) {
         const monthStr = month.toString().padStart(2, '0');
@@ -227,7 +266,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
         options.push({ value, label });
       }
     }
-    
+
     return options;
   };
 
@@ -241,9 +280,18 @@ const PromotionList: React.FC<PromotionListProps> = ({
           <h1 className="admin-page-title">프로모션 관리</h1>
           <p className="admin-description mt-1">프로모션 목록을 조회하고 관리할 수 있습니다.</p>
         </div>
-        <Button onClick={onAdd} className="bg-blue-600 hover:bg-blue-700">
-          새 프로모션 등록
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsBulkCopyOpen(true)}
+            variant="outline"
+            className="border-green-600 text-green-600 hover:bg-green-50"
+          >
+            월별 대량 복사
+          </Button>
+          <Button onClick={onAdd} className="bg-blue-600 hover:bg-blue-700">
+            새 프로모션 등록
+          </Button>
+        </div>
       </div>
 
       {/* 검색 및 필터 */}
@@ -312,16 +360,16 @@ const PromotionList: React.FC<PromotionListProps> = ({
               <select
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 admin-body-text"
                 onChange={(e) => {
-                  const [field] = e.target.value.split('-');
-                  handleSort(field as any);
+                  const [field, direction] = e.target.value.split('-');
+                  setSort({ field: field as any, direction: direction as any });
                 }}
                 value={`${sort.field}-${sort.direction}`}
               >
+                <option value="code-asc">코드순</option>
                 <option value="createdAt-desc">최신순</option>
                 <option value="createdAt-asc">오래된순</option>
                 <option value="title-asc">제목순</option>
                 <option value="month-desc">월순</option>
-                <option value="code-asc">코드순</option>
               </select>
             </div>
           </div>
@@ -358,6 +406,15 @@ const PromotionList: React.FC<PromotionListProps> = ({
           </Button>
         </div>
       )}
+
+      {/* 대량 복사 다이얼로그 */}
+      <BulkCopyDialog
+        isOpen={isBulkCopyOpen}
+        onClose={() => setIsBulkCopyOpen(false)}
+        onSuccess={() => {
+          loadPromotions(true);
+        }}
+      />
 
       {/* 커스텀 확인창 */}
       <ConfirmComponent />
