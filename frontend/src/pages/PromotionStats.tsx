@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+﻿import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { getPromotions } from '../services/promotionService';
 import { getAllPromotionStats } from '../services/promotionStatsService';
 import { Promotion, PromotionViewStats } from '../types';
@@ -166,20 +166,38 @@ const PromotionStatsPage: React.FC = () => {
     return monthColumns.map(m => {
       const startOfMonth = new Date(m.year, m.month - 1, 1);
       const endOfMonth = new Date(m.year, m.month, 0);
-      const data = aggregateViewsByDate(mergedRecordsInRange, startOfMonth, endOfMonth);
+
+      // 개별 프로모션 또는 월 필터가 선택된 경우 -> 기존 방식 유지
+      if (selectedPromotionId !== 'all' || selectedMonth !== 'all' || isDateFilterMode) {
+        const data = aggregateViewsByDate(mergedRecordsInRange, startOfMonth, endOfMonth);
+        return { ...m, data };
+      }
+
+      // 필터 없는 전체 보기: 해당 월 컬럼에 속하는 프로모션(promotion.month === m.key)의 뷰 기록만 수집
+      // 예) 4월 컬럼 -> promotion.month === "2026-04" 인 프로모션의 4월 열람 기록만 집계
+      const monthRecords: ViewRecordLike[] = [];
+      allStats.forEach(s => {
+        const promotion = promotions.find(p => p.id === s.promotionId);
+        if (!promotion) return;
+        const promoMonth = promotion.month || '';
+        if (promoMonth !== m.key) return;
+        if (Array.isArray(s.viewHistory)) monthRecords.push(...(s.viewHistory as any));
+      });
+
+      const data = aggregateViewsByDate(monthRecords, startOfMonth, endOfMonth);
       return { ...m, data };
     });
-  }, [monthColumns, mergedRecordsInRange]);
+  }, [monthColumns, mergedRecordsInRange, allStats, promotions, selectedPromotionId, selectedMonth, isDateFilterMode]);
 
-  const maxDailyViews = useMemo(() => {
-    const values = monthDailySeries.flatMap(m => m.data.map(d => d.totalViews));
-    return Math.max(1, ...values, 1);
-  }, [monthDailySeries]);
 
-  const maxDailyUsers = useMemo(() => {
-    const values = monthDailySeries.flatMap(m => m.data.map(d => d.uniqueIPCount));
-    return Math.max(1, ...values, 1);
-  }, [monthDailySeries]);
+
+
+
+
+
+
+
+
 
   const overview = useMemo(() => {
     const totalViews = mergedRecordsInRange.length;
