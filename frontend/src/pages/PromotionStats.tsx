@@ -645,10 +645,10 @@ const PromotionStatsPage: React.FC = () => {
             <div className="w-full border rounded overflow-x-auto">
               <table className="min-w-[1300px] w-full border-collapse text-[10px] table-fixed">
                 <thead>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-slate-100">
                     <th className="text-center p-0.5 border !text-[14px] text-gray-600 font-semibold w-20">{"\uC6D4"}</th>
                     {Array.from({ length: 31 }, (_, i) => (
-                      <th key={i + 1} className={`p-0.5 border text-center !text-[14px] font-semibold w-10 ${(i + 1) === new Date().getDate() ? 'bg-amber-100 text-amber-800' : 'text-gray-600'}`}>{i + 1}</th>
+                      <th key={i + 1} className={`p-0.5 border text-center !text-[14px] font-semibold w-10 ${(i + 1) === new Date().getDate() ? 'bg-amber-100 text-amber-800' : 'text-gray-600'}`}>{`${i + 1}\uC77C`}</th>
                     ))}
                   </tr>
                 </thead>
@@ -663,15 +663,15 @@ const PromotionStatsPage: React.FC = () => {
                     let runningUsers = 0;
                     return (
                       <React.Fragment key={m.key}>
-                        <tr>
-                          <td className="p-0.5 border whitespace-nowrap !text-[12px] text-black text-center w-20">{`${m.month}\uC6D4`}</td>
+                        <tr className="h-10">
+                          <td className="px-0.5 py-2 border whitespace-nowrap !text-[12px] text-black text-center w-20">{`${m.month}\uC6D4`}</td>
                           {Array.from({ length: 31 }, (_, i) => {
                             const day = i + 1;
                             const now = new Date();
                             const isToday = day === now.getDate() && m.month === (now.getMonth() + 1) && m.year === now.getFullYear();
                             const v = dayMap.get(day);
                             return (
-                              <td key={day} className={`p-0.5 border text-center !text-[12px] text-black w-10 ${isToday ? 'bg-amber-100 font-bold' : ''}`}>
+                              <td key={day} className={`px-0.5 py-2 border text-center !text-[12px] text-black w-10 ${isToday ? 'bg-amber-100 font-bold' : ''}`}>
                                 {v ? `${v.views}/${v.users}` : '-'}
                               </td>
                             );
