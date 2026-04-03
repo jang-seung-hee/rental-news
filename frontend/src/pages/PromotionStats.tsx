@@ -688,7 +688,7 @@ const PromotionStatsPage: React.FC = () => {
                             }
                             const hasAny = dayMap.size > 0;
                             return (
-                              <td key={day} className={`p-0.5 border text-center !text-[12px] w-10 ${day === new Date().getDate() && m.month === (new Date().getMonth() + 1) && m.year === new Date().getFullYear() ? 'bg-amber-100 text-slate-900 font-bold' : ''}`} style={day === new Date().getDate() && m.month === (new Date().getMonth() + 1) && m.year === new Date().getFullYear() ? {} : { color: '#f8fafc' }}>
+                              <td key={day} className="p-0.5 border text-center !text-[12px] w-10" style={{ color: '#f8fafc' }}>
                                 {hasAny ? `${runningViews}/${runningUsers}` : '-'}
                               </td>
                             );
