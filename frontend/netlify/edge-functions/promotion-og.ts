@@ -58,6 +58,11 @@ export default async (request: Request, context: Context) => {
 
   const urlObj = new URL(request.url);
   const origin = `${urlObj.protocol}//${urlObj.host}`;
+  const pathname = urlObj.pathname;
+  const adminPrefixes = ["/promotions", "/settings", "/404"];
+  const isAdminPath =
+    pathname === "/" || adminPrefixes.some((prefix) => pathname.startsWith(prefix));
+  if (isAdminPath) return context.next();
   const canonicalUrl = origin + urlObj.pathname + urlObj.search;
 
   // 기본값

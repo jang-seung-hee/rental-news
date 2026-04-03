@@ -80,11 +80,11 @@ const LegacyPromotionRedirect: React.FC = () => {
         if (result.success && result.data) {
           // slug가 있으면 slug 기반 URL로 리다이렉션
           if (result.data.slug) {
-            navigate(`/view/${result.data.slug}`, { replace: true });
+            navigate(`/${result.data.slug}`, { replace: true });
           } else {
             // slug가 없어도 현재 slug 기반 URL로 접근 가능하도록 리다이렉션
             // slug가 없는 경우 ID를 slug로 사용
-            navigate(`/view/${result.data.id}`, { replace: true });
+            navigate(`/${result.data.id}`, { replace: true });
           }
         } else {
           // 프로모션을 찾을 수 없으면 404로 리다이렉션
@@ -127,7 +127,12 @@ function App() {
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-  const isPromotionView = location.pathname.startsWith('/view/');
+  const isLegacyPromotionView = location.pathname.startsWith('/view/');
+  const adminPrefixes = ['/promotions', '/settings', '/404'];
+  const isAdminRoute =
+    location.pathname === '/' ||
+    adminPrefixes.some((prefix) => location.pathname.startsWith(prefix));
+  const isPromotionView = isLegacyPromotionView || !isAdminRoute;
   const { user, isAdmin, loading } = useAdminAuth();
 
   // 로딩 상태 처리
@@ -147,6 +152,7 @@ const AppContent: React.FC = () => {
     return (
       <>
         <Routes>
+          <Route path="/:identifier" element={<PromotionViewPage />} />
           <Route path="/view/:identifier" element={<PromotionViewPage />} />
           {/* 기존 ID 기반 URL 지원 (리다이렉션용) */}
           <Route path="/view/id/:id" element={<LegacyPromotionRedirect />} />

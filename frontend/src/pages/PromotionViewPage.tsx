@@ -154,7 +154,7 @@ const PromotionViewPage: React.FC = () => {
     const title = systemSettings?.defaultTitle || `${promotion.title} - ${systemSettings?.siteName || '렌탈톡톡'}`;
     const description = systemSettings?.defaultDescription || promotion.content.replace(/<[^>]*>/g, '').substring(0, 160);
     const imageUrl = promotion.imageUrl || systemSettings?.defaultImageUrl || '/promotionViewTitle_resize.png';
-    const url = `${window.location.origin}/view/${promotion.slug || promotion.id}`;
+    const url = `${window.location.origin}/${promotion.slug || promotion.id}`;
     const siteName = systemSettings?.siteName || '렌탈톡톡';
 
     return (

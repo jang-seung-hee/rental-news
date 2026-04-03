@@ -82,8 +82,8 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
 
   const copyPromotionLink = async (promotion: Promotion) => {
     const url = promotion.slug 
-      ? `${window.location.origin}/view/${promotion.slug}`
-      : `${window.location.origin}/view/${promotion.id}`;
+      ? `${window.location.origin}/${promotion.slug}`
+      : `${window.location.origin}/${promotion.id}`;
     
     const success = await copyToClipboard(url);
     
@@ -347,7 +347,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                         variant="outline"
                         onClick={() => openSlugUrlDialog(promotion)}
                         className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 text-xs w-36 truncate"
-                        title={`${window.location.origin}/view/${promotion.slug || promotion.id}`}
+                        title={`${window.location.origin}/${promotion.slug || promotion.id}`}
                       >
                         <span className="truncate block w-full text-center">
                           {promotion.slug || promotion.id}
@@ -360,8 +360,8 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                         variant="outline"
                         onClick={() => {
                           const url = promotion.slug 
-                            ? `${window.location.origin}/view/${promotion.slug}`
-                            : `${window.location.origin}/view/${promotion.id}`;
+                            ? `${window.location.origin}/${promotion.slug}`
+                            : `${window.location.origin}/${promotion.id}`;
                           window.open(url, '_blank');
                         }}
                         className="text-purple-600 border-purple-200 hover:bg-purple-50"
@@ -439,8 +439,8 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                     variant="outline"
                     onClick={() => {
                       const url = promotion.slug 
-                        ? `${window.location.origin}/view/${promotion.slug}`
-                        : `${window.location.origin}/view/${promotion.id}`;
+                        ? `${window.location.origin}/${promotion.slug}`
+                        : `${window.location.origin}/${promotion.id}`;
                       window.open(url, '_blank');
                     }}
                     className="flex-1 text-purple-600 border-purple-200 hover:bg-purple-50"
@@ -536,7 +536,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
               <p className="text-sm text-gray-600 mb-2">전체 URL:</p>
               <div className="bg-gray-50 p-3 rounded border">
                 <p className="font-mono text-sm text-gray-800 break-all">
-                  {`${window.location.origin}/view/${slugUrlDialog.slugValue || slugUrlDialog.promotion.id}`}
+                  {`${window.location.origin}/${slugUrlDialog.slugValue || slugUrlDialog.promotion.id}`}
                 </p>
               </div>
             </div>
@@ -545,7 +545,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                 variant="outline"
                 onClick={() => {
                   if (slugUrlDialog.promotion) {
-                    const url = `${window.location.origin}/view/${slugUrlDialog.slugValue || slugUrlDialog.promotion.id}`;
+                    const url = `${window.location.origin}/${slugUrlDialog.slugValue || slugUrlDialog.promotion.id}`;
                     navigator.clipboard.writeText(url);
                     toast({
                       title: "슬러그 URL이 복사되었습니다",
@@ -560,7 +560,7 @@ const PromotionTable: React.FC<PromotionTableProps> = ({
                 variant="outline"
                 onClick={() => {
                   if (slugUrlDialog.promotion) {
-                    const url = `${window.location.origin}/view/${slugUrlDialog.slugValue || slugUrlDialog.promotion.id}`;
+                    const url = `${window.location.origin}/${slugUrlDialog.slugValue || slugUrlDialog.promotion.id}`;
                     window.open(url, '_blank');
                   }
                 }}
