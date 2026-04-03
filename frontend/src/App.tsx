@@ -182,7 +182,7 @@ const AppContent: React.FC = () => {
         </div>
 
         {/* 메인 콘텐츠 */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0 overflow-hidden flex flex-col">
           {/* 헤더 */}
           <header className="bg-white shadow-sm border-b border-gray-200">
             <div className="px-4 lg:px-6 py-3 lg:py-4">

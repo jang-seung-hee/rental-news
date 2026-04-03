@@ -660,13 +660,13 @@ const PromotionStatsPage: React.FC = () => {
 
           <div className="mb-6">
             <div className="admin-subsection-title mb-2">{"\uC77C\uC790\uBCC4 \uC5F4\uB78C\uC218 / \uC774\uC6A9\uC790\uC218"}</div>
-            <div className="w-full border rounded overflow-x-auto">
-              <table className="min-w-[1300px] w-full border-collapse text-[10px] table-fixed">
+            <div className="w-full border rounded overflow-x-auto" style={{ maxWidth: '100%', display: 'block' }}>
+              <table className="w-full border-collapse text-[10px] table-fixed" style={{ minWidth: '2600px' }}>
                 <thead>
                   <tr className="bg-slate-100">
-                    <th className="text-center p-0.5 border !text-[14px] text-gray-600 font-semibold w-20">{"\uC6D4"}</th>
+                    <th className="sticky left-0 z-20 bg-slate-100 text-center p-0.5 border !text-[14px] text-gray-600 font-semibold w-20">{"\uC6D4"}</th>
                     {Array.from({ length: 31 }, (_, i) => (
-                      <th key={i + 1} className={`p-0.5 border text-center !text-[14px] font-semibold w-10 ${(i + 1) === new Date().getDate() ? 'bg-amber-100 text-amber-800' : 'text-gray-600'}`}>{`${i + 1}\uC77C`}</th>
+                      <th key={i + 1} className={`p-0.5 border text-center !text-[14px] font-semibold w-20 ${(i + 1) === new Date().getDate() ? 'bg-amber-100 text-amber-800' : 'text-gray-600'}`}>{`${i + 1}\uC77C`}</th>
                     ))}
                   </tr>
                 </thead>
@@ -682,21 +682,21 @@ const PromotionStatsPage: React.FC = () => {
                     return (
                       <React.Fragment key={m.key}>
                         <tr className="h-10">
-                          <td className="px-0.5 py-2 border whitespace-nowrap !text-[12px] text-black text-center w-20">{`${m.month}\uC6D4`}</td>
+                          <td className="sticky left-0 z-10 bg-white px-0.5 py-2 border whitespace-nowrap !text-[12px] text-black text-center w-20">{`${m.month}\uC6D4`}</td>
                           {Array.from({ length: 31 }, (_, i) => {
                             const day = i + 1;
                             const now = new Date();
                             const isToday = day === now.getDate() && m.month === (now.getMonth() + 1) && m.year === now.getFullYear();
                             const v = dayMap.get(day);
                             return (
-                              <td key={day} className={`px-0.5 py-2 border text-center !text-[12px] text-black w-10 ${isToday ? 'bg-amber-100 font-bold' : ''}`}>
+                              <td key={day} className={`px-0.5 py-2 border text-center !text-[12px] text-black w-20 ${isToday ? 'bg-amber-100 font-bold' : ''}`}>
                                 {v ? `${v.views}/${v.users}` : '-'}
                               </td>
                             );
                           })}
                         </tr>
                         <tr className="bg-slate-900">
-                          <td className="p-0.5 border whitespace-nowrap !text-[12px] text-center w-20" style={{ color: '#f8fafc' }}>{"\uB204\uC801"}</td>
+                          <td className="sticky left-0 z-10 bg-slate-900 p-0.5 border whitespace-nowrap !text-[12px] text-center w-20" style={{ color: '#f8fafc' }}>{"\uB204\uC801"}</td>
                           {Array.from({ length: 31 }, (_, i) => {
                             const day = i + 1;
                             const v = dayMap.get(day);
@@ -706,7 +706,7 @@ const PromotionStatsPage: React.FC = () => {
                             }
                             const hasAny = dayMap.size > 0;
                             return (
-                              <td key={day} className="p-0.5 border text-center !text-[12px] w-10" style={{ color: '#f8fafc' }}>
+                              <td key={day} className="p-0.5 border text-center !text-[12px] w-20" style={{ color: '#f8fafc' }}>
                                 {hasAny ? `${runningViews}/${runningUsers}` : '-'}
                               </td>
                             );
