@@ -22,6 +22,7 @@ const PromotionStatsPage: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
   const [selectedPromotionId, setSelectedPromotionId] = useState<string>('all');
   const [showDatePopup, setShowDatePopup] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     const load = async () => {
@@ -149,7 +150,7 @@ const PromotionStatsPage: React.FC = () => {
     }
 
     const now = new Date();
-    for (let i = 4; i >= 0; i -= 1) {
+    for (let i = 11; i >= 0; i -= 1) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       columns.push({
@@ -671,7 +672,7 @@ const PromotionStatsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {[...monthDailySeries].reverse().map((m) => {
+                  {[...monthDailySeries].reverse().slice(0, isExpanded ? 12 : 4).map((m) => {
                     const dayMap = new Map<number, { views: number; users: number }>();
                     m.data.forEach(d => {
                       const day = Number(d.date.slice(8));
@@ -718,7 +719,19 @@ const PromotionStatsPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
-            <div className="mt-2 text-[11px] text-gray-500">{"\uD45C\uAE30 \uD615\uC2DD: \uC5F4\uB78C\uC218/\uC774\uC6A9\uC790\uC218, \uB204\uC801\uC740 1\uC77C~\uD574\uB2F9\uC77C \uD569\uACC4"}</div>
+            <div className="mt-2 flex items-center justify-between">
+              <div className="text-[11px] text-gray-500">{"\uD45C\uAE30 \uD615\uC2DD: \uC5F4\uB78C\uC218/\uC774\uC6A9\uC790\uC218, \uB204\uC801\uC740 1\uC77C~\uD574\uB2F9\uC77C \uD569\uACC4"}</div>
+              <button 
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center gap-1 px-4 py-1.5 text-xs font-semibold bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                {isExpanded ? (
+                  <>{"\uC811\uAE30"} <span className="text-[10px]">▲</span></>
+                ) : (
+                  <>{"\uB354 \uBCF4\uAE30"} <span className="text-[10px]">▼</span></>
+                )}
+              </button>
+            </div>
           </div>
 
           {isOverallView && (
