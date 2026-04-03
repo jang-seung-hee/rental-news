@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { getPromotions } from '../services/promotionService';
 import { getAllPromotionStats } from '../services/promotionStatsService';
 import { Promotion, PromotionViewStats } from '../types';
@@ -149,7 +149,7 @@ const PromotionStatsPage: React.FC = () => {
     }
 
     const now = new Date();
-    for (let i = 2; i >= 0; i -= 1) {
+    for (let i = 4; i >= 0; i -= 1) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       columns.push({
