@@ -129,16 +129,57 @@ const PromotionStatsPage: React.FC = () => {
     return all as ViewRecordLike[];
   }, [allStats, selectedPromotionId, selectedMonth, promotions, isDateFilterMode, startDate, endDate, filterByRange]);
 
-  const daily = useMemo(() => {
-    if (!isDateFilterMode) {
-      // 날짜 필터가 없으면 최근 30일 기본 표시
-      const defaultEnd = new Date();
-      const defaultStart = new Date();
-      defaultStart.setDate(defaultEnd.getDate() - 29);
-      return aggregateViewsByDate(mergedRecordsInRange, defaultStart, defaultEnd);
+  const monthColumns = useMemo(() => {
+    const columns: { key: string; year: number; month: number; label: string }[] = [];
+    if (isDateFilterMode) {
+      const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      const endCursor = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+      while (cursor <= endCursor) {
+        const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`;
+        columns.push({
+          key,
+          year: cursor.getFullYear(),
+          month: cursor.getMonth() + 1,
+          label: `${cursor.getMonth() + 1}월`
+        });
+        cursor.setMonth(cursor.getMonth() + 1);
+      }
+      // 비교를 위해 최대 3개월만 표시 (기간이 더 길면 최근 3개월)
+      return columns.slice(-3);
     }
-    return aggregateViewsByDate(mergedRecordsInRange, startDate, endDate);
-  }, [mergedRecordsInRange, startDate, endDate, isDateFilterMode]);
+
+    const now = new Date();
+    for (let i = 2; i >= 0; i -= 1) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      columns.push({
+        key,
+        year: d.getFullYear(),
+        month: d.getMonth() + 1,
+        label: `${d.getMonth() + 1}월`
+      });
+    }
+    return columns;
+  }, [isDateFilterMode, startDate, endDate]);
+
+  const monthDailySeries = useMemo(() => {
+    return monthColumns.map(m => {
+      const startOfMonth = new Date(m.year, m.month - 1, 1);
+      const endOfMonth = new Date(m.year, m.month, 0);
+      const data = aggregateViewsByDate(mergedRecordsInRange, startOfMonth, endOfMonth);
+      return { ...m, data };
+    });
+  }, [monthColumns, mergedRecordsInRange]);
+
+  const maxDailyViews = useMemo(() => {
+    const values = monthDailySeries.flatMap(m => m.data.map(d => d.totalViews));
+    return Math.max(1, ...values, 1);
+  }, [monthDailySeries]);
+
+  const maxDailyUsers = useMemo(() => {
+    const values = monthDailySeries.flatMap(m => m.data.map(d => d.uniqueIPCount));
+    return Math.max(1, ...values, 1);
+  }, [monthDailySeries]);
 
   const overview = useMemo(() => {
     const totalViews = mergedRecordsInRange.length;
@@ -168,6 +209,106 @@ const PromotionStatsPage: React.FC = () => {
     
     return { totalViews, uniqueIPCount: uniqueIPs.size, involvedPromotionCount };
   }, [mergedRecordsInRange, allStats, startDate, endDate, isDateFilterMode, selectedPromotionId, selectedMonth, promotions]);
+
+  const recentMonths = useMemo(() => {
+    const now = new Date();
+    const months: { key: string; year: number; month: number }[] = [];
+    for (let i = 0; i < 6; i += 1) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      months.push({ key, year: d.getFullYear(), month: d.getMonth() + 1 });
+    }
+    const hasOtherYear = months.some(m => m.year !== now.getFullYear());
+    return months.map(m => ({
+      ...m,
+      label: hasOtherYear ? `${m.year}년 ${m.month}월` : `${m.month}월`
+    }));
+  }, []);
+
+  const normalizePromotionTitle = useCallback((title: string) => {
+    let t = (title || '').trim();
+    if (!t) return '';
+    // "프로모션 안내(XXX)" 형태 정리
+    t = t.replace(/^프로모션\s*안내\s*\(\s*/i, '');
+    t = t.replace(/\)\s*$/, '');
+    t = t.replace(/^\s*\d{1,2}\s*\/\s*\d{1,2}\s*월\s*/i, '');
+    t = t.replace(/^\s*\d{1,2}\s*~\s*\d{1,2}\s*월\s*/i, '');
+    t = t.replace(/^\s*\d{1,2}\s*월\s*/i, '');
+    return t.trim() || title;
+  }, []);
+
+  const recentCompareRows = useMemo(() => {
+    const promotionById = new Map<string, Promotion>();
+    promotions.forEach(p => promotionById.set(p.id, p));
+    const statsByPromotionId = new Map<string, PromotionViewStats>();
+    allStats.forEach(s => statsByPromotionId.set(s.promotionId, s));
+    const monthKeySet = new Set(recentMonths.map(m => m.key));
+    const acc: Record<string, { title: string; month: Record<string, { views: number; users: number }>; totalViews: number }> = {};
+
+    promotions.forEach(p => {
+      if (!p.month || !monthKeySet.has(p.month)) return;
+      const stats = statsByPromotionId.get(p.id);
+      const rawTitle = p.title || p.id;
+      const baseTitle = normalizePromotionTitle(rawTitle);
+      if (!acc[baseTitle]) acc[baseTitle] = { title: baseTitle, month: {}, totalViews: 0 };
+      if (!acc[baseTitle].month[p.month]) acc[baseTitle].month[p.month] = { views: 0, users: 0 };
+      const views = stats?.totalViews || 0;
+      const users = stats?.uniqueIPCount || (stats?.uniqueIPs?.length || 0);
+      acc[baseTitle].month[p.month].views += views;
+      acc[baseTitle].month[p.month].users += users;
+      acc[baseTitle].totalViews += views;
+    });
+
+    const getSortKey = (title: string) => {
+      const t = title || '';
+      const has = (s: string) => t.includes(s);
+      if (has('정수전용') && has('신규')) return 1;
+      if (has('정수전용') && has('타사')) return 2;
+      if (has('정수전용')) return 3;
+      if (has('냉정') && has('신규')) return 4;
+      if (has('냉정') && has('타사')) return 5;
+      if (has('냉정')) return 6;
+      if (has('냉온정') && has('신규')) return 7;
+      if (has('냉온정') && has('타사')) return 8;
+      if (has('냉온정')) return 9;
+      if (has('냉온얼음') && has('신규')) return 10;
+      if (has('냉온얼음') && has('타사')) return 11;
+      if (has('냉온얼음')) return 12;
+      if (has('비데')) return 13;
+      if (has('탱크형')) return 14;
+      return 99;
+    };
+
+    const rows = Object.values(acc)
+      .filter(r => r.totalViews > 0)
+      .map(r => ({
+        title: r.title,
+        totalViews: r.totalViews,
+        monthCells: recentMonths.map(m => {
+          const cell = r.month[m.key];
+          return { key: m.key, views: cell?.views || 0, users: cell?.users || 0 };
+        })
+      }));
+
+    rows.sort((a, b) => {
+      const ka = getSortKey(a.title);
+      const kb = getSortKey(b.title);
+      if (ka !== kb) return ka - kb;
+      return a.title.localeCompare(b.title);
+    });
+    return rows;
+  }, [allStats, promotions, recentMonths, normalizePromotionTitle]);
+
+  const recentCompareTotals = useMemo(() => {
+    const totals = recentMonths.map(m => ({ key: m.key, views: 0, users: 0 }));
+    recentCompareRows.forEach(row => {
+      row.monthCells.forEach((cell, idx) => {
+        totals[idx].views += cell.views;
+        totals[idx].users += cell.users;
+      });
+    });
+    return totals;
+  }, [recentMonths, recentCompareRows]);
 
   const monthlyByPromotion = useMemo(() => {
     const acc: { [pid: string]: { totalViews: number; uniqueIPs: Set<string> } } = {};
@@ -213,6 +354,8 @@ const PromotionStatsPage: React.FC = () => {
     rows.sort((a, b) => b.totalViews - a.totalViews);
     return rows;
   }, [allStats, promotionTitleMap, isDateFilterMode, selectedPromotionId, selectedMonth, promotions, startDate, endDate]);
+
+  const isOverallView = !isDateFilterMode && selectedMonth === 'all' && selectedPromotionId === 'all';
 
   return (
     <div className="space-y-4">
@@ -498,43 +641,111 @@ const PromotionStatsPage: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <div className="admin-subsection-title mb-2">일자별 열람수 / 이용자수</div>
-            <div className="w-full border rounded p-3 overflow-x-auto">
-              <div className="flex items-end space-x-3 min-w-[800px]">
-                {daily.map(d => {
-                  const maxViews = Math.max(1, ...daily.map(x => x.totalViews));
-                  const maxUsers = Math.max(1, ...daily.map(x => x.uniqueIPCount));
-                  const viewsHeight = Math.round((d.totalViews / maxViews) * 120);
-                  const usersHeight = Math.round((d.uniqueIPCount / maxUsers) * 120);
-                  return (
-                    <div key={d.date} className="flex flex-col items-center">
-                      <div className="flex items-end space-x-1 mb-1">
-                        <div className="flex flex-col items-center">
-                          <div className="bg-blue-500 w-4" style={{ height: `${viewsHeight}px` }} />
-                          <div className="text-[9px] text-blue-700 mt-1">{d.totalViews}</div>
-                        </div>
-                        <div className="flex flex-col items-center">
-                          <div className="bg-green-500 w-4" style={{ height: `${usersHeight}px` }} />
-                          <div className="text-[9px] text-green-700 mt-1">{d.uniqueIPCount}</div>
-                        </div>
-                      </div>
-                      <div className="text-[10px] text-gray-600">{d.date.slice(5)}</div>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex justify-center mt-3 space-x-4">
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 bg-blue-500"></div>
-                  <span className="admin-caption">열람수</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-3 h-3 bg-green-500"></div>
-                  <span className="admin-caption">이용자수</span>
-                </div>
+            <div className="admin-subsection-title mb-2">{"\uC77C\uC790\uBCC4 \uC5F4\uB78C\uC218 / \uC774\uC6A9\uC790\uC218"}</div>
+            <div className="w-full border rounded overflow-x-auto">
+              <table className="min-w-[1300px] w-full border-collapse text-[10px] table-fixed">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="text-center p-0.5 border !text-[14px] text-gray-600 font-semibold w-20">{"\uC6D4"}</th>
+                    {Array.from({ length: 31 }, (_, i) => (
+                      <th key={i + 1} className={`p-0.5 border text-center !text-[14px] font-semibold w-10 ${(i + 1) === new Date().getDate() ? 'bg-amber-100 text-amber-800' : 'text-gray-600'}`}>{i + 1}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...monthDailySeries].reverse().map((m) => {
+                    const dayMap = new Map<number, { views: number; users: number }>();
+                    m.data.forEach(d => {
+                      const day = Number(d.date.slice(8));
+                      dayMap.set(day, { views: d.totalViews, users: d.uniqueIPCount });
+                    });
+                    let runningViews = 0;
+                    let runningUsers = 0;
+                    return (
+                      <React.Fragment key={m.key}>
+                        <tr>
+                          <td className="p-0.5 border whitespace-nowrap !text-[12px] text-black text-center w-20">{`${m.month}\uC6D4`}</td>
+                          {Array.from({ length: 31 }, (_, i) => {
+                            const day = i + 1;
+                            const now = new Date();
+                            const isToday = day === now.getDate() && m.month === (now.getMonth() + 1) && m.year === now.getFullYear();
+                            const v = dayMap.get(day);
+                            return (
+                              <td key={day} className={`p-0.5 border text-center !text-[12px] text-black w-10 ${isToday ? 'bg-amber-100 font-bold' : ''}`}>
+                                {v ? `${v.views}/${v.users}` : '-'}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                        <tr className="bg-slate-900">
+                          <td className="p-0.5 border whitespace-nowrap !text-[12px] text-center w-20" style={{ color: '#f8fafc' }}>{"\uB204\uC801"}</td>
+                          {Array.from({ length: 31 }, (_, i) => {
+                            const day = i + 1;
+                            const v = dayMap.get(day);
+                            if (v) {
+                              runningViews += v.views;
+                              runningUsers += v.users;
+                            }
+                            const hasAny = dayMap.size > 0;
+                            return (
+                              <td key={day} className={`p-0.5 border text-center !text-[12px] w-10 ${day === new Date().getDate() && m.month === (new Date().getMonth() + 1) && m.year === new Date().getFullYear() ? 'bg-amber-100 text-slate-900 font-bold' : ''}`} style={day === new Date().getDate() && m.month === (new Date().getMonth() + 1) && m.year === new Date().getFullYear() ? {} : { color: '#f8fafc' }}>
+                                {hasAny ? `${runningViews}/${runningUsers}` : '-'}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="mt-2 text-[11px] text-gray-500">{"\uD45C\uAE30 \uD615\uC2DD: \uC5F4\uB78C\uC218/\uC774\uC6A9\uC790\uC218, \uB204\uC801\uC740 1\uC77C~\uD574\uB2F9\uC77C \uD569\uACC4"}</div>
+          </div>
+
+          {isOverallView && (
+            <div className="mt-6">
+              <div className="admin-subsection-title mb-2">최근 열람 비교</div>
+              <div className="border rounded">
+                {recentCompareRows.length === 0 ? (
+                  <div className="p-4 admin-caption text-gray-500">최근 4개월 내 열람 기록이 없습니다.</div>
+                ) : (
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="text-left p-1 border admin-table-header text-[9px]">프로모션명</th>
+                        {recentMonths.map(m => (
+                          <th key={m.key} className="text-right p-1 border admin-table-header text-[9px]">{m.label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentCompareRows.map((row, idx) => (
+                        <tr key={row.title} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="p-1 border admin-table-cell">{row.title}</td>
+                          {row.monthCells.map(cell => (
+                            <td key={cell.key} className="p-1 border admin-table-cell text-right">
+                              {cell.views}/{cell.users}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="bg-gray-50">
+                        <td className="p-1 border admin-table-cell font-semibold">합계</td>
+                        {recentCompareTotals.map(cell => (
+                          <td key={cell.key} className="p-1 border admin-table-cell text-right font-semibold">
+                            {cell.views}/{cell.users}
+                          </td>
+                        ))}
+                      </tr>
+                    </tfoot>
+                  </table>
+                )}
               </div>
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-1 gap-6 mt-6">
             <div>
@@ -640,9 +851,9 @@ const PromotionStatsPage: React.FC = () => {
             <table className="w-full border">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="text-left p-2 border admin-table-header">레퍼러</th>
-                  <th className="text-right p-2 border admin-table-header">비율</th>
-                  <th className="text-right p-2 border admin-table-header">건수</th>
+                  <th className="text-left p-2 border admin-table-header text-[9px]">레퍼러</th>
+                  <th className="text-right p-2 border admin-table-header text-[9px]">비율</th>
+                  <th className="text-right p-2 border admin-table-header text-[9px]">건수</th>
                 </tr>
               </thead>
               <tbody>
@@ -671,9 +882,9 @@ const PromotionStatsPage: React.FC = () => {
             <table className="w-full border">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="text-left p-2 border admin-table-header">프로모션</th>
-                  <th className="text-right p-2 border admin-table-header">열람수</th>
-                  <th className="text-right p-2 border admin-table-header">이용자수</th>
+                  <th className="text-left p-2 border admin-table-header text-[9px]">프로모션</th>
+                  <th className="text-right p-2 border admin-table-header text-[9px]">열람수</th>
+                  <th className="text-right p-2 border admin-table-header text-[9px]">이용자수</th>
                 </tr>
               </thead>
               <tbody>
@@ -693,18 +904,25 @@ const PromotionStatsPage: React.FC = () => {
             <table className="w-full border">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="text-left p-2 border admin-table-header">날짜</th>
-                  <th className="text-right p-2 border admin-table-header">열람수</th>
-                  <th className="text-right p-2 border admin-table-header">이용자수</th>
+                  <th className="text-left p-2 border admin-table-header text-[9px]">날짜</th>
+                  <th className="text-right p-2 border admin-table-header text-[9px]">열람수</th>
+                  <th className="text-right p-2 border admin-table-header text-[9px]">이용자수</th>
                 </tr>
               </thead>
               <tbody>
-                {daily.map(d => (
-                  <tr key={d.date}>
-                    <td className="p-2 border admin-table-cell">{d.date}</td>
-                    <td className="p-2 border admin-table-cell text-right">{d.totalViews}</td>
-                    <td className="p-2 border admin-table-cell text-right">{d.uniqueIPCount}</td>
-                  </tr>
+                {monthDailySeries.map(m => (
+                  <React.Fragment key={m.key}>
+                    <tr className="bg-gray-50">
+                      <td className="p-2 border admin-table-cell font-semibold" colSpan={3}>{m.year}년 {m.month}월</td>
+                    </tr>
+                    {m.data.map(d => (
+                      <tr key={`${m.key}-${d.date}`}>
+                        <td className="p-2 border admin-table-cell">{d.date}</td>
+                        <td className="p-2 border admin-table-cell text-right">{d.totalViews}</td>
+                        <td className="p-2 border admin-table-cell text-right">{d.uniqueIPCount}</td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
@@ -716,5 +934,3 @@ const PromotionStatsPage: React.FC = () => {
 };
 
 export default PromotionStatsPage;
-
-

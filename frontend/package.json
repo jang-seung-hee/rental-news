@@ -77,6 +77,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "verify:recent-compare": "node scripts/verify-recent-compare.mjs",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
