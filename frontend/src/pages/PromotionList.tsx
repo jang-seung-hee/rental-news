@@ -37,7 +37,8 @@ const PromotionList: React.FC<PromotionListProps> = ({
   const lastDocRef = useRef<any>(null);
   const { ConfirmComponent } = useConfirm();
 
-  const pageSize = 10;
+  const isFiltered = !!(searchTerm || filter.month || filter.isActive !== undefined);
+  const pageSize = isFiltered ? 15 : 10;
 
   // 로컬스토리지 키 (버전 업데이트로 인한 초기화)
   const STORAGE_KEY = 'promotion-list-filters-v3';
@@ -385,7 +386,7 @@ const PromotionList: React.FC<PromotionListProps> = ({
       />
 
       {/* 더 보기 버튼 */}
-      {hasNextPage && !searchTerm && (
+      {hasNextPage && (
         <div className="flex justify-center">
           <Button
             onClick={handleLoadMore}

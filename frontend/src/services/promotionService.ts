@@ -186,9 +186,9 @@ export const getPromotions = async (
     const sortDirection = sort?.direction || 'desc';
     q = query(q, orderBy(sortField, sortDirection));
 
-    // 페이지네이션 적용 (검색어가 있을 때는 더 많은 데이터를 가져옴)
-    const limitSize = filter?.searchTerm ? 50 : pageSize;
-    if (lastDoc && !filter?.searchTerm) {
+    // 페이지네이션 적용 (검색어가 있을 때는 매칭 정확도를 위해 더 넓은 범위를 스캔)
+    const limitSize = filter?.searchTerm ? 100 : pageSize;
+    if (lastDoc) {
       q = query(q, startAfter(lastDoc), limit(limitSize));
     } else {
       q = query(q, limit(limitSize));
@@ -196,33 +196,58 @@ export const getPromotions = async (
 
     const querySnapshot = await getDocs(q);
     let promotions: Promotion[] = [];
-
-    querySnapshot.forEach((doc) => {
-      promotions.push({
-        id: doc.id,
-        ...(doc.data() as any)
-      } as Promotion);
-    });
+    let lastVisible: any = null;
+    let hasNextPage = false;
 
     // 검색어 필터링 (클라이언트 사이드)
     if (filter?.searchTerm) {
       const searchTerm = filter.searchTerm.toLowerCase();
-      promotions = promotions.filter(promotion =>
-        promotion.title.toLowerCase().includes(searchTerm) ||
-        promotion.code.toLowerCase().includes(searchTerm) ||
-        promotion.content.toLowerCase().includes(searchTerm) ||
-        promotion.greeting.toLowerCase().includes(searchTerm) ||
-        promotion.closing.toLowerCase().includes(searchTerm)
-      );
+      
+      for (const docSnap of querySnapshot.docs) {
+        const data = docSnap.data() as any;
+        const isMatch = (
+          (data.title || '').toLowerCase().includes(searchTerm) ||
+          (data.code || '').toLowerCase().includes(searchTerm) ||
+          (data.content || '').toLowerCase().includes(searchTerm) ||
+          (data.greeting || '').toLowerCase().includes(searchTerm) ||
+          (data.closing || '').toLowerCase().includes(searchTerm)
+        );
+
+        if (isMatch) {
+          if (promotions.length < pageSize) {
+            promotions.push({
+              id: docSnap.id,
+              ...data
+            } as Promotion);
+            lastVisible = docSnap;
+          } else {
+            // 이미 pageSize만큼 가득 찼으므로 더 이상 추가하지 않고 '다음 페이지 있음' 표시
+            hasNextPage = true;
+            break;
+          }
+        } else {
+          // 매칭되지 않더라도 스캔 지점을 전진시키기 위해 lastVisible 업데이트
+          if (promotions.length === 0 || !hasNextPage) {
+            lastVisible = docSnap;
+          }
+        }
+      }
+      
+      // 검색 결과를 다 채우지 못했더라도 limitSize만큼 데이터를 다 가져왔다면 뒤에 더 있을 수 있음
+      if (!hasNextPage && querySnapshot.docs.length === limitSize) {
+        hasNextPage = true;
+      }
+    } else {
+      // 검색어가 없는 경우 기존 방식 유지
+      querySnapshot.forEach((docSnap) => {
+        promotions.push({
+          id: docSnap.id,
+          ...(docSnap.data() as any)
+        } as Promotion);
+      });
+      hasNextPage = querySnapshot.docs.length === limitSize;
+      lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
     }
-
-
-
-    // 검색어가 있을 때는 페이지네이션 비활성화
-    const hasNextPage = filter?.searchTerm
-      ? false
-      : querySnapshot.docs.length === limitSize;
-    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
 
     return {
       success: true,
@@ -230,7 +255,7 @@ export const getPromotions = async (
         promotions,
         totalCount: promotions.length,
         hasNextPage,
-        lastDoc: lastVisible
+        lastDoc: lastVisible || undefined
       }
     };
   } catch (error) {
