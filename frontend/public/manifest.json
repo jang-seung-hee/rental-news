@@ -3,17 +3,12 @@
   "name": "렌탈톡톡 월간 소식",
   "icons": [
     {
-      "src": "promotionViewTitle_resize.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "logo192.png",
+      "src": "remake_logo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "logo512.png",
+      "src": "remake_logo512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
