@@ -224,12 +224,7 @@ export const recordPromotionView = async (
       uniqueIPs: arrayUnion(clientIP),
       viewHistory: arrayUnion(newViewRecord),
       lastUpdated: viewedAt,
-      updatedAt: Timestamp.now(),
-      // 문서가 없을 때만 설정될 기본값들
-      ...(newViewRecord.ip && { 
-        createdAt: viewedAt
-        // uniqueIPCount 제거 - 항상 uniqueIPs.length로 계산
-      })
+      updatedAt: Timestamp.now()
     } as any, { merge: true });
     
     console.log('✅ 통계 문서 업데이트/생성 완료');

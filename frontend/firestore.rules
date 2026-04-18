@@ -54,9 +54,23 @@ service cloud.firestore {
       // 읽기: 인증된 관리자만 가능
       allow read: if request.auth != null && 
                   exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-      // 쓰기: 모든 사용자가 통계 기록 가능 (조회수 카운팅용)
-      allow create: if true;
-      allow update: if true;
+      
+      // 쓰기(생성): 스키마 및 초기값 강제 (과금폭탄 및 쓰레기 데이터 방어)
+      allow create: if (request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid))) 
+                    || (request.resource.data.keys().hasAll(['promotionId', 'totalViews', 'uniqueIPs'])
+                    && request.resource.data.totalViews == 1
+                    && request.resource.data.uniqueIPs is list
+                    && request.resource.data.uniqueIPs.size() <= 1);
+
+      // 쓰기(수정): 증가폭 제어 및 배열 한도 제한 (DoS 및 무결성 훼손 방어)
+      allow update: if (request.auth != null && exists(/databases/$(database)/documents/admins/$(request.auth.uid))) 
+                    || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['totalViews', 'uniqueIPs', 'viewHistory', 'lastUpdated', 'updatedAt', 'promotionId', 'createdAt'])
+                    && request.resource.data.promotionId == resource.data.promotionId
+                    && (!('createdAt' in request.resource.data) || request.resource.data.createdAt == resource.data.createdAt)
+                    && request.resource.data.totalViews == resource.data.totalViews + 1
+                    && request.resource.data.uniqueIPs.size() <= 3000
+                    && (!('viewHistory' in request.resource.data) || request.resource.data.viewHistory.size() <= 3000));
+
       // 삭제는 관리자만 가능
       allow delete: if request.auth != null && 
                     exists(/databases/$(database)/documents/admins/$(request.auth.uid));
