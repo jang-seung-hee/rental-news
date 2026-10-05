@@ -1,0 +1,112 @@
+.promotion-detail-preview-light-mode {
+  color-scheme: only light;
+  color: hsl(var(--foreground));
+}
+
+@media (prefers-color-scheme: dark) {
+  .promotion-detail-preview-light-mode .content-group {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .promotion-detail-preview-light-mode .separator-content {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  .promotion-detail-preview-light-mode .separator-text {
+    color: #64748b !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .separator-line {
+    background: linear-gradient(90deg, transparent, #e5e7eb, transparent) !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .thick-horizontal-line {
+    background: linear-gradient(90deg,
+      transparent 0%,
+      #d1d5db 20%,
+      #9ca3af 50%,
+      #d1d5db 80%,
+      transparent 100%) !important;
+    box-shadow: 0 1px 4px rgba(209, 213, 219, 0.3) !important;
+    opacity: 0.8 !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .thick-horizontal-line::before {
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(209, 213, 219, 0.1) 20%,
+      rgba(156, 163, 175, 0.2) 50%,
+      rgba(209, 213, 219, 0.1) 80%,
+      transparent 100%) !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .dotted-separator {
+    background: repeating-linear-gradient(
+      to right,
+      #9ca3af 0,
+      #9ca3af 2px,
+      transparent 2px,
+      transparent 6px
+    ) !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .dotted-separator::before {
+    background: repeating-linear-gradient(
+      to right,
+      rgba(156, 163, 175, 0.1) 0,
+      rgba(156, 163, 175, 0.1) 2px,
+      transparent 2px,
+      transparent 6px
+    ) !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .promotion-link,
+  .promotion-detail-preview-light-mode .content-group .promotion-link,
+  .promotion-detail-preview-light-mode .group-content .promotion-link {
+    color: #1e3a8a !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .promotion-link:hover,
+  .promotion-detail-preview-light-mode .content-group .promotion-link:hover,
+  .promotion-detail-preview-light-mode .group-content .promotion-link:hover {
+    color: #1e40af !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .gray-group-box,
+  .promotion-detail-preview-light-mode .content-group .gray-group-box,
+  .promotion-detail-preview-light-mode .group-content .gray-group-box {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    border-color: #6b7280 !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .pink-gradient-bg,
+  .promotion-detail-preview-light-mode .content-group .pink-gradient-bg,
+  .promotion-detail-preview-light-mode .group-content .pink-gradient-bg {
+    background: #b8d7fc !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .light-pink-bg,
+  .promotion-detail-preview-light-mode .content-group .light-pink-bg,
+  .promotion-detail-preview-light-mode .group-content .light-pink-bg {
+    background: #f4c7d8 !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .blue-title-label,
+  .promotion-detail-preview-light-mode .content-group .blue-title-label,
+  .promotion-detail-preview-light-mode .group-content .blue-title-label {
+    color: #1e40af !important;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    border-color: #93c5fd !important;
+    box-shadow: 0 2px 4px rgba(30, 64, 175, 0.1) !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  }
+
+  .promotion-detail-preview-light-mode .promotion-content-container .blue-title-label::before,
+  .promotion-detail-preview-light-mode .content-group .blue-title-label::before,
+  .promotion-detail-preview-light-mode .group-content .blue-title-label::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent) !important;
+  }
+}
